@@ -573,6 +573,7 @@
                 <button class="config-btn" onclick="saveConfig()">💾 Save Configuration</button>
                 <button class="config-btn secondary" onclick="testConnection()">🔍 Test Connection</button>
                 <button class="config-btn secondary" onclick="useDemo()">🎯 Use Demo Data</button>
+                <button class="config-btn secondary" onclick="clearSavedConfig()">🗑️ Clear Saved</button>
                 <button class="config-btn secondary" onclick="toggleConfig()">❌ Close</button>
             </div>
         </div>
@@ -608,14 +609,23 @@
     <script>
         /* ================ JAVASCRIPT FUNCTIONALITY ================ */
         
-        // Configuration - stored in memory (no localStorage)
+        // Configuration - Multiple persistence options
         let CONFIG = {
+            // DEFAULT CONFIGURATION - Set these URLs and they'll work for everyone
+            DEFAULT_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby9EfAuvKyL-gFE2gi8c-0EfaWetoKdsC53gcT76oOmQEpQO71je055gAOAEg-IBY3_LQ/exec', // Put your Apps Script URL here for everyone
+            DEFAULT_CSV_URL: '', // Put your CSV URL here as fallback
+            
+            // Runtime configuration (can be overridden)
             APPS_SCRIPT_URL: '',
             CSV_URL: '',
             REFRESH_INTERVAL: 60 * 60 * 1000, // 1 hour in milliseconds
             RETRY_ATTEMPTS: 3,
             RETRY_DELAY: 2000,
-            USE_DEMO: false
+            USE_DEMO: false,
+            
+            // Persistence settings
+            ALLOW_USER_CONFIG: true, // Set to false to lock configuration
+            AUTO_SAVE: true // Automatically save user configurations
         };
 
         // Global variables using memory storage instead of localStorage
@@ -626,14 +636,205 @@
         let isRefreshing = false;
 
         // ================ CONFIGURATION MANAGEMENT ================ 
+        
+        // Load configuration from URL parameters or localStorage
+        function loadConfig() {
+            // Check URL parameters first (highest priority)
+            const urlParams = new URLSearchParams(window.location.search);
+            const scriptUrl = urlParams.get('script');
+            const csvUrl = urlParams.get('csv');
+            const demo = urlParams.get('demo');
+            
+            if (scriptUrl) {
+                CONFIG.APPS_SCRIPT_URL = decodeURIComponent(scriptUrl);
+                CONFIG.USE_DEMO = false;
+                console.log('🔗 Using Apps Script URL from URL parameter');
+                return true;
+            }
+            
+            if (csvUrl) {
+                CONFIG.CSV_URL = decodeURIComponent(csvUrl);
+                CONFIG.USE_DEMO = false;
+                console.log('🔗 Using CSV URL from URL parameter');
+                return true;
+            }
+            
+            if (demo === 'true') {
+                CONFIG.USE_DEMO = true;
+                console.log('🎯 Using demo mode from URL parameter');
+                return true;
+            }
+            
+            // Try localStorage if available and AUTO_SAVE is enabled
+            if (CONFIG.AUTO_SAVE && typeof(Storage) !== "undefined") {
+                try {
+                    const savedConfig = localStorage.getItem('forexDashboardConfig');
+                    if (savedConfig) {
+                        const parsed = JSON.parse(savedConfig);
+                        CONFIG.APPS_SCRIPT_URL = parsed.appsScriptUrl || '';
+                        CONFIG.CSV_URL = parsed.csvUrl || '';
+                        CONFIG.USE_DEMO = parsed.useDemo || false;
+                        console.log('💾 Loaded configuration from localStorage');
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('Failed to load saved configuration:', e);
+                }
+            }
+            
+            // Use default configuration if set
+            if (CONFIG.DEFAULT_APPS_SCRIPT_URL) {
+                CONFIG.APPS_SCRIPT_URL = CONFIG.DEFAULT_APPS_SCRIPT_URL;
+                CONFIG.USE_DEMO = false;
+                console.log('🏠 Using default Apps Script configuration');
+                return true;
+            }
+            
+            if (CONFIG.DEFAULT_CSV_URL) {
+                CONFIG.CSV_URL = CONFIG.DEFAULT_CSV_URL;
+                CONFIG.USE_DEMO = false;
+                console.log('🏠 Using default CSV configuration');
+                return true;
+            }
+            
+            console.log('❓ No configuration found, will show setup');
+            return false;
+        }
+        
+        // Save configuration to localStorage
+        function saveConfigToStorage() {
+            if (!CONFIG.AUTO_SAVE || typeof(Storage) === "undefined") return;
+            
+            try {
+                const configToSave = {
+                    appsScriptUrl: CONFIG.APPS_SCRIPT_URL,
+                    csvUrl: CONFIG.CSV_URL,
+                    useDemo: CONFIG.USE_DEMO,
+                    savedAt: new Date().toISOString()
+                };
+                localStorage.setItem('forexDashboardConfig', JSON.stringify(configToSave));
+                console.log('💾 Configuration saved to localStorage');
+            } catch (e) {
+                console.warn('Failed to save configuration:', e);
+            }
+        }
+        
+        // Generate shareable URLs
+        function generateShareableUrls() {
+            const baseUrl = window.location.origin + window.location.pathname;
+            
+            const urls = {
+                current: window.location.href,
+                appsScript: CONFIG.APPS_SCRIPT_URL ? 
+                    `${baseUrl}?script=${encodeURIComponent(CONFIG.APPS_SCRIPT_URL)}` : null,
+                csv: CONFIG.CSV_URL ? 
+                    `${baseUrl}?csv=${encodeURIComponent(CONFIG.CSV_URL)}` : null,
+                demo: `${baseUrl}?demo=true`
+            };
+            
+            return urls;
+        }
+        
         function toggleConfig() {
             const panel = document.getElementById('configPanel');
+            
+            // Don't allow configuration changes if locked
+            if (!CONFIG.ALLOW_USER_CONFIG && !panel.classList.contains('show')) {
+                showNotification('🔒 Configuration Locked', 'Configuration is managed by the app administrator');
+                return;
+            }
+            
             panel.classList.toggle('show');
             
             if (panel.classList.contains('show')) {
                 // Pre-populate with current config
                 document.getElementById('appsScriptUrl').value = CONFIG.APPS_SCRIPT_URL;
                 document.getElementById('csvUrl').value = CONFIG.CSV_URL;
+                
+                // Update sharing section
+                updateSharingSection();
+            }
+        }
+        
+        function updateSharingSection() {
+            const urls = generateShareableUrls();
+            const sharingHtml = `
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                    <h4 style="color: var(--success); margin-bottom: 1rem;">🔗 Share Your Dashboard</h4>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                            Current Configuration URL:
+                        </label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" readonly class="config-input" id="currentUrl" value="${urls.current}" style="flex: 1;">
+                            <button class="config-btn secondary" onclick="copyToClipboard('currentUrl')" style="min-width: auto; padding: 0.5rem;">📋</button>
+                        </div>
+                    </div>
+                    ${urls.appsScript ? `
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                            Direct Apps Script Link:
+                        </label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" readonly class="config-input" id="appsScriptLink" value="${urls.appsScript}" style="flex: 1;">
+                            <button class="config-btn secondary" onclick="copyToClipboard('appsScriptLink')" style="min-width: auto; padding: 0.5rem;">📋</button>
+                        </div>
+                    </div>` : ''}
+                    ${urls.csv ? `
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                            Direct CSV Link:
+                        </label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" readonly class="config-input" id="csvLink" value="${urls.csv}" style="flex: 1;">
+                            <button class="config-btn secondary" onclick="copyToClipboard('csvLink')" style="min-width: auto; padding: 0.5rem;">📋</button>
+                        </div>
+                    </div>` : ''}
+                    <div style="margin-bottom: 1rem;">
+                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                            Demo Mode Link:
+                        </label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" readonly class="config-input" id="demoLink" value="${urls.demo}" style="flex: 1;">
+                            <button class="config-btn secondary" onclick="copyToClipboard('demoLink')" style="min-width: auto; padding: 0.5rem;">📋</button>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4;">
+                        💡 <strong>Tip:</strong> Share these URLs with others to give them instant access to your dashboard without any setup required!
+                    </p>
+                </div>
+            `;
+            
+            // Add or update sharing section
+            let sharingDiv = document.getElementById('sharingSection');
+            if (!sharingDiv) {
+                sharingDiv = document.createElement('div');
+                sharingDiv.id = 'sharingSection';
+                document.querySelector('.config-buttons').parentNode.insertBefore(sharingDiv, document.querySelector('.config-buttons'));
+            }
+            sharingDiv.innerHTML = sharingHtml;
+        }
+        
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.select();
+                element.setSelectionRange(0, 99999); // For mobile
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showNotification('📋 Copied!', 'URL copied to clipboard');
+                    } else {
+                        // Fallback for modern browsers
+                        navigator.clipboard.writeText(element.value).then(() => {
+                            showNotification('📋 Copied!', 'URL copied to clipboard');
+                        });
+                    }
+                } catch (err) {
+                    // Manual copy fallback
+                    showNotification('📋 Select & Copy', 'Please manually copy the selected text');
+                }
             }
         }
 
@@ -650,15 +851,35 @@
             CONFIG.CSV_URL = csvUrl;
             CONFIG.USE_DEMO = false;
             
+            // Save to localStorage if enabled
+            saveConfigToStorage();
+            
             toggleConfig();
-            showNotification('⚙️ Configuration Saved', 'Data source URLs have been updated');
+            showNotification('⚙️ Configuration Saved', 'Data source URLs have been updated and saved');
             loadData();
         }
 
         function useDemo() {
             CONFIG.USE_DEMO = true;
+            CONFIG.APPS_SCRIPT_URL = '';
+            CONFIG.CSV_URL = '';
+            
+            // Save demo preference
+            saveConfigToStorage();
+            
             toggleConfig();
             loadData();
+        }
+        
+        function clearSavedConfig() {
+            if (typeof(Storage) !== "undefined") {
+                try {
+                    localStorage.removeItem('forexDashboardConfig');
+                    showNotification('🗑️ Configuration Cleared', 'Saved settings have been removed');
+                } catch (e) {
+                    console.warn('Failed to clear configuration:', e);
+                }
+            }
         }
 
         async function testConnection() {
@@ -1254,16 +1475,23 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupPWA();
             
-            // Check if there's no configuration and show setup panel
-            setTimeout(() => {
-                if (!CONFIG.APPS_SCRIPT_URL && !CONFIG.CSV_URL && !CONFIG.USE_DEMO) {
-                    toggleConfig();
-                    showNotification('⚙️ Setup Required', 'Please configure your data source to get started');
-                } else {
-                    loadData();
-                    startAutoRefresh();
-                }
-            }, 1000);
+            // Load configuration first
+            const hasConfig = loadConfig();
+            
+            if (hasConfig) {
+                // Configuration found, load data immediately
+                console.log('✅ Configuration loaded, starting app...');
+                loadData();
+                startAutoRefresh();
+            } else {
+                // No configuration found, show setup after delay
+                setTimeout(() => {
+                    if (!CONFIG.APPS_SCRIPT_URL && !CONFIG.CSV_URL && !CONFIG.USE_DEMO) {
+                        toggleConfig();
+                        showNotification('⚙️ Setup Required', 'Please configure your data source to get started');
+                    }
+                }, 1000);
+            }
         });
     </script>
 </body>
