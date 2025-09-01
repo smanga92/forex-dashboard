@@ -1083,13 +1083,15 @@
                 console.log('Already refreshing, skipping...');
                 return;
             }
-
+        
             try {
                 isRefreshing = true;
                 showLoading(true);
                 hideError();
                 updateConnectionStatus('connecting');
                 setRefreshButtonState(true);
+                
+                console.log('Loading data for app:', CONFIG.CURRENT_APP);
                 
                 if (CONFIG.USE_DEMO) {
                     console.log('Using demo data...');
@@ -1101,9 +1103,18 @@
                     showLoading(false);
                     return;
                 }
-
+        
                 const data = await fetchDataFromSheets();
+                console.log('Raw data fetched successfully');
+                
                 allData = parseData(data);
+                console.log('Data parsed, items:', allData.length);
+                
+                if (allData.length > 0) {
+                    console.log('Sample parsed item:', allData[0]);
+                    debugDataStructure(); // Call debug function
+                }
+                
                 filteredData = [...allData];
                 renderData();
                 updateLastUpdateTime();
@@ -1194,12 +1205,16 @@
             if (!dataText || dataText.trim().length === 0) {
                 throw new Error('Empty response received');
             }
-
+        
+            console.log('Raw data received (first 200 chars):', dataText.substring(0, 200));
+        
             // Try to parse as JSON first (from Apps Script)
             try {
                 const jsonData = JSON.parse(dataText);
                 if (Array.isArray(jsonData) && jsonData.length > 0) {
                     console.log('Parsed as JSON data from Apps Script');
+                    console.log('First JSON item keys:', Object.keys(jsonData[0]));
+                    console.log('First JSON item:', jsonData[0]);
                     return validateData(jsonData);
                 }
             } catch (e) {
@@ -1208,7 +1223,10 @@
             
             // Parse as CSV
             console.log('Parsing as CSV data');
-            return validateData(parseCSVData(dataText));
+            const csvData = parseCSVData(dataText);
+            console.log('First CSV item keys:', csvData.length > 0 ? Object.keys(csvData[0]) : 'No data');
+            console.log('First CSV item:', csvData.length > 0 ? csvData[0] : 'No data');
+            return validateData(csvData);
         }
 
         function validateData(data) {
@@ -1225,10 +1243,14 @@
             if (lines.length < 2) {
                 throw new Error('CSV must have at least a header and one data row');
             }
-
-            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+        
+            console.log('CSV Lines count:', lines.length);
+            console.log('CSV Header line:', lines[0]);
             
-            return lines.slice(1).map((line, index) => {
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            console.log('CSV Headers parsed:', headers);
+            
+            const data = lines.slice(1).map((line, index) => {
                 try {
                     const values = parseCSVLine(line);
                     const obj = {};
@@ -1241,6 +1263,9 @@
                     return null;
                 }
             }).filter(item => item !== null);
+            
+            console.log('CSV Data parsed:', data.length, 'items');
+            return data;
         }
 
         function parseCSVLine(line) {
@@ -1642,18 +1667,29 @@
                 console.log('Current App:', CONFIG.CURRENT_APP);
                 console.log('Total Items:', allData.length);
                 console.log('First Item Keys:', Object.keys(allData[0]));
-                console.log('First Item Sample:', allData[0]);
+                console.log('First Item Values:', allData[0]);
+                
+                // Log all unique keys across all items
+                const allKeys = new Set();
+                allData.forEach(item => {
+                    Object.keys(item).forEach(key => allKeys.add(key));
+                });
+                console.log('All unique keys found:', Array.from(allKeys));
                 
                 if (CONFIG.CURRENT_APP === 'forex') {
                     console.log('=== FOREX FIELDS CHECK ===');
-                    console.log('Retail Long Field:', allData[0]['Retail Sentiment Long%']);
-                    console.log('Retail Short Field:', allData[0]['Retail Sentiment Short%']);
-                    console.log('AI Bias Field:', allData[0]['AI Bias']);
+                    Object.keys(allData[0]).forEach(key => {
+                        if (key.toLowerCase().includes('sentiment') || key.toLowerCase().includes('long') || key.toLowerCase().includes('short')) {
+                            console.log(`Sentiment field "${key}":`, allData[0][key]);
+                        }
+                    });
                 } else {
                     console.log('=== G8 FIELDS CHECK ===');
-                    console.log('Currency Field:', allData[0]['Currency']);
-                    console.log('Interest Rate Field:', allData[0]['Interest Rate']);
-                    console.log('Central Bank Field:', allData[0]['Central Bank']);
+                    Object.keys(allData[0]).forEach(key => {
+                        if (key.toLowerCase().includes('currency') || key.toLowerCase().includes('rate') || key.toLowerCase().includes('bank')) {
+                            console.log(`G8 field "${key}":`, allData[0][key]);
+                        }
+                    });
                 }
             } else {
                 console.log('No data available for debugging');
@@ -1668,20 +1704,23 @@
                 showNotification('Demo Mode', 'Using demo data - connection test not needed');
                 return;
             }
-
+        
+            showNotification('Testing Connections...', 'Checking data sources and analyzing structure');
+            
+            // Test current app's data source
+            await testDataSource();
+            
             const forexConfigured = CONFIG.FOREX_APPS_SCRIPT_URL || CONFIG.FOREX_CSV_URL;
             const g8Configured = CONFIG.G8_APPS_SCRIPT_URL || CONFIG.G8_CSV_URL;
-
+        
             if (!forexConfigured && !g8Configured) {
                 showNotification('No Configuration', 'Please configure data source URLs first');
                 toggleConfig();
                 return;
             }
-
-            showNotification('Testing Connections...', 'Checking both dashboard data sources');
-            
+        
             let results = [];
-
+        
             // Test Forex dashboard
             if (forexConfigured) {
                 try {
@@ -1700,7 +1739,7 @@
                     results.push(`Forex Dashboard: ❌ ${error.message}`);
                 }
             }
-
+        
             // Test G8 dashboard
             if (g8Configured) {
                 try {
@@ -1719,10 +1758,56 @@
                     results.push(`G8 Dashboard: ❌ ${error.message}`);
                 }
             }
-
+        
             showNotification('Connection Test Results', results.join('\n'));
+            console.log('Check the browser console for detailed data structure analysis');
         }
 
+        async function testDataSource() {
+            console.log('=== TESTING DATA SOURCE ===');
+            console.log('Current App:', CONFIG.CURRENT_APP);
+            
+            const appsScriptUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_APPS_SCRIPT_URL : CONFIG.G8_APPS_SCRIPT_URL;
+            const csvUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_CSV_URL : CONFIG.G8_CSV_URL;
+            
+            console.log('Apps Script URL:', appsScriptUrl);
+            console.log('CSV URL:', csvUrl);
+            
+            try {
+                const response = await fetch(appsScriptUrl + '?t=' + Date.now());
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const responseText = await response.text();
+                console.log('Response text (first 500 chars):', responseText.substring(0, 500));
+                
+                // Try to parse and see what we get
+                try {
+                    const jsonData = JSON.parse(responseText);
+                    console.log('JSON parsed successfully');
+                    console.log('Data type:', typeof jsonData);
+                    console.log('Is array:', Array.isArray(jsonData));
+                    if (Array.isArray(jsonData) && jsonData.length > 0) {
+                        console.log('First item keys:', Object.keys(jsonData[0]));
+                        console.log('First item:', jsonData[0]);
+                    }
+                } catch (e) {
+                    console.log('Not valid JSON, might be CSV');
+                    const lines = responseText.split('\n');
+                    console.log('Lines count:', lines.length);
+                    if (lines.length > 0) {
+                        console.log('First line (header):', lines[0]);
+                        if (lines.length > 1) {
+                            console.log('Second line (first data):', lines[1]);
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+            }
+        }
+        
         // ================ UTILITY FUNCTIONS ================ 
         function truncateText(text, maxLength) {
             if (!text || text.length <= maxLength) return text || 'No data available';
@@ -1947,4 +2032,5 @@ Ready to analyze global forex markets!
     </script>
 </body>
 </html>            
+
 
