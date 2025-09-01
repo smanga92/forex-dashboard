@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forex Analysis Dashboard</title>
+    <title>Multi-Dashboard Forex Analysis</title>
     <link rel="manifest" href="#" id="manifest-placeholder">
     <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -55,6 +55,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .logo {
@@ -63,10 +65,58 @@
             color: var(--success);
         }
 
+        /* ================ APP TOGGLE ================ */
+        .app-toggle {
+            display: flex;
+            background: var(--secondary);
+            border-radius: 12px;
+            padding: 0.25rem;
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 140px;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toggle-btn:hover {
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            color: white;
+            box-shadow: 0 4px 15px rgba(15, 76, 117, 0.4);
+        }
+
+        .toggle-btn.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+        }
+
         .controls {
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .refresh-btn {
@@ -121,6 +171,21 @@
             gap: 0.5rem;
         }
 
+        .config-group {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(26, 26, 46, 0.5);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .config-group-title {
+            color: var(--success);
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
         .config-input {
             background: var(--primary);
             border: 1px solid var(--border);
@@ -128,8 +193,14 @@
             padding: 0.75rem;
             border-radius: 8px;
             width: 100%;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             font-size: 0.9rem;
+        }
+
+        .config-input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(15, 76, 117, 0.2);
         }
 
         .config-buttons {
@@ -239,6 +310,93 @@
         .bias-long { background: rgba(0, 255, 136, 0.2); color: var(--success); }
         .bias-short { background: rgba(255, 71, 87, 0.2); color: var(--danger); }
         .bias-neutral { background: rgba(255, 167, 38, 0.2); color: var(--warning); }
+
+        /* ================ G8 SPECIFIC STYLES ================ */
+        .g8-card {
+            background: linear-gradient(135deg, rgba(22, 33, 62, 0.9), rgba(26, 26, 46, 0.8));
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .g8-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1976d2, #0d47a1);
+        }
+
+        .g8-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow);
+            border-color: var(--success);
+        }
+
+        .g8-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .currency-flag {
+            font-size: 1.8rem;
+        }
+
+        .currency-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-left: 0.5rem;
+        }
+
+        .g8-section {
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: rgba(15, 76, 117, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .g8-section-title {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .g8-data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .g8-data-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .g8-data-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+        .trend-neutral { color: var(--warning); }
 
         .sentiment-row {
             display: flex;
@@ -461,6 +619,16 @@
                 gap: 1rem;
             }
             
+            .app-toggle {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .toggle-btn {
+                flex: 1;
+                min-width: auto;
+            }
+            
             .container {
                 padding: 1rem;
             }
@@ -490,6 +658,12 @@
             .pair-name {
                 font-size: 1.2rem;
             }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
         }
 
         @media (min-width: 1200px) {
@@ -504,7 +678,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .currency-card {
+        .currency-card, .g8-card {
             animation: fadeIn 0.5s ease forwards;
         }
 
@@ -522,12 +696,49 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* ================ NOTIFICATION STYLES ================ */
+        .notification-popup {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--secondary);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 1rem;
+            max-width: 300px;
+            z-index: 1500;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="logo">📊 Forex Analysis</div>
+            <div class="logo">📊 Multi-Dashboard Forex Analysis</div>
+            
+            <!-- App Toggle Buttons -->
+            <div class="app-toggle">
+                <button class="toggle-btn active" onclick="switchApp('forex')" id="forexBtn">
+                    📈 Forex Analysis
+                </button>
+                <button class="toggle-btn" onclick="switchApp('g8')" id="g8Btn">
+                    🌍 G8 Fundamentals
+                </button>
+            </div>
+
             <div class="controls">
                 <div class="connection-status" id="connectionStatus">
                     <div class="connection-dot"></div>
@@ -553,25 +764,43 @@
         <!-- Configuration Panel -->
         <div class="config-panel" id="configPanel">
             <div class="config-title">
-                ⚙️ Data Source Configuration
+                ⚙️ Multi-Dashboard Configuration
             </div>
             <p style="color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;">
-                Configure your Google Sheets data source. You can use either a Google Apps Script Web App URL or a CSV export URL.
+                Configure data sources for both dashboards. You can use Google Apps Script Web App URLs or CSV export URLs for each dashboard.
             </p>
             
-            <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
-                Google Apps Script Web App URL (Recommended):
-            </label>
-            <input type="url" class="config-input" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
-            
-            <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
-                Or CSV Export URL (Fallback):
-            </label>
-            <input type="url" class="config-input" id="csvUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=csv&gid=0">
+            <!-- Forex Analysis Configuration -->
+            <div class="config-group">
+                <div class="config-group-title">📈 Forex Analysis Dashboard</div>
+                <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                    Google Apps Script Web App URL (Recommended):
+                </label>
+                <input type="url" class="config-input" id="forexAppsScriptUrl" placeholder="https://script.google.com/macros/s/YOUR_FOREX_SCRIPT_ID/exec">
+                
+                <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                    Or CSV Export URL (Fallback):
+                </label>
+                <input type="url" class="config-input" id="forexCsvUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_FOREX_SHEET_ID/export?format=csv&gid=0">
+            </div>
+
+            <!-- G8 Fundamentals Configuration -->
+            <div class="config-group">
+                <div class="config-group-title">🌍 G8 Fundamentals Dashboard</div>
+                <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                    Google Apps Script Web App URL (Recommended):
+                </label>
+                <input type="url" class="config-input" id="g8AppsScriptUrl" placeholder="https://script.google.com/macros/s/YOUR_G8_SCRIPT_ID/exec">
+                
+                <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                    Or CSV Export URL (Fallback):
+                </label>
+                <input type="url" class="config-input" id="g8CsvUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_G8_SHEET_ID/export?format=csv&gid=0">
+            </div>
             
             <div class="config-buttons">
                 <button class="config-btn" onclick="saveConfig()">💾 Save Configuration</button>
-                <button class="config-btn secondary" onclick="testConnection()">🔍 Test Connection</button>
+                <button class="config-btn secondary" onclick="testConnection()">🔍 Test Both Connections</button>
                 <button class="config-btn secondary" onclick="useDemo()">🎯 Use Demo Data</button>
                 <button class="config-btn secondary" onclick="clearSavedConfig()">🗑️ Clear Saved</button>
                 <button class="config-btn secondary" onclick="toggleConfig()">❌ Close</button>
@@ -582,15 +811,16 @@
             <input type="text" class="filter-input" id="pairFilter" placeholder="Filter by currency pair..." onkeyup="filterData()">
             <select class="filter-input" id="biasFilter" onchange="filterData()">
                 <option value="">All Biases</option>
-                <option value="LONG">Long Only</option>
-                <option value="SHORT">Short Only</option>
+                <option value="LONG">Long/Bullish Only</option>
+                <option value="SHORT">Short/Bearish Only</option>
+                <option value="NEUTRAL">Neutral Only</option>
             </select>
         </div>
 
         <div id="error-container"></div>
         <div id="loading" class="loading">
             <div class="spinner"></div>
-            <p>Loading forex data...</p>
+            <p>Loading data...</p>
         </div>
         <div id="currency-grid" class="currency-grid"></div>
     </div>
@@ -609,72 +839,131 @@
     <script>
         /* ================ JAVASCRIPT FUNCTIONALITY ================ */
         
-        // Configuration - Multiple persistence options
+        // Enhanced Configuration for Multi-Dashboard Support
         let CONFIG = {
-            // DEFAULT CONFIGURATION - Set these URLs and they'll work for everyone
-            DEFAULT_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby9EfAuvKyL-gFE2gi8c-0EfaWetoKdsC53gcT76oOmQEpQO71je055gAOAEg-IBY3_LQ/exec', // Put your Apps Script URL here for everyone
-            DEFAULT_CSV_URL: '', // Put your CSV URL here as fallback
+            // Forex Analysis URLs
+            FOREX_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby9EfAuvKyL-gFE2gi8c-0EfaWetoKdsC53gcT76oOmQEpQO71je055gAOAEg-IBY3_LQ/exec',
+            FOREX_CSV_URL: '',
             
-            // Runtime configuration (can be overridden)
-            APPS_SCRIPT_URL: '',
-            CSV_URL: '',
-            REFRESH_INTERVAL: 60 * 60 * 1000, // 1 hour in milliseconds
+            // G8 Fundamentals URLs  
+            G8_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyaCVkCKxh8i0aRCSuY8VmHcacBVyQ6UQZXHBpXs8zYfdJ5_ypzeuJZAasYiIAW0-oEyQ/exec',
+            G8_CSV_URL: '',
+            
+            // Current app state
+            CURRENT_APP: 'forex', // 'forex' or 'g8'
+            
+            // Runtime configuration
+            REFRESH_INTERVAL: 60 * 60 * 1000, // 1 hour
             RETRY_ATTEMPTS: 3,
             RETRY_DELAY: 2000,
             USE_DEMO: false,
             
             // Persistence settings
-            ALLOW_USER_CONFIG: true, // Set to false to lock configuration
-            AUTO_SAVE: true // Automatically save user configurations
+            ALLOW_USER_CONFIG: true,
+            AUTO_SAVE: true
         };
 
-        // Global variables using memory storage instead of localStorage
+        // Global variables
         let allData = [];
         let filteredData = [];
         let refreshInterval;
         let connectionStatus = 'connecting';
         let isRefreshing = false;
 
-        // ================ CONFIGURATION MANAGEMENT ================ 
-        
-        // Load configuration from URL parameters or localStorage
-        function loadConfig() {
-            // Check URL parameters first (highest priority)
-            const urlParams = new URLSearchParams(window.location.search);
-            const scriptUrl = urlParams.get('script');
-            const csvUrl = urlParams.get('csv');
-            const demo = urlParams.get('demo');
+        // ================ APP SWITCHING ================ 
+        function switchApp(appType) {
+            CONFIG.CURRENT_APP = appType;
             
-            if (scriptUrl) {
-                CONFIG.APPS_SCRIPT_URL = decodeURIComponent(scriptUrl);
+            // Update button states
+            document.getElementById('forexBtn').classList.toggle('active', appType === 'forex');
+            document.getElementById('g8Btn').classList.toggle('active', appType === 'g8');
+            
+            // Update page title
+            const title = appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals Analysis';
+            document.querySelector('.logo').textContent = `📊 ${title}`;
+            
+            // Clear current data and load new
+            allData = [];
+            filteredData = [];
+            
+            // Update filters for current app
+            updateFiltersForApp(appType);
+            
+            // Load data for selected app
+            loadData();
+            
+            showNotification(`Switched to ${title}`, 'Loading data for selected dashboard...');
+        }
+
+        function updateFiltersForApp(appType) {
+            const pairFilter = document.getElementById('pairFilter');
+            const biasFilter = document.getElementById('biasFilter');
+            
+            if (appType === 'forex') {
+                pairFilter.placeholder = 'Filter by currency pair...';
+                biasFilter.innerHTML = `
+                    <option value="">All Biases</option>
+                    <option value="LONG">Long Only</option>
+                    <option value="SHORT">Short Only</option>
+                    <option value="NEUTRAL">Neutral Only</option>
+                `;
+            } else {
+                pairFilter.placeholder = 'Filter by currency or country...';
+                biasFilter.innerHTML = `
+                    <option value="">All Biases</option>
+                    <option value="BULLISH">Bullish Only</option>
+                    <option value="BEARISH">Bearish Only</option>
+                    <option value="NEUTRAL">Neutral Only</option>
+                `;
+            }
+        }
+
+        // ================ CONFIGURATION MANAGEMENT ================ 
+        function loadConfig() {
+            // Check URL parameters first
+            const urlParams = new URLSearchParams(window.location.search);
+            const forexScript = urlParams.get('forex_script');
+            const g8Script = urlParams.get('g8_script');
+            const demo = urlParams.get('demo');
+            const app = urlParams.get('app');
+            
+            if (forexScript) {
+                CONFIG.FOREX_APPS_SCRIPT_URL = decodeURIComponent(forexScript);
                 CONFIG.USE_DEMO = false;
-                console.log('🔗 Using Apps Script URL from URL parameter');
+                console.log('Using Forex Apps Script URL from URL parameter');
                 return true;
             }
             
-            if (csvUrl) {
-                CONFIG.CSV_URL = decodeURIComponent(csvUrl);
+            if (g8Script) {
+                CONFIG.G8_APPS_SCRIPT_URL = decodeURIComponent(g8Script);
                 CONFIG.USE_DEMO = false;
-                console.log('🔗 Using CSV URL from URL parameter');
+                console.log('Using G8 Apps Script URL from URL parameter');
                 return true;
+            }
+            
+            if (app) {
+                CONFIG.CURRENT_APP = app;
+                switchApp(app);
             }
             
             if (demo === 'true') {
                 CONFIG.USE_DEMO = true;
-                console.log('🎯 Using demo mode from URL parameter');
+                console.log('Using demo mode from URL parameter');
                 return true;
             }
             
-            // Try localStorage if available and AUTO_SAVE is enabled
+            // Try localStorage if available
             if (CONFIG.AUTO_SAVE && typeof(Storage) !== "undefined") {
                 try {
-                    const savedConfig = localStorage.getItem('forexDashboardConfig');
+                    const savedConfig = localStorage.getItem('multiDashboardConfig');
                     if (savedConfig) {
                         const parsed = JSON.parse(savedConfig);
-                        CONFIG.APPS_SCRIPT_URL = parsed.appsScriptUrl || '';
-                        CONFIG.CSV_URL = parsed.csvUrl || '';
+                        CONFIG.FOREX_APPS_SCRIPT_URL = parsed.forexAppsScriptUrl || CONFIG.FOREX_APPS_SCRIPT_URL;
+                        CONFIG.FOREX_CSV_URL = parsed.forexCsvUrl || '';
+                        CONFIG.G8_APPS_SCRIPT_URL = parsed.g8AppsScriptUrl || CONFIG.G8_APPS_SCRIPT_URL;
+                        CONFIG.G8_CSV_URL = parsed.g8CsvUrl || '';
                         CONFIG.USE_DEMO = parsed.useDemo || false;
-                        console.log('💾 Loaded configuration from localStorage');
+                        console.log('Loaded configuration from localStorage');
                         return true;
                     }
                 } catch (e) {
@@ -682,65 +971,34 @@
                 }
             }
             
-            // Use default configuration if set
-            if (CONFIG.DEFAULT_APPS_SCRIPT_URL) {
-                CONFIG.APPS_SCRIPT_URL = CONFIG.DEFAULT_APPS_SCRIPT_URL;
-                CONFIG.USE_DEMO = false;
-                console.log('🏠 Using default Apps Script configuration');
-                return true;
-            }
-            
-            if (CONFIG.DEFAULT_CSV_URL) {
-                CONFIG.CSV_URL = CONFIG.DEFAULT_CSV_URL;
-                CONFIG.USE_DEMO = false;
-                console.log('🏠 Using default CSV configuration');
-                return true;
-            }
-            
-            console.log('❓ No configuration found, will show setup');
-            return false;
+            console.log('Using default configuration');
+            return true;
         }
         
-        // Save configuration to localStorage
         function saveConfigToStorage() {
             if (!CONFIG.AUTO_SAVE || typeof(Storage) === "undefined") return;
             
             try {
                 const configToSave = {
-                    appsScriptUrl: CONFIG.APPS_SCRIPT_URL,
-                    csvUrl: CONFIG.CSV_URL,
+                    forexAppsScriptUrl: CONFIG.FOREX_APPS_SCRIPT_URL,
+                    forexCsvUrl: CONFIG.FOREX_CSV_URL,
+                    g8AppsScriptUrl: CONFIG.G8_APPS_SCRIPT_URL,
+                    g8CsvUrl: CONFIG.G8_CSV_URL,
                     useDemo: CONFIG.USE_DEMO,
                     savedAt: new Date().toISOString()
                 };
-                localStorage.setItem('forexDashboardConfig', JSON.stringify(configToSave));
-                console.log('💾 Configuration saved to localStorage');
+                localStorage.setItem('multiDashboardConfig', JSON.stringify(configToSave));
+                console.log('Configuration saved to localStorage');
             } catch (e) {
                 console.warn('Failed to save configuration:', e);
             }
         }
-        
-        // Generate shareable URLs
-        function generateShareableUrls() {
-            const baseUrl = window.location.origin + window.location.pathname;
-            
-            const urls = {
-                current: window.location.href,
-                appsScript: CONFIG.APPS_SCRIPT_URL ? 
-                    `${baseUrl}?script=${encodeURIComponent(CONFIG.APPS_SCRIPT_URL)}` : null,
-                csv: CONFIG.CSV_URL ? 
-                    `${baseUrl}?csv=${encodeURIComponent(CONFIG.CSV_URL)}` : null,
-                demo: `${baseUrl}?demo=true`
-            };
-            
-            return urls;
-        }
-        
+
         function toggleConfig() {
             const panel = document.getElementById('configPanel');
             
-            // Don't allow configuration changes if locked
             if (!CONFIG.ALLOW_USER_CONFIG && !panel.classList.contains('show')) {
-                showNotification('🔒 Configuration Locked', 'Configuration is managed by the app administrator');
+                showNotification('Configuration Locked', 'Configuration is managed by the app administrator');
                 return;
             }
             
@@ -748,125 +1006,39 @@
             
             if (panel.classList.contains('show')) {
                 // Pre-populate with current config
-                document.getElementById('appsScriptUrl').value = CONFIG.APPS_SCRIPT_URL;
-                document.getElementById('csvUrl').value = CONFIG.CSV_URL;
-                
-                // Update sharing section
-                updateSharingSection();
-            }
-        }
-        
-        function updateSharingSection() {
-            const urls = generateShareableUrls();
-            const sharingHtml = `
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                    <h4 style="color: var(--success); margin-bottom: 1rem;">🔗 Share Your Dashboard</h4>
-                    <div style="margin-bottom: 1rem;">
-                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
-                            Current Configuration URL:
-                        </label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" readonly class="config-input" id="currentUrl" value="${urls.current}" style="flex: 1;">
-                            <button class="config-btn secondary" onclick="copyToClipboard('currentUrl')" style="min-width: auto; padding: 0.5rem;">📋</button>
-                        </div>
-                    </div>
-                    ${urls.appsScript ? `
-                    <div style="margin-bottom: 1rem;">
-                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
-                            Direct Apps Script Link:
-                        </label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" readonly class="config-input" id="appsScriptLink" value="${urls.appsScript}" style="flex: 1;">
-                            <button class="config-btn secondary" onclick="copyToClipboard('appsScriptLink')" style="min-width: auto; padding: 0.5rem;">📋</button>
-                        </div>
-                    </div>` : ''}
-                    ${urls.csv ? `
-                    <div style="margin-bottom: 1rem;">
-                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
-                            Direct CSV Link:
-                        </label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" readonly class="config-input" id="csvLink" value="${urls.csv}" style="flex: 1;">
-                            <button class="config-btn secondary" onclick="copyToClipboard('csvLink')" style="min-width: auto; padding: 0.5rem;">📋</button>
-                        </div>
-                    </div>` : ''}
-                    <div style="margin-bottom: 1rem;">
-                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
-                            Demo Mode Link:
-                        </label>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" readonly class="config-input" id="demoLink" value="${urls.demo}" style="flex: 1;">
-                            <button class="config-btn secondary" onclick="copyToClipboard('demoLink')" style="min-width: auto; padding: 0.5rem;">📋</button>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4;">
-                        💡 <strong>Tip:</strong> Share these URLs with others to give them instant access to your dashboard without any setup required!
-                    </p>
-                </div>
-            `;
-            
-            // Add or update sharing section
-            let sharingDiv = document.getElementById('sharingSection');
-            if (!sharingDiv) {
-                sharingDiv = document.createElement('div');
-                sharingDiv.id = 'sharingSection';
-                document.querySelector('.config-buttons').parentNode.insertBefore(sharingDiv, document.querySelector('.config-buttons'));
-            }
-            sharingDiv.innerHTML = sharingHtml;
-        }
-        
-        function copyToClipboard(elementId) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.select();
-                element.setSelectionRange(0, 99999); // For mobile
-                
-                try {
-                    const successful = document.execCommand('copy');
-                    if (successful) {
-                        showNotification('📋 Copied!', 'URL copied to clipboard');
-                    } else {
-                        // Fallback for modern browsers
-                        navigator.clipboard.writeText(element.value).then(() => {
-                            showNotification('📋 Copied!', 'URL copied to clipboard');
-                        });
-                    }
-                } catch (err) {
-                    // Manual copy fallback
-                    showNotification('📋 Select & Copy', 'Please manually copy the selected text');
-                }
+                document.getElementById('forexAppsScriptUrl').value = CONFIG.FOREX_APPS_SCRIPT_URL;
+                document.getElementById('forexCsvUrl').value = CONFIG.FOREX_CSV_URL;
+                document.getElementById('g8AppsScriptUrl').value = CONFIG.G8_APPS_SCRIPT_URL;
+                document.getElementById('g8CsvUrl').value = CONFIG.G8_CSV_URL;
             }
         }
 
         function saveConfig() {
-            const appsScriptUrl = document.getElementById('appsScriptUrl').value.trim();
-            const csvUrl = document.getElementById('csvUrl').value.trim();
+            const forexAppsScript = document.getElementById('forexAppsScriptUrl').value.trim();
+            const forexCsv = document.getElementById('forexCsvUrl').value.trim();
+            const g8AppsScript = document.getElementById('g8AppsScriptUrl').value.trim();
+            const g8Csv = document.getElementById('g8CsvUrl').value.trim();
             
-            if (!appsScriptUrl && !csvUrl) {
-                alert('Please provide at least one data source URL');
+            if (!forexAppsScript && !forexCsv && !g8AppsScript && !g8Csv) {
+                alert('Please provide at least one data source URL for at least one dashboard');
                 return;
             }
             
-            CONFIG.APPS_SCRIPT_URL = appsScriptUrl;
-            CONFIG.CSV_URL = csvUrl;
+            CONFIG.FOREX_APPS_SCRIPT_URL = forexAppsScript;
+            CONFIG.FOREX_CSV_URL = forexCsv;
+            CONFIG.G8_APPS_SCRIPT_URL = g8AppsScript;
+            CONFIG.G8_CSV_URL = g8Csv;
             CONFIG.USE_DEMO = false;
             
-            // Save to localStorage if enabled
             saveConfigToStorage();
-            
             toggleConfig();
-            showNotification('⚙️ Configuration Saved', 'Data source URLs have been updated and saved');
+            showNotification('Configuration Saved', 'Data source URLs have been updated and saved');
             loadData();
         }
 
         function useDemo() {
             CONFIG.USE_DEMO = true;
-            CONFIG.APPS_SCRIPT_URL = '';
-            CONFIG.CSV_URL = '';
-            
-            // Save demo preference
             saveConfigToStorage();
-            
             toggleConfig();
             loadData();
         }
@@ -874,39 +1046,11 @@
         function clearSavedConfig() {
             if (typeof(Storage) !== "undefined") {
                 try {
-                    localStorage.removeItem('forexDashboardConfig');
-                    showNotification('🗑️ Configuration Cleared', 'Saved settings have been removed');
+                    localStorage.removeItem('multiDashboardConfig');
+                    showNotification('Configuration Cleared', 'Saved settings have been removed');
                 } catch (e) {
                     console.warn('Failed to clear configuration:', e);
                 }
-            }
-        }
-
-        async function testConnection() {
-            if (CONFIG.USE_DEMO) {
-                showNotification('🎯 Demo Mode', 'Using demo data - connection test not needed');
-                return;
-            }
-
-            if (!CONFIG.APPS_SCRIPT_URL && !CONFIG.CSV_URL) {
-                showNotification('❌ No Configuration', 'Please configure data source URLs first');
-                toggleConfig();
-                return;
-            }
-
-            showNotification('🔍 Testing...', 'Checking data source connection');
-            
-            try {
-                const data = await fetchDataFromSheets();
-                const parsedData = parseData(data);
-                
-                if (parsedData && parsedData.length > 0) {
-                    showNotification('✅ Connection Success', `Found ${parsedData.length} currency pairs`);
-                } else {
-                    showNotification('⚠️ No Data', 'Connection successful but no data found');
-                }
-            } catch (error) {
-                showNotification('❌ Connection Failed', error.message);
             }
         }
 
@@ -953,7 +1097,6 @@
                 console.log('Using demo data as final fallback...');
                 showError(`Connection failed after ${CONFIG.RETRY_ATTEMPTS} attempts. Showing demo data. Error: ${error.message}`);
                 
-                // Use demo data as final fallback
                 allData = getDemoData();
                 filteredData = [...allData];
                 renderData();
@@ -965,23 +1108,18 @@
             }
         }
 
-        function setRefreshButtonState(disabled) {
-            const btn = document.getElementById('refreshBtn');
-            if (btn) {
-                btn.disabled = disabled;
-                btn.innerHTML = disabled ? '⏳ Loading...' : '🔄 Refresh';
-            }
-        }
-
-        // Enhanced fetch function with better error handling
         async function fetchDataFromSheets() {
             let lastError = null;
+            
+            // Get URLs based on current app
+            const appsScriptUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_APPS_SCRIPT_URL : CONFIG.G8_APPS_SCRIPT_URL;
+            const csvUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_CSV_URL : CONFIG.G8_CSV_URL;
 
             // Try Apps Script first if configured
-            if (CONFIG.APPS_SCRIPT_URL) {
+            if (appsScriptUrl) {
                 try {
-                    console.log('Trying Apps Script Web App...');
-                    const response = await fetch(CONFIG.APPS_SCRIPT_URL + '?t=' + Date.now(), {
+                    console.log(`Trying ${CONFIG.CURRENT_APP} Apps Script...`);
+                    const response = await fetch(appsScriptUrl + '?t=' + Date.now(), {
                         method: 'GET',
                         headers: {
                             'Accept': 'application/json, text/plain, */*'
@@ -993,19 +1131,19 @@
                     }
                     
                     const data = await response.text();
-                    console.log('✅ Apps Script data fetched successfully');
+                    console.log(`${CONFIG.CURRENT_APP} Apps Script data fetched successfully`);
                     return data;
                 } catch (error) {
-                    console.error('❌ Apps Script failed:', error);
+                    console.error(`${CONFIG.CURRENT_APP} Apps Script failed:`, error);
                     lastError = error;
                 }
             }
 
             // Try CSV with CORS proxy if configured
-            if (CONFIG.CSV_URL) {
+            if (csvUrl) {
                 try {
-                    console.log('Trying CSV with CORS proxy...');
-                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(CONFIG.CSV_URL)}`;
+                    console.log(`Trying ${CONFIG.CURRENT_APP} CSV with CORS proxy...`);
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(csvUrl)}`;
                     const proxyResponse = await fetch(proxyUrl);
                     
                     if (!proxyResponse.ok) {
@@ -1018,19 +1156,17 @@
                         throw new Error(`Google Sheets returned error: ${proxyData.status.http_code}`);
                     }
                     
-                    console.log('✅ CSV data fetched successfully via proxy');
+                    console.log(`${CONFIG.CURRENT_APP} CSV data fetched successfully via proxy`);
                     return proxyData.contents;
                 } catch (error) {
-                    console.error('❌ CSV fetch failed:', error);
+                    console.error(`${CONFIG.CURRENT_APP} CSV fetch failed:`, error);
                     lastError = error;
                 }
             }
 
-            // If we get here, both methods failed
             throw new Error(lastError ? lastError.message : 'No data sources configured');
         }
 
-        // Parse data (handles both JSON from Apps Script and CSV)
         function parseData(dataText) {
             if (!dataText || dataText.trim().length === 0) {
                 throw new Error('Empty response received');
@@ -1040,16 +1176,15 @@
             try {
                 const jsonData = JSON.parse(dataText);
                 if (Array.isArray(jsonData) && jsonData.length > 0) {
-                    console.log('✅ Parsed as JSON data from Apps Script');
+                    console.log('Parsed as JSON data from Apps Script');
                     return validateData(jsonData);
                 }
             } catch (e) {
-                // Not JSON, continue to CSV parsing
                 console.log('Not JSON, trying CSV parsing...');
             }
             
             // Parse as CSV
-            console.log('✅ Parsing as CSV data');
+            console.log('Parsing as CSV data');
             return validateData(parseCSVData(dataText));
         }
 
@@ -1058,16 +1193,7 @@
                 throw new Error('No valid data found');
             }
 
-            // Check if required fields exist
-            const requiredFields = ['Pair', 'AI Bias'];
-            const firstItem = data[0];
-            const missingFields = requiredFields.filter(field => !(field in firstItem));
-            
-            if (missingFields.length > 0) {
-                console.warn('Missing fields:', missingFields);
-            }
-
-            console.log(`✅ Validated ${data.length} data items`);
+            console.log(`Validated ${data.length} data items for ${CONFIG.CURRENT_APP} dashboard`);
             return data;
         }
 
@@ -1114,8 +1240,16 @@
             return values;
         }
 
-        // Demo data fallback with more examples
+        // ================ DEMO DATA ================ 
         function getDemoData() {
+            if (CONFIG.CURRENT_APP === 'forex') {
+                return getForexDemoData();
+            } else {
+                return getG8DemoData();
+            }
+        }
+
+        function getForexDemoData() {
             return [
                 {
                     "Pair": "EURUSD",
@@ -1155,140 +1289,103 @@
                     "Surprise Scenario": "BoJ announces yield curve control adjustment, causing JPY surge and USD/JPY drop to 140.00 levels.",
                     "Cross-Market Driver": "US 10Y-Japan 10Y spread at cycle highs. Nikkei momentum supports risk appetite for JPY selling.",
                     "Macro News": "Japan CPI remains below target, wages growth disappointing. US jobless claims steady, supporting Fed hawkish stance."
-                },
-                {
-                    "Pair": "AUDUSD",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "AI Bias": "NEUTRAL",
-                    "Retail Sentiment Long%": "55",
-                    "Retail Sentiment Short%": "45",
-                    "COT Positioning": "Mixed",
-                    "Base Case": "AUD range-bound as RBA policy uncertainty meets mixed China data. Key resistance at 0.6750, support at 0.6650.",
-                    "Opposite Case": "China stimulus measures boost commodity demand, AUD breaks above 0.6800. Iron ore prices surge on infrastructure spending.",
-                    "Surprise Scenario": "RBA surprise rate hike on sticky inflation concerns drives AUD rally to 0.7000 levels against USD weakness.",
-                    "Cross-Market Driver": "Iron ore and gold prices diverging. ASX200 underperforming on banking sector concerns.",
-                    "Macro News": "Australia employment data mixed, China PMI shows manufacturing contraction. RBA minutes reveal policy divide."
-                },
-                {
-                    "Pair": "USDCAD",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "AI Bias": "SHORT",
-                    "Retail Sentiment Long%": "38",
-                    "Retail Sentiment Short%": "62",
-                    "COT Positioning": "Bearish",
-                    "Base Case": "CAD strength on oil price recovery and BoC hawkish stance. USD/CAD targets 1.3200 support level.",
-                    "Opposite Case": "Oil prices decline on demand concerns, BoC pauses rate hikes, USD/CAD rallies above 1.3500.",
-                    "Surprise Scenario": "Major oil supply disruption sends WTI above $90, CAD surges against weakening USD.",
-                    "Cross-Market Driver": "WTI oil prices correlating positively with CAD. TSX energy sector outperforming S&P 500.",
-                    "Macro News": "Canada employment beats expectations, oil inventories decline. Fed dovish signals support CAD strength."
-                },
-                {
-                    "Pair": "NZDUSD",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "AI Bias": "LONG",
-                    "Retail Sentiment Long%": "61",
-                    "Retail Sentiment Short%": "39",
-                    "COT Positioning": "Bullish",
-                    "Base Case": "RBNZ maintains hawkish tone on persistent inflation concerns. NZD/USD breaks above 0.6200 resistance.",
-                    "Opposite Case": "China economic slowdown impacts NZ exports, RBNZ signals policy pause, NZD weakens to 0.5900.",
-                    "Surprise Scenario": "New Zealand housing market recovery accelerates, RBNZ forced into aggressive tightening cycle.",
-                    "Cross-Market Driver": "Dairy prices stabilizing, NZX50 showing resilience. China PMI impacts sentiment.",
-                    "Macro News": "NZ inflation expectations remain elevated, employment data strong. Dairy auction prices steady."
                 }
             ];
         }
 
-        function startAutoRefresh() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-            refreshInterval = setInterval(loadData, CONFIG.REFRESH_INTERVAL);
-        }
-
-        function showLoading(show) {
-            const loadingEl = document.getElementById('loading');
-            const gridEl = document.getElementById('currency-grid');
-            if (loadingEl) loadingEl.style.display = show ? 'block' : 'none';
-            if (gridEl) gridEl.style.display = show ? 'none' : 'grid';
-        }
-
-        function showError(message) {
-            const errorContainer = document.getElementById('error-container');
-            if (errorContainer) {
-                errorContainer.innerHTML = `<div class="error">${message}</div>`;
-            }
-        }
-
-        function hideError() {
-            const errorContainer = document.getElementById('error-container');
-            if (errorContainer) {
-                errorContainer.innerHTML = '';
-            }
-        }
-
-        function updateLastUpdateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            const updateEl = document.getElementById('lastUpdate');
-            if (updateEl) {
-                updateEl.textContent = `Last update: ${timeString}`;
-            }
-        }
-
-        function updateConnectionStatus(status) {
-            connectionStatus = status;
-            const statusEl = document.getElementById('connectionStatus');
-            const textEl = document.getElementById('connectionText');
-            
-            if (statusEl && textEl) {
-                statusEl.className = `connection-status ${status}`;
-                
-                switch(status) {
-                    case 'online':
-                        textEl.textContent = 'Live Data';
-                        break;
-                    case 'offline':
-                        textEl.textContent = 'Connection Error';
-                        break;
-                    case 'demo':
-                        textEl.textContent = 'Demo Mode';
-                        break;
-                    default:
-                        textEl.textContent = 'Connecting...';
+        function getG8DemoData() {
+            return [
+                {
+                    "Currency": "USD",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "United States",
+                    "Central Bank": "Federal Reserve",
+                    "Interest Rate": "5.25%",
+                    "Previous": "5.50%",
+                    "Trend": "↘️",
+                    "Next Meeting": "Dec 2024",
+                    "AI Bias": "BULLISH - Fed maintaining restrictive policy, strong yields attracting capital flows globally",
+                    "Indicator": "Federal Funds Rate",
+                    "Actual": "5.25%",
+                    "Target": "2.00%",
+                    "AI Analysis": "Above target suggests continued hawkish stance supporting USD strength"
+                },
+                {
+                    "Currency": "EUR",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Euro Area",
+                    "Central Bank": "European Central Bank",
+                    "Interest Rate": "4.25%",
+                    "Previous": "4.50%",
+                    "Trend": "↘️",
+                    "Next Meeting": "Dec 2024",
+                    "AI Bias": "NEUTRAL - ECB policy on hold, inflation moderating but growth concerns persist",
+                    "Indicator": "CPI (YoY)",
+                    "Actual": "2.4%",
+                    "Target": "2.0%",
+                    "AI Analysis": "Inflation near target but growth concerns limiting ECB hawkishness"
+                },
+                {
+                    "Currency": "GBP",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "United Kingdom",
+                    "Central Bank": "Bank of England",
+                    "Interest Rate": "5.00%",
+                    "Previous": "5.25%",
+                    "Trend": "↘️",
+                    "Next Meeting": "Dec 2024",
+                    "AI Bias": "BEARISH - BoE dovish pivot likely, inflation falling faster than expected",
+                    "Indicator": "CPI (YoY)",
+                    "Actual": "6.8%",
+                    "Target": "2.0%",
+                    "AI Analysis": "Inflation declining rapidly, BoE may pause tightening cycle earlier than expected"
+                },
+                {
+                    "Currency": "JPY",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Japan",
+                    "Central Bank": "Bank of Japan",
+                    "Interest Rate": "-0.10%",
+                    "Previous": "-0.10%",
+                    "Trend": "→",
+                    "Next Meeting": "Dec 2024",
+                    "AI Bias": "NEUTRAL - BoJ ultra-loose policy unchanged, intervention risks limiting downside",
+                    "Indicator": "CPI (YoY)",
+                    "Actual": "3.2%",
+                    "Target": "2.0%",
+                    "AI Analysis": "Inflation above target but BoJ maintains accommodation, JPY weakness persists"
+                },
+                {
+                    "Currency": "AUD",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Australia",
+                    "Central Bank": "Reserve Bank of Australia",
+                    "Interest Rate": "4.35%",
+                    "Previous": "4.10%",
+                    "Trend": "↗️",
+                    "Next Meeting": "Dec 2024",
+                    "AI Bias": "BULLISH - RBA hawkish stance, commodity strength supporting fundamentals",
+                    "Indicator": "CPI (YoY)",
+                    "Actual": "5.4%",
+                    "Target": "2-3%",
+                    "AI Analysis": "Inflation above target range, RBA likely to maintain restrictive policy"
+                },
+                {
+                    "Currency": "CAD",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Canada",
+                    "Central Bank": "Bank of Canada",
+                    "Interest Rate": "5.00%",
+                    "Previous": "4.75%",
+                    "Trend": "↗️",
+                    "Next Meeting": "Dec 2024",
+                    "AI Bias": "NEUTRAL - BoC pausing cycle, oil prices mixed, housing market cooling",
+                    "Indicator": "CPI (YoY)",
+                    "Actual": "3.4%",
+                    "Target": "2.0%",
+                    "AI Analysis": "Inflation moderating, BoC likely to pause amid housing market concerns"
                 }
-            }
-        }
-
-        // ================ NOTIFICATION SYSTEM ================ 
-        function showNotification(title, body) {
-            // Create in-app notification
-            const popup = document.createElement('div');
-            popup.className = 'notification-popup';
-            popup.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 20px;
-                background: var(--secondary);
-                border: 1px solid var(--success);
-                border-radius: 12px;
-                padding: 1rem;
-                max-width: 300px;
-                z-index: 1500;
-                animation: slideIn 0.3s ease;
-                box-shadow: 0 10px 30px var(--shadow);
-            `;
-            
-            popup.innerHTML = `
-                <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--success);">${title}</div>
-                <div style="font-size: 0.9rem; color: var(--text-secondary);">${body}</div>
-            `;
-            
-            document.body.appendChild(popup);
-            
-            setTimeout(() => {
-                popup.style.animation = 'slideIn 0.3s ease reverse';
-                setTimeout(() => popup.remove(), 300);
-            }, 4000);
+            ];
         }
 
         // ================ UI RENDERING ================ 
@@ -1300,16 +1397,19 @@
                 return;
             }
             
-            grid.innerHTML = filteredData.map(item => createCurrencyCard(item)).join('');
+            if (CONFIG.CURRENT_APP === 'forex') {
+                grid.innerHTML = filteredData.map(item => createForexCard(item)).join('');
+            } else {
+                grid.innerHTML = filteredData.map(item => createG8Card(item)).join('');
+            }
         }
 
-        function createCurrencyCard(data) {
+        function createForexCard(data) {
             const longPercent = parseInt(data['Retail Sentiment Long%']) || 0;
             const shortPercent = parseInt(data['Retail Sentiment Short%']) || 0;
             const bias = data['AI Bias'] || 'NEUTRAL';
             const pair = data['Pair'] || 'UNKNOWN';
             
-            // Escape data for safe HTML insertion
             const safeBaseCase = escapeHtml(data['Base Case'] || '');
             const safeOppositeCase = escapeHtml(data['Opposite Case'] || '');
             const safeSurpriseScenario = escapeHtml(data['Surprise Scenario'] || '');
@@ -1374,6 +1474,184 @@
             `;
         }
 
+        function createG8Card(data) {
+            const currency = data['Currency'] || 'N/A';
+            const country = data['Country'] || '';
+            const centralBank = data['Central Bank'] || '';
+            const interestRate = data['Interest Rate'] || data['Actual'] || 'N/A';
+            const previous = data['Previous'] || 'N/A';
+            const trend = data['Trend'] || '→';
+            const bias = data['AI Bias'] || data['AI Analysis'] || 'No analysis available';
+            const indicator = data['Indicator'] || 'Interest Rate';
+            const target = data['Target'] || data['Next Meeting'] || 'N/A';
+            
+            // Get currency flag
+            const flags = {
+                'USD': '🇺🇸', 'EUR': '🇪🇺', 'GBP': '🇬🇧', 'JPY': '🇯🇵',
+                'AUD': '🇦🇺', 'CAD': '🇨🇦', 'CHF': '🇨🇭', 'NZD': '🇳🇿'
+            };
+            const flag = flags[currency] || '🏳️';
+            
+            const safeBias = escapeHtml(bias);
+            
+            return `
+                <div class="g8-card">
+                    <div class="g8-header">
+                        <div style="display: flex; align-items: center;">
+                            <div class="currency-flag">${flag}</div>
+                            <div>
+                                <div class="currency-name">${currency}</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">${country}</div>
+                            </div>
+                        </div>
+                        <div class="bias-badge ${getBiasClass(bias)}">${getBiasLabel(bias)}</div>
+                    </div>
+                    
+                    <div class="g8-section">
+                        <div class="g8-section-title">Central Bank</div>
+                        <div class="g8-data-row">
+                            <div class="g8-data-label">${centralBank}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="g8-section">
+                        <div class="g8-section-title">${indicator}</div>
+                        <div class="g8-data-row">
+                            <div class="g8-data-label">Current:</div>
+                            <div class="g8-data-value">${interestRate}</div>
+                        </div>
+                        <div class="g8-data-row">
+                            <div class="g8-data-label">Previous:</div>
+                            <div class="g8-data-value">${previous}</div>
+                        </div>
+                        <div class="g8-data-row">
+                            <div class="g8-data-label">Trend:</div>
+                            <div class="g8-data-value ${getTrendClass(trend)}">${trend}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="g8-section">
+                        <div class="g8-section-title">Target/Meeting</div>
+                        <div class="g8-data-value">${target}</div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="section-title">AI Analysis</div>
+                        <div class="clickable-info" onclick="showModal('${currency} Analysis', '${safeBias}')">
+                            🤖 ${truncateText(bias, 120)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getBiasClass(bias) {
+            if (bias.includes('BULLISH') || bias.includes('LONG')) return 'bias-long';
+            if (bias.includes('BEARISH') || bias.includes('SHORT')) return 'bias-short';
+            return 'bias-neutral';
+        }
+
+        function getBiasLabel(bias) {
+            if (bias.includes('BULLISH')) return 'BULLISH';
+            if (bias.includes('BEARISH')) return 'BEARISH';
+            if (bias.includes('LONG')) return 'LONG';
+            if (bias.includes('SHORT')) return 'SHORT';
+            return 'NEUTRAL';
+        }
+
+        function getTrendClass(trend) {
+            if (trend.includes('↗️') || trend.includes('↑')) return 'trend-up';
+            if (trend.includes('↘️') || trend.includes('↓')) return 'trend-down';
+            return 'trend-neutral';
+        }
+
+        // ================ FILTERING ================ 
+        function filterData() {
+            const pairFilter = document.getElementById('pairFilter').value.toLowerCase();
+            const biasFilter = document.getElementById('biasFilter').value;
+            
+            filteredData = allData.filter(item => {
+                let matchesPair = false;
+                let matchesBias = false;
+                
+                if (CONFIG.CURRENT_APP === 'forex') {
+                    matchesPair = !pairFilter || (item['Pair'] || '').toLowerCase().includes(pairFilter);
+                    matchesBias = !biasFilter || (item['AI Bias'] || '').includes(biasFilter);
+                } else {
+                    matchesPair = !pairFilter || 
+                        (item['Currency'] || '').toLowerCase().includes(pairFilter) ||
+                        (item['Country'] || '').toLowerCase().includes(pairFilter);
+                    matchesBias = !biasFilter || 
+                        (item['AI Bias'] || '').includes(biasFilter) ||
+                        (item['AI Analysis'] || '').includes(biasFilter);
+                }
+                
+                return matchesPair && matchesBias;
+            });
+            
+            renderData();
+        }
+
+        async function testConnection() {
+            if (CONFIG.USE_DEMO) {
+                showNotification('Demo Mode', 'Using demo data - connection test not needed');
+                return;
+            }
+
+            const forexConfigured = CONFIG.FOREX_APPS_SCRIPT_URL || CONFIG.FOREX_CSV_URL;
+            const g8Configured = CONFIG.G8_APPS_SCRIPT_URL || CONFIG.G8_CSV_URL;
+
+            if (!forexConfigured && !g8Configured) {
+                showNotification('No Configuration', 'Please configure data source URLs first');
+                toggleConfig();
+                return;
+            }
+
+            showNotification('Testing Connections...', 'Checking both dashboard data sources');
+            
+            let results = [];
+
+            // Test Forex dashboard
+            if (forexConfigured) {
+                try {
+                    const originalApp = CONFIG.CURRENT_APP;
+                    CONFIG.CURRENT_APP = 'forex';
+                    const forexData = await fetchDataFromSheets();
+                    const parsedForexData = parseData(forexData);
+                    CONFIG.CURRENT_APP = originalApp;
+                    
+                    if (parsedForexData && parsedForexData.length > 0) {
+                        results.push(`Forex Dashboard: ✅ Found ${parsedForexData.length} items`);
+                    } else {
+                        results.push('Forex Dashboard: ⚠️ Connected but no data found');
+                    }
+                } catch (error) {
+                    results.push(`Forex Dashboard: ❌ ${error.message}`);
+                }
+            }
+
+            // Test G8 dashboard
+            if (g8Configured) {
+                try {
+                    const originalApp = CONFIG.CURRENT_APP;
+                    CONFIG.CURRENT_APP = 'g8';
+                    const g8Data = await fetchDataFromSheets();
+                    const parsedG8Data = parseData(g8Data);
+                    CONFIG.CURRENT_APP = originalApp;
+                    
+                    if (parsedG8Data && parsedG8Data.length > 0) {
+                        results.push(`G8 Dashboard: ✅ Found ${parsedG8Data.length} items`);
+                    } else {
+                        results.push('G8 Dashboard: ⚠️ Connected but no data found');
+                    }
+                } catch (error) {
+                    results.push(`G8 Dashboard: ❌ ${error.message}`);
+                }
+            }
+
+            showNotification('Connection Test Results', results.join('\n'));
+        }
+
         // ================ UTILITY FUNCTIONS ================ 
         function truncateText(text, maxLength) {
             if (!text || text.length <= maxLength) return text || 'No data available';
@@ -1395,22 +1673,150 @@
             document.getElementById('modal').style.display = 'none';
         }
 
-        // ================ FILTERING ================ 
-        function filterData() {
-            const pairFilter = document.getElementById('pairFilter').value.toLowerCase();
-            const biasFilter = document.getElementById('biasFilter').value;
+        function setRefreshButtonState(disabled) {
+            const btn = document.getElementById('refreshBtn');
+            if (btn) {
+                btn.disabled = disabled;
+                btn.innerHTML = disabled ? '⏳ Loading...' : '🔄 Refresh';
+            }
+        }
+
+        function showLoading(show) {
+            const loadingEl = document.getElementById('loading');
+            const gridEl = document.getElementById('currency-grid');
+            if (loadingEl) loadingEl.style.display = show ? 'block' : 'none';
+            if (gridEl) gridEl.style.display = show ? 'none' : 'grid';
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            if (errorContainer) {
+                errorContainer.innerHTML = `<div class="error">${message}</div>`;
+            }
+        }
+
+        function hideError() {
+            const errorContainer = document.getElementById('error-container');
+            if (errorContainer) {
+                errorContainer.innerHTML = '';
+            }
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const updateEl = document.getElementById('lastUpdate');
+            if (updateEl) {
+                updateEl.textContent = `Last update: ${timeString}`;
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            connectionStatus = status;
+            const statusEl = document.getElementById('connectionStatus');
+            const textEl = document.getElementById('connectionText');
             
-            filteredData = allData.filter(item => {
-                const matchesPair = !pairFilter || (item['Pair'] || '').toLowerCase().includes(pairFilter);
-                const matchesBias = !biasFilter || (item['AI Bias'] || '') === biasFilter;
+            if (statusEl && textEl) {
+                statusEl.className = `connection-status ${status}`;
                 
-                return matchesPair && matchesBias;
-            });
+                switch(status) {
+                    case 'online':
+                        textEl.textContent = 'Live Data';
+                        break;
+                    case 'offline':
+                        textEl.textContent = 'Connection Error';
+                        break;
+                    case 'demo':
+                        textEl.textContent = 'Demo Mode';
+                        break;
+                    default:
+                        textEl.textContent = 'Connecting...';
+                }
+            }
+        }
+
+        function startAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            refreshInterval = setInterval(loadData, CONFIG.REFRESH_INTERVAL);
+        }
+
+        // ================ NOTIFICATION SYSTEM ================ 
+        function showNotification(title, body) {
+            const popup = document.createElement('div');
+            popup.className = 'notification-popup';
+            popup.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: var(--secondary);
+                border: 1px solid var(--success);
+                border-radius: 12px;
+                padding: 1rem;
+                max-width: 300px;
+                z-index: 1500;
+                animation: slideInRight 0.3s ease;
+                box-shadow: 0 10px 30px var(--shadow);
+            `;
             
-            renderData();
+            popup.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--success);">${title}</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); white-space: pre-line;">${body}</div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                popup.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => popup.remove(), 300);
+            }, 4000);
+        }
+
+        // ================ PWA SETUP ================ 
+        function setupPWA() {
+            const manifest = {
+                name: "Multi-Dashboard Forex Analysis",
+                short_name: "ForexMulti",
+                description: "Dual forex analysis dashboards with seamless switching",
+                start_url: "./",
+                display: "standalone",
+                background_color: "#1a1a2e",
+                theme_color: "#1a1a2e",
+                icons: [
+                    {
+                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%2300ff88'/%3E%3Ctext x='50' y='60' text-anchor='middle' font-size='30' fill='%231a1a2e'%3E📊%3C/text%3E%3C/svg%3E",
+                        sizes: "192x192",
+                        type: "image/svg+xml"
+                    }
+                ]
+            };
+
+            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            document.getElementById('manifest-placeholder').href = manifestURL;
         }
 
         // ================ EVENT HANDLERS ================ 
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPWA();
+            
+            const hasConfig = loadConfig();
+            
+            if (hasConfig) {
+                console.log('Configuration loaded, starting app...');
+                loadData();
+                startAutoRefresh();
+            } else {
+                setTimeout(() => {
+                    if (!CONFIG.FOREX_APPS_SCRIPT_URL && !CONFIG.G8_APPS_SCRIPT_URL && !CONFIG.USE_DEMO) {
+                        toggleConfig();
+                        showNotification('Setup Required', 'Please configure your data sources to get started');
+                    }
+                }, 1000);
+            }
+        });
+
         // Close modal when clicking outside
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('modal');
@@ -1427,7 +1833,6 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal();
-                // Also close config panel
                 const configPanel = document.getElementById('configPanel');
                 if (configPanel && configPanel.classList.contains('show')) {
                     toggleConfig();
@@ -1447,52 +1852,27 @@
             }
         });
 
-        // ================ PWA SETUP ================ 
-        function setupPWA() {
-            const manifest = {
-                name: "Forex Analysis Dashboard",
-                short_name: "ForexAnalysis",
-                description: "Real-time forex market analysis and sentiment tracking",
-                start_url: "./",
-                display: "standalone",
-                background_color: "#1a1a2e",
-                theme_color: "#1a1a2e",
-                icons: [
-                    {
-                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%2300ff88'/%3E%3Ctext x='50' y='60' text-anchor='middle' font-size='40' fill='%231a1a2e'%3E$%3C/text%3E%3C/svg%3E",
-                        sizes: "192x192",
-                        type: "image/svg+xml"
-                    }
-                ]
-            };
+        console.log(`
+🚀 MULTI-DASHBOARD FOREX ANALYSIS SYSTEM LOADED
+==============================================
 
-            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(blob);
-            document.getElementById('manifest-placeholder').href = manifestURL;
-        }
+📊 Available Dashboards:
+1. Forex Analysis - Traditional forex sentiment & analysis
+2. G8 Fundamentals - Central bank rates & economic data
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            setupPWA();
-            
-            // Load configuration first
-            const hasConfig = loadConfig();
-            
-            if (hasConfig) {
-                // Configuration found, load data immediately
-                console.log('✅ Configuration loaded, starting app...');
-                loadData();
-                startAutoRefresh();
-            } else {
-                // No configuration found, show setup after delay
-                setTimeout(() => {
-                    if (!CONFIG.APPS_SCRIPT_URL && !CONFIG.CSV_URL && !CONFIG.USE_DEMO) {
-                        toggleConfig();
-                        showNotification('⚙️ Setup Required', 'Please configure your data source to get started');
-                    }
-                }, 1000);
-            }
-        });
+🔗 Pre-configured URLs:
+- Forex: ${CONFIG.FOREX_APPS_SCRIPT_URL}
+- G8: ${CONFIG.G8_APPS_SCRIPT_URL}
+
+✨ Features:
+- Seamless dashboard switching
+- Individual configuration for each dashboard
+- Demo data fallback
+- Responsive design
+- PWA support
+
+Ready to analyze global forex markets!
+        `);
     </script>
 </body>
-</html>
+</html>            
