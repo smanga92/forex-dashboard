@@ -1112,7 +1112,7 @@
                 
                 if (allData.length > 0) {
                     console.log('Sample parsed item:', allData[0]);
-                    debugDataStructure(); // Call debug function
+                    debugDataStructure(); // This will show us the actual values
                 }
                 
                 filteredData = [...allData];
@@ -1453,27 +1453,35 @@
         }
 
         function createForexCard(data) {
-        // Fix: Check for alternative field names for retail sentiment
-        const longPercent = parseInt(data['Retail Sentiment Long%'] || data['Long%'] || data['Long'] || data['Retail Long'] || 0);
-        const shortPercent = parseInt(data['Retail Sentiment Short%'] || data['Short%'] || data['Short'] || data['Retail Short'] || 0);
+        // Fix: Convert string values to numbers and handle different formats
+        const longPercent = parseFloat(data['Retail Sentiment Long%']) || 
+                           parseFloat(data['Long%']) || 
+                           parseFloat(data['Long']) || 0;
+        const shortPercent = parseFloat(data['Retail Sentiment Short%']) || 
+                            parseFloat(data['Short%']) || 
+                            parseFloat(data['Short']) || 0;
+        
+        // Alternative calculation if short isn't provided but long is
+        const calculatedShort = longPercent > 0 && shortPercent === 0 ? 100 - longPercent : shortPercent;
+        
         const bias = data['AI Bias'] || data['Bias'] || 'NEUTRAL';
         const pair = data['Pair'] || data['Currency Pair'] || data['Symbol'] || 'UNKNOWN';
         
-        // Debug: Log the data to see actual field names
-        console.log('Forex card data fields:', Object.keys(data));
-        console.log('Long sentiment value:', longPercent, 'Short sentiment value:', shortPercent);
+        // Enhanced debugging
+        console.log(`${pair} - Raw Long: "${data['Retail Sentiment Long%']}", Parsed: ${longPercent}`);
+        console.log(`${pair} - Raw Short: "${data['Retail Sentiment Short%']}", Parsed: ${calculatedShort}`);
         
         const safeBaseCase = escapeHtml(data['Base Case'] || '');
         const safeOppositeCase = escapeHtml(data['Opposite Case'] || '');
         const safeSurpriseScenario = escapeHtml(data['Surprise Scenario'] || '');
         const safeCrossMarket = escapeHtml(data['Cross-Market Driver'] || '');
-        const safeMacroNews = escapeHtml(data['Macro News'] || '');
+        const safeMacroNews = escapeHtml(data['Macro News'] || data['USD Macro News'] || '');
         
         return `
             <div class="currency-card">
                 <div class="card-header">
                     <div class="pair-name">${pair}</div>
-                    <div class="bias-badge bias-${bias.toLowerCase()}">${bias}</div>
+                    <div class="bias-badge bias-${bias.toLowerCase().replace(' ', '-')}">${bias}</div>
                 </div>
                 
                 <div class="sentiment-row">
@@ -1483,7 +1491,7 @@
                     </div>
                     <div class="sentiment-item">
                         <div class="sentiment-label">Short</div>
-                        <div class="sentiment-value short-value">${shortPercent}%</div>
+                        <div class="sentiment-value short-value">${calculatedShort}%</div>
                     </div>
                     <div class="sentiment-item">
                         <div class="sentiment-label">COT</div>
@@ -1520,7 +1528,7 @@
                 <div class="info-section">
                     <div class="section-title">News Impact</div>
                     <div class="clickable-info" onclick="showModal('Macro News - ${pair}', '${safeMacroNews}')">
-                        📰 Macro: ${truncateText(data['Macro News'], 60)}
+                        📰 Macro: ${truncateText(safeMacroNews, 60)}
                     </div>
                 </div>
             </div>
@@ -1666,31 +1674,28 @@
                 console.log('=== DEBUG: Data Structure Analysis ===');
                 console.log('Current App:', CONFIG.CURRENT_APP);
                 console.log('Total Items:', allData.length);
-                console.log('First Item Keys:', Object.keys(allData[0]));
-                console.log('First Item Values:', allData[0]);
                 
-                // Log all unique keys across all items
-                const allKeys = new Set();
-                allData.forEach(item => {
-                    Object.keys(item).forEach(key => allKeys.add(key));
-                });
-                console.log('All unique keys found:', Array.from(allKeys));
+                // Show first complete item
+                console.log('FIRST COMPLETE ITEM:');
+                console.table(allData[0]);
                 
                 if (CONFIG.CURRENT_APP === 'forex') {
-                    console.log('=== FOREX FIELDS CHECK ===');
-                    Object.keys(allData[0]).forEach(key => {
-                        if (key.toLowerCase().includes('sentiment') || key.toLowerCase().includes('long') || key.toLowerCase().includes('short')) {
-                            console.log(`Sentiment field "${key}":`, allData[0][key]);
-                        }
-                    });
-                } else {
-                    console.log('=== G8 FIELDS CHECK ===');
-                    Object.keys(allData[0]).forEach(key => {
-                        if (key.toLowerCase().includes('currency') || key.toLowerCase().includes('rate') || key.toLowerCase().includes('bank')) {
-                            console.log(`G8 field "${key}":`, allData[0][key]);
-                        }
+                    console.log('=== FOREX SENTIMENT VALUES CHECK ===');
+                    allData.slice(0, 3).forEach((item, index) => {
+                        console.log(`Item ${index + 1} (${item.Pair}):`);
+                        console.log(`  Raw Long Value: "${item['Retail Sentiment Long%']}" (type: ${typeof item['Retail Sentiment Long%']})`);
+                        console.log(`  Raw Short Value: "${item['Retail Sentiment Short%']}" (type: ${typeof item['Retail Sentiment Short%']})`);
+                        console.log(`  Parsed Long: ${parseFloat(item['Retail Sentiment Long%']) || 0}`);
+                        console.log(`  Parsed Short: ${parseFloat(item['Retail Sentiment Short%']) || 0}`);
                     });
                 }
+                
+                // Show all field names and first few values
+                console.log('=== ALL FIELDS AND VALUES ===');
+                Object.keys(allData[0]).forEach(key => {
+                    const values = allData.slice(0, 2).map(item => item[key]);
+                    console.log(`${key}: [${values.map(v => `"${v}"`).join(', ')}]`);
+                });
             } else {
                 console.log('No data available for debugging');
             }
@@ -2032,5 +2037,6 @@ Ready to analyze global forex markets!
     </script>
 </body>
 </html>            
+
 
 
