@@ -37,6 +37,123 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
+
+        /* ================ MOBILE STICKY HEADER ================ */
+        @media (max-width: 768px) {
+            /* Make header sticky and always visible on mobile */
+            .header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 2000;
+                padding: 0.75rem 1rem;
+                background: rgba(26, 26, 46, 0.95);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                border-bottom: 2px solid var(--accent);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            /* Adjust container to account for fixed header */
+            .container {
+                padding-top: 120px; /* Adjust based on your header height */
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            /* Simplify header content on mobile */
+            .header-content {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: center;
+            }
+            
+            /* Make logo more compact */
+            .logo {
+                font-size: 1.2rem;
+                text-align: center;
+                line-height: 1.2;
+            }
+            
+            /* Compact app toggle */
+            .app-toggle {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .toggle-btn {
+                flex: 1;
+                min-width: auto;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+            
+            /* Hide less important controls on mobile to save space */
+            .connection-status {
+                display: none;
+            }
+            
+            .advanced-controls {
+                display: none;
+            }
+            
+            .last-update {
+                font-size: 0.7rem;
+            }
+            
+            /* Compact refresh button */
+            .refresh-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            
+            /* Ensure header stays on top of everything */
+            .modal {
+                z-index: 3000;
+            }
+            
+            .config-panel {
+                margin-top: 120px; /* Account for fixed header */
+            }
+            
+            /* Adjust filters to account for header */
+            .filters {
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            /* Make sure currency cards don't get hidden behind header */
+            .currency-grid {
+                margin-top: 0.5rem;
+            }
+            
+            /* Compact controls layout */
+            .controls {
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                width: 100%;
+            }
+        }
+        
+        /* For very small screens */
+        @media (max-width: 480px) {
+            .container {
+                padding-top: 130px; /* Slightly more space for very small screens */
+            }
+            
+            .logo {
+                font-size: 1rem;
+            }
+            
+            .toggle-btn {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.6rem;
+            }
+        }
         
         /* ================ HEADER ================ */
         .header {
@@ -1769,32 +1886,21 @@
         }
 
         function createG8Card(data) {
-            // Debug: Log the data to see actual field names
-            console.log('G8 card data fields:', Object.keys(data));
-            console.log('G8 data sample:', data);
+            // Clean currency name - remove any country codes or extra text
+            let currency = data['Currency'] || data['Pair'] || data['Symbol'] || 'N/A';
             
-            // Extract field values
-            const currency = data['Currency'] || data['Pair'] || data['Symbol'] || 'N/A';
+            // Remove common country code patterns
+            currency = currency.replace(/\s*(EU|GB|US|JP|AU|CA|CH|NZ)\s*$/i, '').trim();
+            currency = currency.replace(/\s*🇪🇺|🇬🇧|🇺🇸|🇯🇵|🇦🇺|🇨🇦|🇨🇭|🇳🇿\s*/g, '').trim();
+            
             const country = data['Country'] || data['Nation'] || data['Region'] || '';
-            const centralBank = data['Central Bank'] || data['Bank'] || data['Institution'] || '';
-            
-            // Get the Meta-Analysis data (you'll need to add this to your Apps Script response)
             const metaAnalysis = data['Meta-Analysis'] || data['AI Meta-Analysis'] || 'Analysis not available';
             
-            // Try multiple field names for rates and values
-            const interestRate = data['Interest Rate'] || data['Rate'] || data['Current Rate'] || 
-                                data['Policy Rate'] || data['Fed Rate'] || data['Actual'] || 'N/A';
-            const previous = data['Previous'] || data['Previous Rate'] || data['Prior'] || 'N/A';
-            const trend = data['Trend'] || data['Direction'] || data['Change'] || '→';
-            
-            // Try multiple field names for bias and analysis
-            const bias = data['AI Bias'] || data['Bias'] || data['Analysis'] || 
-                        data['AI Analysis'] || data['Recommendation'] || 'No analysis available';
-            
-            // Try multiple field names for indicators
-            const indicator = data['Indicator'] || data['Metric'] || data['Data Type'] || 'Interest Rate';
-            const target = data['Target'] || data['Goal'] || data['Next Meeting'] || 
-                          data['Meeting'] || data['Consensus'] || 'N/A';
+            const interestRate = data['Interest Rate'] || 'N/A';
+            const previous = data['Previous'] || 'N/A';
+            const trend = data['Trend'] || '→';
+            const bias = data['AI Bias'] || 'No analysis available';
+            const target = data['Target'] || data['Next Meeting'] || 'N/A';
             
             // Get currency flag
             const flags = {
@@ -1827,7 +1933,7 @@
                     </div>
                     
                     <div class="g8-section">
-                        <div class="g8-section-title">${indicator}</div>
+                        <div class="g8-section-title">Interest Rate</div>
                         <div class="g8-data-row">
                             <div class="g8-data-label">Current:</div>
                             <div class="g8-data-value">${interestRate}</div>
@@ -1843,7 +1949,7 @@
                     </div>
                     
                     <div class="g8-section">
-                        <div class="g8-section-title">Target/Meeting</div>
+                        <div class="g8-section-title">Next Meeting</div>
                         <div class="g8-data-value">${target}</div>
                     </div>
                     
@@ -2273,6 +2379,7 @@ Ready to analyze global forex markets!
     </script>
 </body>
 </html>            
+
 
 
 
