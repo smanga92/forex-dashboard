@@ -1239,16 +1239,31 @@
                 
                 if (allData.length > 0) {
                     console.log('Sample parsed item:', allData[0]);
-                    debugDataStructure(); // This will show us the actual values
+                    debugDataStructure();
                 }
                 
                 filteredData = [...allData];
                 renderData();
                 updateLastUpdateTime();
-                updateConnectionStatus('online');
+                updateConnectionStatus(allData === getDemoData() ? 'demo' : 'online');
                 showLoading(false);
             } catch (error) {
                 console.error('Error loading data:', error);
+                
+                // For G8 data issues, fall back to demo immediately
+                if (CONFIG.CURRENT_APP === 'g8' && retryCount === 0) {
+                    console.log('G8 data issue detected, using demo data...');
+                    showError(`G8 data source issue detected. Using demo data. Configure proper G8 sheet structure.`);
+                    allData = getDemoData();
+                    filteredData = [...allData];
+                    renderData();
+                    updateConnectionStatus('demo');
+                    showLoading(false);
+                    isRefreshing = false;
+                    setRefreshButtonState(false);
+                    return;
+                }
+                
                 if (retryCount < CONFIG.RETRY_ATTEMPTS) {
                     showError(`Retry ${retryCount + 1}/${CONFIG.RETRY_ATTEMPTS}: ${error.message}`);
                     setTimeout(() => loadData(retryCount + 1), CONFIG.RETRY_DELAY);
@@ -1342,6 +1357,13 @@
                     console.log('Parsed as JSON data from Apps Script');
                     console.log('First JSON item keys:', Object.keys(jsonData[0]));
                     console.log('First JSON item:', jsonData[0]);
+                    
+                    // Check if G8 data is malformed (contains API keys as field names)
+                    if (CONFIG.CURRENT_APP === 'g8' && isG8DataMalformed(jsonData[0])) {
+                        console.warn('G8 data appears malformed, using demo data');
+                        return getDemoData();
+                    }
+                    
                     return validateData(jsonData);
                 }
             } catch (e) {
@@ -1353,9 +1375,29 @@
             const csvData = parseCSVData(dataText);
             console.log('First CSV item keys:', csvData.length > 0 ? Object.keys(csvData[0]) : 'No data');
             console.log('First CSV item:', csvData.length > 0 ? csvData[0] : 'No data');
+            
+            // Check if G8 CSV data is malformed
+            if (CONFIG.CURRENT_APP === 'g8' && csvData.length > 0 && isG8DataMalformed(csvData[0])) {
+                console.warn('G8 CSV data appears malformed, using demo data');
+                return getDemoData();
+            }
+            
             return validateData(csvData);
         }
 
+        function isG8DataMalformed(dataItem) {
+            const keys = Object.keys(dataItem);
+            // Check if field names look like API keys or URLs instead of proper column headers
+            const hasAPIKeyField = keys.some(key => key.length > 20 && /^[a-zA-Z0-9_-]+$/.test(key));
+            const hasEmptyField = keys.includes('');
+            const hasExpectedG8Fields = keys.some(key => 
+                key.toLowerCase().includes('currency') || 
+                key.toLowerCase().includes('rate') || 
+                key.toLowerCase().includes('bank')
+            );
+            
+            return (hasAPIKeyField || hasEmptyField) && !hasExpectedG8Fields;
+        }
         function validateData(data) {
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('No valid data found');
@@ -1479,56 +1521,40 @@
                     "Previous": "5.50%",
                     "Trend": "↘️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "BULLISH - Fed maintaining restrictive policy, strong yields attracting capital flows globally",
-                    "Indicator": "Federal Funds Rate",
-                    "Actual": "5.25%",
-                    "Target": "2.00%",
-                    "AI Analysis": "Above target suggests continued hawkish stance supporting USD strength"
+                    "AI Bias": "BULLISH - Fed maintaining restrictive policy, strong yields attracting capital flows globally"
                 },
                 {
                     "Currency": "EUR",
                     "Date": new Date().toISOString().split('T')[0],
-                    "Country": "Euro Area",
+                    "Country": "Euro Area", 
                     "Central Bank": "European Central Bank",
                     "Interest Rate": "4.25%",
                     "Previous": "4.50%",
                     "Trend": "↘️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "NEUTRAL - ECB policy on hold, inflation moderating but growth concerns persist",
-                    "Indicator": "CPI (YoY)",
-                    "Actual": "2.4%",
-                    "Target": "2.0%",
-                    "AI Analysis": "Inflation near target but growth concerns limiting ECB hawkishness"
+                    "AI Bias": "NEUTRAL - ECB policy on hold, inflation moderating but growth concerns persist"
                 },
                 {
                     "Currency": "GBP",
                     "Date": new Date().toISOString().split('T')[0],
                     "Country": "United Kingdom",
-                    "Central Bank": "Bank of England",
+                    "Central Bank": "Bank of England", 
                     "Interest Rate": "5.00%",
                     "Previous": "5.25%",
                     "Trend": "↘️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "BEARISH - BoE dovish pivot likely, inflation falling faster than expected",
-                    "Indicator": "CPI (YoY)",
-                    "Actual": "6.8%",
-                    "Target": "2.0%",
-                    "AI Analysis": "Inflation declining rapidly, BoE may pause tightening cycle earlier than expected"
+                    "AI Bias": "BEARISH - BoE dovish pivot likely, inflation falling faster than expected"
                 },
                 {
                     "Currency": "JPY",
                     "Date": new Date().toISOString().split('T')[0],
                     "Country": "Japan",
                     "Central Bank": "Bank of Japan",
-                    "Interest Rate": "-0.10%",
+                    "Interest Rate": "-0.10%", 
                     "Previous": "-0.10%",
                     "Trend": "→",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "NEUTRAL - BoJ ultra-loose policy unchanged, intervention risks limiting downside",
-                    "Indicator": "CPI (YoY)",
-                    "Actual": "3.2%",
-                    "Target": "2.0%",
-                    "AI Analysis": "Inflation above target but BoJ maintains accommodation, JPY weakness persists"
+                    "AI Bias": "NEUTRAL - BoJ ultra-loose policy unchanged, intervention risks limiting downside"
                 },
                 {
                     "Currency": "AUD",
@@ -1536,14 +1562,10 @@
                     "Country": "Australia",
                     "Central Bank": "Reserve Bank of Australia",
                     "Interest Rate": "4.35%",
-                    "Previous": "4.10%",
+                    "Previous": "4.10%", 
                     "Trend": "↗️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "BULLISH - RBA hawkish stance, commodity strength supporting fundamentals",
-                    "Indicator": "CPI (YoY)",
-                    "Actual": "5.4%",
-                    "Target": "2-3%",
-                    "AI Analysis": "Inflation above target range, RBA likely to maintain restrictive policy"
+                    "AI Bias": "BULLISH - RBA hawkish stance, commodity strength supporting fundamentals"
                 },
                 {
                     "Currency": "CAD",
@@ -1552,13 +1574,31 @@
                     "Central Bank": "Bank of Canada",
                     "Interest Rate": "5.00%",
                     "Previous": "4.75%",
+                    "Trend": "↗️", 
+                    "Next Meeting": "Dec 2024",
+                    "AI Bias": "NEUTRAL - BoC pausing cycle, oil prices mixed, housing market cooling"
+                },
+                {
+                    "Currency": "CHF",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Switzerland",
+                    "Central Bank": "Swiss National Bank",
+                    "Interest Rate": "1.75%",
+                    "Previous": "1.75%",
+                    "Trend": "→",
+                    "Next Meeting": "Dec 2024", 
+                    "AI Bias": "NEUTRAL - SNB maintaining stability focus, safe haven demand balanced"
+                },
+                {
+                    "Currency": "NZD",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "New Zealand",
+                    "Central Bank": "Reserve Bank of New Zealand",
+                    "Interest Rate": "5.50%",
+                    "Previous": "5.25%",
                     "Trend": "↗️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "NEUTRAL - BoC pausing cycle, oil prices mixed, housing market cooling",
-                    "Indicator": "CPI (YoY)",
-                    "Actual": "3.4%",
-                    "Target": "2.0%",
-                    "AI Analysis": "Inflation moderating, BoC likely to pause amid housing market concerns"
+                    "AI Bias": "BEARISH - RBNZ cutting cycle ahead, dairy prices under pressure"
                 }
             ];
         }
@@ -2156,6 +2196,7 @@ Ready to analyze global forex markets!
     </script>
 </body>
 </html>            
+
 
 
 
