@@ -1358,10 +1358,23 @@
                     console.log('First JSON item keys:', Object.keys(jsonData[0]));
                     console.log('First JSON item:', jsonData[0]);
                     
-                    // Check if G8 data is malformed (contains API keys as field names)
-                    if (CONFIG.CURRENT_APP === 'g8' && isG8DataMalformed(jsonData[0])) {
-                        console.warn('G8 data appears malformed, using demo data');
-                        return getDemoData();
+                    // Special handling for G8 data
+                    if (CONFIG.CURRENT_APP === 'g8') {
+                        if (isG8DataMalformed(jsonData[0])) {
+                            console.warn('G8 data is malformed, using demo data');
+                            return handleG8DataIssue();
+                        }
+                        
+                        // If G8 data looks valid, validate it has the right structure
+                        const firstItem = jsonData[0];
+                        const hasValidG8Structure = firstItem.hasOwnProperty('Currency') || 
+                                                  firstItem.hasOwnProperty('Interest Rate') ||
+                                                  firstItem.hasOwnProperty('Central Bank');
+                        
+                        if (!hasValidG8Structure) {
+                            console.warn('G8 data missing expected fields, using demo data');
+                            return handleG8DataIssue();
+                        }
                     }
                     
                     return validateData(jsonData);
@@ -1376,27 +1389,88 @@
             console.log('First CSV item keys:', csvData.length > 0 ? Object.keys(csvData[0]) : 'No data');
             console.log('First CSV item:', csvData.length > 0 ? csvData[0] : 'No data');
             
-            // Check if G8 CSV data is malformed
+            // Check CSV data for G8 app
             if (CONFIG.CURRENT_APP === 'g8' && csvData.length > 0 && isG8DataMalformed(csvData[0])) {
                 console.warn('G8 CSV data appears malformed, using demo data');
-                return getDemoData();
+                return handleG8DataIssue();
             }
             
             return validateData(csvData);
         }
 
-        function isG8DataMalformed(dataItem) {
-            const keys = Object.keys(dataItem);
-            // Check if field names look like API keys or URLs instead of proper column headers
-            const hasAPIKeyField = keys.some(key => key.length > 20 && /^[a-zA-Z0-9_-]+$/.test(key));
-            const hasEmptyField = keys.includes('');
-            const hasExpectedG8Fields = keys.some(key => 
-                key.toLowerCase().includes('currency') || 
-                key.toLowerCase().includes('rate') || 
-                key.toLowerCase().includes('bank')
+        function showG8SetupInstructions() {
+                    showNotification(
+                        'G8 Setup Required', 
+                        'The G8 Apps Script needs proper deployment:\n' +
+                        '1. Run setupCompleteG8System() in the script\n' +
+                        '2. Redeploy as web app\n' +
+                        '3. Update doGet() function as provided'
+                    );
+                }
+        
+                async function testBothDashboards() {
+            console.log('=== TESTING BOTH DASHBOARDS ===');
+            
+            // Test Forex
+            CONFIG.CURRENT_APP = 'forex';
+            try {
+                const forexData = await fetchDataFromSheets();
+                const parsedForex = parseData(forexData);
+                console.log(`✅ Forex: ${parsedForex.length} items loaded`);
+            } catch (error) {
+                console.log(`❌ Forex: ${error.message}`);
+            }
+            
+            // Test G8
+            CONFIG.CURRENT_APP = 'g8';
+            try {
+                const g8Data = await fetchDataFromSheets();
+                const parsedG8 = parseData(g8Data);
+                console.log(`✅ G8: ${parsedG8Data.length} items loaded`);
+            } catch (error) {
+                console.log(`❌ G8: ${error.message}`);
+            }
+            
+            showNotification('Dashboard Test Complete', 'Check console for results');
+        }
+        
+        function handleG8DataIssue() {
+            console.warn('G8 data source returning configuration instead of data');
+            showNotification(
+                'G8 Data Issue', 
+                'G8 sheet needs setup. Using demo data. Check Apps Script deployment.'
             );
             
-            return (hasAPIKeyField || hasEmptyField) && !hasExpectedG8Fields;
+            // Always use demo data for G8 when malformed
+            return getG8DemoData();
+        }
+        
+        function isG8DataMalformed(dataItem) {
+            const keys = Object.keys(dataItem);
+            
+            // Check for API key-like fields (long alphanumeric strings)
+            const hasAPIKeyField = keys.some(key => 
+                key.length > 30 && /^[a-zA-Z0-9_-]+$/.test(key)
+            );
+            
+            // Check for empty field names
+            const hasEmptyField = keys.includes('') || keys.includes(null) || keys.includes(undefined);
+            
+            // Check for "Fred" field (indicates config data)
+            const hasFredField = keys.includes('Fred');
+            
+            // Check if we have expected G8 fields
+            const hasExpectedG8Fields = keys.some(key => {
+                const lowerKey = key.toLowerCase();
+                return lowerKey.includes('currency') || 
+                       lowerKey.includes('rate') || 
+                       lowerKey.includes('bank') ||
+                       lowerKey.includes('country') ||
+                       lowerKey.includes('date');
+            });
+            
+            // Data is malformed if it has config-like fields and no proper G8 fields
+            return (hasAPIKeyField || hasEmptyField || hasFredField) && !hasExpectedG8Fields;
         }
         function validateData(data) {
             if (!Array.isArray(data) || data.length === 0) {
@@ -2196,6 +2270,7 @@ Ready to analyze global forex markets!
     </script>
 </body>
 </html>            
+
 
 
 
