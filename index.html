@@ -16,7 +16,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         :root {
             --primary: #1a1a2e;
             --secondary: #16213e;
@@ -29,7 +29,7 @@
             --border: #2a2a3e;
             --shadow: rgba(0, 0, 0, 0.3);
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -37,10 +37,11 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
-
+        
         /* ================ HEADER ================ */
         .header {
             background: rgba(26, 26, 46, 0.9);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             padding: 1rem 2rem;
             position: sticky;
@@ -48,7 +49,7 @@
             z-index: 1000;
             border-bottom: 1px solid var(--border);
         }
-
+        
         .header-content {
             max-width: 1400px;
             margin: 0 auto;
@@ -58,13 +59,13 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-
+        
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--success);
         }
-
+        
         /* ================ APP TOGGLE ================ */
         .app-toggle {
             display: flex;
@@ -74,7 +75,7 @@
             border: 1px solid var(--accent);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-
+        
         .toggle-btn {
             background: none;
             border: none;
@@ -90,18 +91,18 @@
             position: relative;
             overflow: hidden;
         }
-
+        
         .toggle-btn:hover {
             color: var(--text-primary);
             transform: translateY(-1px);
         }
-
+        
         .toggle-btn.active {
             background: linear-gradient(135deg, var(--accent), var(--success));
             color: white;
             box-shadow: 0 4px 15px rgba(15, 76, 117, 0.4);
         }
-
+        
         .toggle-btn.active::before {
             content: '';
             position: absolute;
@@ -111,14 +112,14 @@
             bottom: 0;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
         }
-
+        
         .controls {
             display: flex;
             gap: 1rem;
             align-items: center;
             flex-wrap: wrap;
         }
-
+        
         .refresh-btn {
             background: var(--accent);
             border: none;
@@ -131,23 +132,23 @@
             gap: 0.5rem;
             transition: all 0.3s ease;
         }
-
+        
         .refresh-btn:hover {
             background: #0e3f66;
             transform: translateY(-2px);
         }
-
+        
         .refresh-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-
+        
         .last-update {
             font-size: 0.8rem;
             color: var(--text-secondary);
         }
-
+        
         /* ================ CONFIG PANEL ================ */
         .config-panel {
             background: var(--secondary);
@@ -157,11 +158,11 @@
             margin-bottom: 2rem;
             display: none;
         }
-
+        
         .config-panel.show {
             display: block;
         }
-
+        
         .config-title {
             color: var(--warning);
             font-size: 1.1rem;
@@ -170,7 +171,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-
+        
         .config-group {
             margin-bottom: 1.5rem;
             padding: 1rem;
@@ -178,14 +179,14 @@
             border-radius: 8px;
             border: 1px solid var(--border);
         }
-
+        
         .config-group-title {
             color: var(--success);
             font-size: 0.95rem;
             margin-bottom: 0.75rem;
             font-weight: 600;
         }
-
+        
         .config-input {
             background: var(--primary);
             border: 1px solid var(--border);
@@ -196,19 +197,20 @@
             margin-bottom: 0.5rem;
             font-size: 0.9rem;
         }
-
+        
         .config-input:focus {
             border-color: var(--accent);
-            outline: none;
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
             box-shadow: 0 0 0 2px rgba(15, 76, 117, 0.2);
         }
-
+        
         .config-buttons {
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
         }
-
+        
         .config-btn {
             background: var(--success);
             color: var(--primary);
@@ -219,31 +221,46 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-
+        
         .config-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
         }
-
+        
         .config-btn.secondary {
             background: var(--accent);
             color: white;
         }
-
+        
         /* ================ MAIN CONTAINER ================ */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
-
+        
         .filters {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
             flex-wrap: wrap;
+            position: relative;
         }
-
+        
+        /* Hidden labels for accessibility */
+        .filters::before {
+            content: 'Currency pair filter';
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
         .filter-input {
             background: var(--secondary);
             border: 1px solid var(--border);
@@ -252,25 +269,32 @@
             border-radius: 8px;
             min-width: 200px;
         }
-
+        
+        .filter-input:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+            border-color: var(--accent);
+        }
+        
         /* ================ CURRENCY CARDS ================ */
         .currency-grid {
             display: grid;
             gap: 1.5rem;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
         }
-
+        
         .currency-card {
             background: rgba(22, 33, 62, 0.8);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1.5rem;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
-
+        
         .currency-card::before {
             content: '';
             position: absolute;
@@ -280,25 +304,25 @@
             height: 4px;
             background: linear-gradient(90deg, var(--success), var(--accent));
         }
-
+        
         .currency-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px var(--shadow);
         }
-
+        
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
         }
-
+        
         .pair-name {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--success);
         }
-
+        
         .bias-badge {
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
@@ -306,23 +330,24 @@
             font-weight: 600;
             text-transform: uppercase;
         }
-
+        
         .bias-long { background: rgba(0, 255, 136, 0.2); color: var(--success); }
         .bias-short { background: rgba(255, 71, 87, 0.2); color: var(--danger); }
         .bias-neutral { background: rgba(255, 167, 38, 0.2); color: var(--warning); }
-
+        
         /* ================ G8 SPECIFIC STYLES ================ */
         .g8-card {
             background: linear-gradient(135deg, rgba(22, 33, 62, 0.9), rgba(26, 26, 46, 0.8));
             border: 1px solid var(--accent);
             border-radius: 16px;
             padding: 1.5rem;
+            -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
-
+        
         .g8-card::before {
             content: '';
             position: absolute;
@@ -332,13 +357,13 @@
             height: 4px;
             background: linear-gradient(90deg, #1976d2, #0d47a1);
         }
-
+        
         .g8-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px var(--shadow);
             border-color: var(--success);
         }
-
+        
         .g8-header {
             display: flex;
             justify-content: space-between;
@@ -347,18 +372,18 @@
             padding-bottom: 0.75rem;
             border-bottom: 1px solid var(--border);
         }
-
+        
         .currency-flag {
             font-size: 1.8rem;
         }
-
+        
         .currency-name {
             font-size: 1.3rem;
             font-weight: 700;
             color: var(--success);
             margin-left: 0.5rem;
         }
-
+        
         .g8-section {
             margin: 1rem 0;
             padding: 0.75rem;
@@ -366,7 +391,7 @@
             border-radius: 8px;
             border-left: 3px solid var(--accent);
         }
-
+        
         .g8-section-title {
             font-size: 0.85rem;
             color: var(--text-secondary);
@@ -375,58 +400,58 @@
             letter-spacing: 0.5px;
             font-weight: 600;
         }
-
+        
         .g8-data-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.5rem;
         }
-
+        
         .g8-data-label {
             font-size: 0.9rem;
             color: var(--text-secondary);
         }
-
+        
         .g8-data-value {
             font-size: 0.95rem;
             font-weight: 600;
             color: var(--text-primary);
         }
-
+        
         .trend-up { color: var(--success); }
         .trend-down { color: var(--danger); }
         .trend-neutral { color: var(--warning); }
-
+        
         .sentiment-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 1rem;
         }
-
+        
         .sentiment-item {
             text-align: center;
             flex: 1;
         }
-
+        
         .sentiment-label {
             font-size: 0.8rem;
             color: var(--text-secondary);
             margin-bottom: 0.25rem;
         }
-
+        
         .sentiment-value {
             font-size: 1.2rem;
             font-weight: 600;
         }
-
+        
         .long-value { color: var(--success); }
         .short-value { color: var(--danger); }
-
+        
         .info-section {
             margin: 1rem 0;
         }
-
+        
         .section-title {
             font-size: 0.9rem;
             color: var(--text-secondary);
@@ -434,7 +459,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
+        
         .clickable-info {
             background: rgba(15, 76, 117, 0.3);
             border: 1px solid var(--accent);
@@ -445,18 +470,18 @@
             font-size: 0.9rem;
             line-height: 1.4;
         }
-
+        
         .clickable-info:hover {
             background: rgba(15, 76, 117, 0.5);
             transform: scale(1.02);
         }
-
+        
         .loading {
             text-align: center;
             padding: 2rem;
             color: var(--text-secondary);
         }
-
+        
         .error {
             background: rgba(255, 71, 87, 0.1);
             border: 1px solid var(--danger);
@@ -466,7 +491,7 @@
             margin-bottom: 1rem;
             text-align: center;
         }
-
+        
         .warning {
             background: rgba(255, 167, 38, 0.1);
             border: 1px solid var(--warning);
@@ -475,10 +500,6 @@
             border-radius: 8px;
             margin-bottom: 1rem;
             text-align: center;
-        }
-        .header, .currency-card, .g8-card {
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px); /* Safari support */
         }
         
         /* ================ MODAL ================ */
@@ -491,9 +512,10 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
             z-index: 2000;
+            -webkit-backdrop-filter: blur(5px);
             backdrop-filter: blur(5px);
         }
-
+        
         .modal-content {
             position: absolute;
             top: 50%;
@@ -510,33 +532,20 @@
             box-sizing: border-box;
         }
         
-        /* Enhanced mobile modal styles */
-        @media (max-width: 768px) {
-            .modal-content {
-                padding: 1rem;
-                max-width: 92vw;
-                max-height: 85vh;
-                min-width: 280px;
-                width: 92vw;
-                left: 4vw;
-                right: 4vw;
-                transform: translateY(-50%);
-                margin: 0;
-            }
-
-            .modal-header {
-                padding-bottom: 0.75rem;
-                margin-bottom: 0.75rem;
-            }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
         }
-
+        
         .modal-title {
-            font-size: 1.1rem;
-            line-height: 1.3;
-            margin-bottom: 0.5rem;
-            word-wrap: break-word;
+            font-size: 1.3rem;
+            color: var(--success);
         }
-
+        
         .close-btn {
             background: none;
             border: none;
@@ -547,24 +556,25 @@
             border-radius: 50%;
             transition: all 0.3s ease;
         }
-
+        
         .close-btn:hover {
             background: var(--accent);
             color: white;
         }
-
+        
         .modal-body {
-            font-size: 0.9rem;
-            line-height: 1.5;
-            text-align: left;
-            padding: 0;
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
         }
         
         .modal-body p {
-            margin-bottom: 0.75rem;
-            padding: 0;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
-            
+        
         /* ================ ADVANCED FEATURES STYLES ================ */
         .advanced-controls {
             display: flex;
@@ -572,7 +582,7 @@
             align-items: center;
             flex-wrap: wrap;
         }
-
+        
         .feature-btn {
             background: var(--secondary);
             border: 1px solid var(--accent);
@@ -586,17 +596,17 @@
             align-items: center;
             gap: 0.3rem;
         }
-
+        
         .feature-btn:hover {
             background: var(--accent);
             transform: translateY(-1px);
         }
-
+        
         .feature-btn.active {
             background: var(--success);
             color: var(--primary);
         }
-
+        
         .connection-status {
             display: inline-flex;
             align-items: center;
@@ -606,22 +616,22 @@
             border-radius: 6px;
             margin-right: 1rem;
         }
-
+        
         .connection-status.online {
             background: rgba(0, 255, 136, 0.2);
             color: var(--success);
         }
-
+        
         .connection-status.offline {
             background: rgba(255, 71, 87, 0.2);
             color: var(--danger);
         }
-
+        
         .connection-status.demo {
             background: rgba(255, 167, 38, 0.2);
             color: var(--warning);
         }
-
+        
         .connection-dot {
             width: 8px;
             height: 8px;
@@ -629,12 +639,12 @@
             background: currentColor;
             animation: pulse 2s infinite;
         }
-
+        
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-
+        
         /* ================ RESPONSIVE DESIGN ================ */
         @media (max-width: 768px) {
             .header {
@@ -679,36 +689,70 @@
             
             .modal-content {
                 padding: 1rem;
-                max-width: 95vw;
+                max-width: 90vw;
+                max-height: 85vh;
+                min-width: 280px;
+                width: 90vw;
+                left: 5vw;
+                right: 5vw;
+                transform: translateY(-50%);
+                margin: 0;
+                box-sizing: border-box;
+            }
+            
+            .modal-body {
+                font-size: 0.9rem;
+                line-height: 1.5;
+                text-align: left;
+                padding: 0;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+            
+            .modal-body p {
+                margin-bottom: 0.75rem;
+                padding: 0;
+            }
+            
+            .modal-title {
+                font-size: 1.1rem;
+                line-height: 1.3;
+                margin-bottom: 0.5rem;
+                word-wrap: break-word;
+            }
+            
+            .modal-header {
+                padding-bottom: 0.75rem;
+                margin-bottom: 0.75rem;
             }
             
             .pair-name {
                 font-size: 1.2rem;
             }
-
+        
             .controls {
                 flex-direction: column;
                 align-items: center;
                 width: 100%;
             }
         }
-
+        
         @media (min-width: 1200px) {
             .currency-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
-
+        
         /* ================ ANIMATIONS ================ */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        
         .currency-card, .g8-card {
             animation: fadeIn 0.5s ease forwards;
         }
-
+        
         .spinner {
             border: 3px solid var(--border);
             border-top: 3px solid var(--success);
@@ -718,12 +762,12 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
+        
         /* ================ NOTIFICATION STYLES ================ */
         .notification-popup {
             position: fixed;
@@ -738,7 +782,7 @@
             animation: slideInRight 0.3s ease;
             box-shadow: 0 10px 30px var(--shadow);
         }
-
+        
         @keyframes slideInRight {
             from {
                 transform: translateX(100%);
@@ -749,7 +793,47 @@
                 opacity: 1;
             }
         }
-    </style>
+        
+        /* ================ ACCESSIBILITY IMPROVEMENTS ================ */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* Focus indicators */
+        button:focus,
+        input:focus,
+        select:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+        
+        /* High contrast support */
+        @media (prefers-contrast: high) {
+            :root {
+                --border: #ffffff;
+                --text-secondary: #ffffff;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        </style>
 </head>
 <body>
     <div class="header">
@@ -2072,6 +2156,7 @@ Ready to analyze global forex markets!
     </script>
 </body>
 </html>            
+
 
 
 
