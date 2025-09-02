@@ -28,6 +28,7 @@
             --text-secondary: #b0bec5;
             --border: #2a2a3e;
             --shadow: rgba(0, 0, 0, 0.3);
+            --header-height: 80px; /* Define header height variable */
         }
         
         body {
@@ -36,135 +37,123 @@
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            padding-top: var(--header-height); /* Add padding to prevent content jumping */
         }
 
-        /* ================ MOBILE STICKY HEADER ================ */
+        /* ================ ENHANCED HEADER WITH AUTO-HIDE ================ */
+        .header {
+            background: rgba(26, 26, 46, 0.95);
+            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--accent);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            height: var(--header-height);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        /* Auto-hide states */
+        .header.header-hidden {
+            transform: translateY(-100%);
+        }
+
+        .header.header-compact {
+            padding: 0.5rem 2rem;
+            height: 60px;
+        }
+
+        .header.header-compact .header-content {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header.header-compact .logo {
+            font-size: 1.2rem;
+        }
+
+        .header.header-compact .controls,
+        .header.header-compact .advanced-controls {
+            display: none;
+        }
+
+        .header.header-compact .app-toggle {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 1rem;
+        }
+
+        /* Mobile header improvements */
         @media (max-width: 768px) {
-            /* Make header sticky and always visible on mobile */
+            :root {
+                --header-height: 70px;
+            }
+
+            body {
+                padding-top: var(--header-height);
+            }
+            
             .header {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                z-index: 2000;
-                padding: 0.75rem 1rem;
-                background: rgba(26, 26, 46, 0.95);
-                backdrop-filter: blur(15px);
-                -webkit-backdrop-filter: blur(15px);
-                border-bottom: 2px solid var(--accent);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                height: var(--header-height);
+                padding: 0.5rem 1rem;
+            }
+
+            .header.header-hidden {
+                transform: translateY(-100%);
+            }
+
+            /* When header is shown on mobile, it takes minimal space */
+            .header:not(.header-hidden) {
+                background: rgba(26, 26, 46, 0.98);
             }
             
-            /* Adjust container to account for fixed header */
-            .container {
-                padding-top: 120px; /* Adjust based on your header height */
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            
-            /* Simplify header content on mobile */
             .header-content {
                 flex-direction: column;
-                gap: 0.75rem;
+                gap: 0.5rem;
                 align-items: center;
+                justify-content: center;
+                height: 100%;
             }
             
-            /* Make logo more compact */
             .logo {
-                font-size: 1.2rem;
+                font-size: 1rem;
                 text-align: center;
                 line-height: 1.2;
+                order: 1;
             }
             
-            /* Compact app toggle */
             .app-toggle {
                 width: 100%;
                 max-width: 300px;
                 justify-content: center;
+                order: 2;
             }
             
             .toggle-btn {
                 flex: 1;
                 min-width: auto;
-                padding: 0.5rem 0.75rem;
-                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
             }
             
-            /* Hide less important controls on mobile to save space */
-            .connection-status {
+            /* Hide secondary controls on mobile to save space */
+            .connection-status,
+            .advanced-controls,
+            .last-update,
+            .controls {
                 display: none;
-            }
-            
-            .advanced-controls {
-                display: none;
-            }
-            
-            .last-update {
-                font-size: 0.7rem;
-            }
-            
-            /* Compact refresh button */
-            .refresh-btn {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
-            }
-            
-            /* Ensure header stays on top of everything */
-            .modal {
-                z-index: 3000;
-            }
-            
-            .config-panel {
-                margin-top: 120px; /* Account for fixed header */
-            }
-            
-            /* Adjust filters to account for header */
-            .filters {
-                margin-top: 1rem;
-                margin-bottom: 1rem;
             }
             
             /* Make sure currency cards don't get hidden behind header */
             .currency-grid {
                 margin-top: 0.5rem;
             }
-            
-            /* Compact controls layout */
-            .controls {
-                flex-direction: row;
-                align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-                width: 100%;
-            }
-        }
-        
-        /* For very small screens */
-        @media (max-width: 480px) {
-            .container {
-                padding-top: 130px; /* Slightly more space for very small screens */
-            }
-            
-            .logo {
-                font-size: 1rem;
-            }
-            
-            .toggle-btn {
-                font-size: 0.75rem;
-                padding: 0.4rem 0.6rem;
-            }
-        }
-        
-        /* ================ HEADER ================ */
-        .header {
-            background: rgba(26, 26, 46, 0.9);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border);
         }
         
         .header-content {
@@ -175,12 +164,14 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
+            height: 100%;
         }
         
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--success);
+            cursor: pointer; /* Make logo clickable to toggle header */
         }
         
         /* ================ APP TOGGLE ================ */
@@ -354,6 +345,13 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                padding-top: 1rem; /* Reduced since header auto-hides */
+            }
         }
         
         .filters {
@@ -586,11 +584,16 @@
             transition: all 0.3s ease;
             font-size: 0.9rem;
             line-height: 1.4;
+            user-select: none; /* Prevent text selection issues */
         }
         
         .clickable-info:hover {
             background: rgba(15, 76, 117, 0.5);
             transform: scale(1.02);
+        }
+
+        .clickable-info:active {
+            transform: scale(0.98);
         }
         
         .loading {
@@ -628,7 +631,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
+            z-index: 3000; /* Higher than header */
             -webkit-backdrop-filter: blur(5px);
             backdrop-filter: blur(5px);
         }
@@ -764,29 +767,6 @@
         
         /* ================ RESPONSIVE DESIGN ================ */
         @media (max-width: 768px) {
-            .header {
-                padding: 1rem;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .app-toggle {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .toggle-btn {
-                flex: 1;
-                min-width: auto;
-            }
-            
-            .container {
-                padding: 1rem;
-            }
-            
             .currency-grid {
                 grid-template-columns: 1fr;
             }
@@ -845,12 +825,6 @@
             
             .pair-name {
                 font-size: 1.2rem;
-            }
-        
-            .controls {
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
             }
         }
         
@@ -949,13 +923,17 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
+            
+            .header {
+                transition: none;
+            }
         }
-        </style>
+    </style>
 </head>
 <body>
-    <div class="header">
+    <div class="header" id="header">
         <div class="header-content">
-            <div class="logo">📊 Multi-Dashboard Forex Analysis</div>
+            <div class="logo" onclick="toggleHeaderOnMobile()" role="button" tabindex="0" aria-label="Toggle header">📊 Multi-Dashboard Forex Analysis</div>
             
             <!-- App Toggle Buttons -->
             <div class="app-toggle">
@@ -1054,11 +1032,11 @@
     </div>
 
     <!-- Modal -->
-    <div id="modal" class="modal">
+    <div id="modal" class="modal" onclick="handleModalClick(event)">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="modal-title">Details</h3>
-                <button class="close-btn" onclick="closeModal()">×</button>
+                <button class="close-btn" onclick="closeModal()" aria-label="Close modal">×</button>
             </div>
             <div class="modal-body" id="modal-body"></div>
         </div>
@@ -1098,6 +1076,139 @@
         let connectionStatus = 'connecting';
         let isRefreshing = false;
 
+        // ================ AUTO-HIDE HEADER FUNCTIONALITY ================ 
+        let lastScrollTop = 0;
+        let scrollTimeout;
+        let isScrolling = false;
+        let headerVisible = true;
+        let isMobile = window.innerWidth <= 768;
+
+        function initAutoHideHeader() {
+            const header = document.getElementById('header');
+            
+            // Update mobile detection on resize
+            window.addEventListener('resize', () => {
+                isMobile = window.innerWidth <= 768;
+            });
+
+            // Throttled scroll handler for better performance
+            window.addEventListener('scroll', () => {
+                if (!scrollTimeout) {
+                    scrollTimeout = setTimeout(() => {
+                        handleScroll();
+                        scrollTimeout = null;
+                    }, 10); // Very responsive on mobile
+                }
+            });
+
+            // Handle scroll start/end
+            window.addEventListener('scroll', () => {
+                if (!isScrolling) {
+                    isScrolling = true;
+                    header.classList.add('scrolling');
+                }
+                
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    isScrolling = false;
+                    header.classList.remove('scrolling');
+                }, 150);
+            });
+        }
+
+        function handleScroll() {
+            if (!isMobile) return; // Only auto-hide on mobile
+            
+            const header = document.getElementById('header');
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollDelta = currentScroll - lastScrollTop;
+            
+            // Minimum scroll distance before hiding/showing
+            const minScrollDelta = 5;
+            
+            if (Math.abs(scrollDelta) < minScrollDelta) {
+                return;
+            }
+            
+            // Show header when at the very top
+            if (currentScroll <= 10) {
+                showHeader();
+            }
+            // Hide header when scrolling down
+            else if (scrollDelta > 0 && headerVisible) {
+                hideHeader();
+            }
+            // Show header when scrolling up
+            else if (scrollDelta < 0 && !headerVisible) {
+                showHeader();
+            }
+            
+            lastScrollTop = currentScroll;
+        }
+
+        function hideHeader() {
+            if (!isMobile) return;
+            
+            const header = document.getElementById('header');
+            header.classList.add('header-hidden');
+            headerVisible = false;
+            
+            // Reduce body padding when header is hidden
+            document.body.style.paddingTop = '0px';
+        }
+
+        function showHeader() {
+            if (!isMobile) return;
+            
+            const header = document.getElementById('header');
+            header.classList.remove('header-hidden');
+            headerVisible = true;
+            
+            // Restore body padding when header is visible
+            document.body.style.paddingTop = 'var(--header-height)';
+        }
+
+        function toggleHeaderOnMobile() {
+            if (!isMobile) return;
+            
+            if (headerVisible) {
+                hideHeader();
+            } else {
+                showHeader();
+            }
+        }
+
+        // ================ MODAL FUNCTIONALITY FIXES ================ 
+        function handleModalClick(event) {
+            // Only close if clicked on the modal backdrop (not the content)
+            if (event.target === event.currentTarget) {
+                closeModal();
+            }
+        }
+
+        function showModal(title, content) {
+            // Clean the content to prevent JavaScript injection
+            const cleanTitle = escapeHtml(title);
+            const cleanContent = escapeHtml(content);
+            
+            document.getElementById('modal-title').innerHTML = cleanTitle;
+            document.getElementById('modal-body').innerHTML = `<p>${cleanContent}</p>`;
+            document.getElementById('modal').style.display = 'block';
+            
+            // Focus on modal for accessibility
+            document.getElementById('modal').focus();
+            
+            // Prevent body scrolling when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            
+            // Restore body scrolling
+            document.body.style.overflow = 'auto';
+        }
+
         // ================ APP SWITCHING ================ 
         function switchApp(appType) {
             CONFIG.CURRENT_APP = appType;
@@ -1108,7 +1219,7 @@
             
             // Update page title
             const title = appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals Analysis';
-            document.querySelector('.logo').textContent = `📊 ${title}`;
+            document.querySelector('.logo').innerHTML = `📊 ${title}`;
             
             // Clear current data and load new
             allData = [];
@@ -1154,8 +1265,10 @@
             }
         }
 
+        // ================ INITIALIZATION ================ 
         document.addEventListener('DOMContentLoaded', function() {
             setupPWA();
+            initAutoHideHeader(); // Initialize auto-hide header
             
             // Initialize accessibility attributes
             const pairFilter = document.getElementById('pairFilter');
@@ -1401,6 +1514,10 @@
             }
         }
 
+        // [Continue with rest of the JavaScript functions...]
+        // I'll provide the remaining functions in the next part to ensure completeness
+
+        // ================ DATA FETCHING ================ 
         async function fetchDataFromSheets() {
             let lastError = null;
             
@@ -1515,42 +1632,6 @@
             return validateData(csvData);
         }
 
-        function showG8SetupInstructions() {
-                    showNotification(
-                        'G8 Setup Required', 
-                        'The G8 Apps Script needs proper deployment:\n' +
-                        '1. Run setupCompleteG8System() in the script\n' +
-                        '2. Redeploy as web app\n' +
-                        '3. Update doGet() function as provided'
-                    );
-                }
-        
-                async function testBothDashboards() {
-            console.log('=== TESTING BOTH DASHBOARDS ===');
-            
-            // Test Forex
-            CONFIG.CURRENT_APP = 'forex';
-            try {
-                const forexData = await fetchDataFromSheets();
-                const parsedForex = parseData(forexData);
-                console.log(`✅ Forex: ${parsedForex.length} items loaded`);
-            } catch (error) {
-                console.log(`❌ Forex: ${error.message}`);
-            }
-            
-            // Test G8
-            CONFIG.CURRENT_APP = 'g8';
-            try {
-                const g8Data = await fetchDataFromSheets();
-                const parsedG8 = parseData(g8Data);
-                console.log(`✅ G8: ${parsedG8Data.length} items loaded`);
-            } catch (error) {
-                console.log(`❌ G8: ${error.message}`);
-            }
-            
-            showNotification('Dashboard Test Complete', 'Check console for results');
-        }
-        
         function handleG8DataIssue() {
             console.warn('G8 data source returning configuration instead of data');
             showNotification(
@@ -1589,6 +1670,7 @@
             // Data is malformed if it has config-like fields and no proper G8 fields
             return (hasAPIKeyField || hasEmptyField || hasFredField) && !hasExpectedG8Fields;
         }
+
         function validateData(data) {
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('No valid data found');
@@ -1663,8 +1745,8 @@
                     "Pair": "EURUSD",
                     "Date": new Date().toISOString().split('T')[0],
                     "AI Bias": "LONG",
-                    "Retail Sentiment Long%": "65",
-                    "Retail Sentiment Short%": "35",
+                    "Retail Sentiment Long%": "0.65",
+                    "Retail Sentiment Short%": "0.35",
                     "COT Positioning": "Bullish",
                     "Base Case": "EUR strength driven by ECB hawkish stance and improving economic data. Technical breakout above 1.0950 resistance confirms uptrend continuation.",
                     "Opposite Case": "Dollar strength resurges on Fed policy uncertainty and global risk-off sentiment, pushing EUR/USD below 1.0850 support.",
@@ -1676,8 +1758,8 @@
                     "Pair": "GBPUSD",
                     "Date": new Date().toISOString().split('T')[0],
                     "AI Bias": "SHORT",
-                    "Retail Sentiment Long%": "42",
-                    "Retail Sentiment Short%": "58",
+                    "Retail Sentiment Long%": "0.42",
+                    "Retail Sentiment Short%": "0.58",
                     "COT Positioning": "Bearish",
                     "Base Case": "GBP weakness persists on BoE dovish tilt and UK economic slowdown concerns. Technical break below 1.2650 opens path to 1.2500.",
                     "Opposite Case": "UK data surprises to upside, BoE maintains hawkish tone, GBP recovers above 1.2750 resistance level.",
@@ -1689,8 +1771,8 @@
                     "Pair": "USDJPY",
                     "Date": new Date().toISOString().split('T')[0],
                     "AI Bias": "LONG",
-                    "Retail Sentiment Long%": "73",
-                    "Retail Sentiment Short%": "27",
+                    "Retail Sentiment Long%": "0.73",
+                    "Retail Sentiment Short%": "0.27",
                     "COT Positioning": "Bullish",
                     "Base Case": "USD/JPY continues uptrend on widening yield differentials. BoJ maintains ultra-loose policy while Fed stays restrictive. Target 152.00.",
                     "Opposite Case": "BoJ intervention concerns mount above 150.00, causing sharp reversal. Risk-off flows boost JPY safe-haven demand.",
@@ -1818,14 +1900,12 @@
             const bias = data['AI Bias'] || data['Bias'] || 'NEUTRAL';
             const pair = data['Pair'] || data['Currency Pair'] || data['Symbol'] || 'UNKNOWN';
             
-            // Debug logging (can be removed later)
-            console.log(`${pair} - Converted Long: ${longPercent}%, Short: ${shortPercent}%`);
-            
-            const safeBaseCase = escapeHtml(data['Base Case'] || '');
-            const safeOppositeCase = escapeHtml(data['Opposite Case'] || '');
-            const safeSurpriseScenario = escapeHtml(data['Surprise Scenario'] || '');
-            const safeCrossMarket = escapeHtml(data['Cross-Market Driver'] || '');
-            const safeMacroNews = escapeHtml(data['Macro News'] || data['USD Macro News'] || '');
+            // Clean data for safe HTML insertion and modal display
+            const safeBaseCase = cleanTextForModal(data['Base Case'] || 'No base case analysis available');
+            const safeOppositeCase = cleanTextForModal(data['Opposite Case'] || 'No opposite case analysis available');
+            const safeSurpriseScenario = cleanTextForModal(data['Surprise Scenario'] || 'No surprise scenario analysis available');
+            const safeCrossMarket = cleanTextForModal(data['Cross-Market Driver'] || 'No cross-market analysis available');
+            const safeMacroNews = cleanTextForModal(data['Macro News'] || data['USD Macro News'] || 'No macro news available');
             
             return `
                 <div class="currency-card">
@@ -1851,33 +1931,33 @@
                     
                     <div class="info-section">
                         <div class="section-title">Analysis</div>
-                        <div class="clickable-info" onclick="showModal('Base Case - ${pair}', '${safeBaseCase}')">
+                        <div class="clickable-info" data-modal-title="Base Case - ${pair}" data-modal-content="${safeBaseCase}">
                             📊 Base Case: ${truncateText(data['Base Case'], 100)}
                         </div>
                     </div>
                     
                     <div class="info-section">
-                        <div class="clickable-info" onclick="showModal('Opposite Case - ${pair}', '${safeOppositeCase}')">
+                        <div class="clickable-info" data-modal-title="Opposite Case - ${pair}" data-modal-content="${safeOppositeCase}">
                             🔄 Opposite Case: ${truncateText(data['Opposite Case'], 100)}
                         </div>
                     </div>
                     
                     <div class="info-section">
-                        <div class="clickable-info" onclick="showModal('Surprise Scenario - ${pair}', '${safeSurpriseScenario}')">
+                        <div class="clickable-info" data-modal-title="Surprise Scenario - ${pair}" data-modal-content="${safeSurpriseScenario}">
                             ⚡ Surprise Scenario: ${truncateText(data['Surprise Scenario'], 100)}
                         </div>
                     </div>
                     
                     <div class="info-section">
                         <div class="section-title">Market Drivers</div>
-                        <div class="clickable-info" onclick="showModal('Cross-Market Drivers - ${pair}', '${safeCrossMarket}')">
+                        <div class="clickable-info" data-modal-title="Cross-Market Drivers - ${pair}" data-modal-content="${safeCrossMarket}">
                             📈 ${truncateText(data['Cross-Market Driver'], 80)}
                         </div>
                     </div>
                     
                     <div class="info-section">
                         <div class="section-title">News Impact</div>
-                        <div class="clickable-info" onclick="showModal('Macro News - ${pair}', '${safeMacroNews}')">
+                        <div class="clickable-info" data-modal-title="Macro News - ${pair}" data-modal-content="${safeMacroNews}">
                             📰 Macro: ${truncateText(safeMacroNews, 60)}
                         </div>
                     </div>
@@ -1902,8 +1982,8 @@
             const bias = data['AI Bias'] || 'No analysis available';
             const target = data['Target'] || data['Next Meeting'] || 'N/A';
             
-            const safeBias = escapeHtml(bias);
-            const safeMetaAnalysis = escapeHtml(metaAnalysis);
+            const safeBias = cleanTextForModal(bias);
+            const safeMetaAnalysis = cleanTextForModal(metaAnalysis);
             
             return `
                 <div class="g8-card">
@@ -1947,14 +2027,40 @@
                     
                     <div class="info-section">
                         <div class="section-title">AI Analysis</div>
-                        <div class="clickable-info" onclick="showModal('${currency} Analysis', '${safeBias}')">
+                        <div class="clickable-info" data-modal-title="${currency} Analysis" data-modal-content="${safeBias}">
                             🤖 ${truncateText(bias, 120)}
                         </div>
                     </div>
                 </div>
             `;
         }
-        
+
+        // ================ IMPROVED MODAL CLICK HANDLING ================ 
+        // Add event delegation for clickable info elements
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(e) {
+                const clickableInfo = e.target.closest('.clickable-info');
+                if (clickableInfo) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const title = clickableInfo.getAttribute('data-modal-title');
+                    const content = clickableInfo.getAttribute('data-modal-content');
+                    
+                    if (title && content) {
+                        showModal(title, content);
+                    }
+                }
+            });
+        });
+
+        // ================ UTILITY FUNCTIONS ================ 
+        function cleanTextForModal(text) {
+            if (!text) return 'No information available';
+            // Remove any potentially problematic characters and ensure proper escaping
+            return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;').trim();
+        }
+
         function getBiasClass(bias) {
             if (bias.includes('BULLISH') || bias.includes('LONG')) return 'bias-long';
             if (bias.includes('BEARISH') || bias.includes('SHORT')) return 'bias-short';
@@ -2035,9 +2141,6 @@
             }
         }
         
-        // Call this after data loads - add to loadData function after successful data fetch
-        // debugDataStructure(); // Uncomment this line temporarily to see the data structure
-                
         async function testConnection() {
             if (CONFIG.USE_DEMO) {
                 showNotification('Demo Mode', 'Using demo data - connection test not needed');
@@ -2147,7 +2250,6 @@
             }
         }
         
-        // ================ UTILITY FUNCTIONS ================ 
         function truncateText(text, maxLength) {
             if (!text || text.length <= maxLength) return text || 'No data available';
             return text.substring(0, maxLength) + '...';
@@ -2156,16 +2258,6 @@
         function escapeHtml(text) {
             if (!text) return '';
             return text.replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        function showModal(title, content) {
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-body').innerHTML = `<p>${content}</p>`;
-            document.getElementById('modal').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
         }
 
         function setRefreshButtonState(disabled) {
@@ -2293,37 +2385,6 @@
         }
 
         // ================ EVENT HANDLERS ================ 
-        document.addEventListener('DOMContentLoaded', function() {
-            setupPWA();
-            
-            const hasConfig = loadConfig();
-            
-            if (hasConfig) {
-                console.log('Configuration loaded, starting app...');
-                loadData();
-                startAutoRefresh();
-            } else {
-                setTimeout(() => {
-                    if (!CONFIG.FOREX_APPS_SCRIPT_URL && !CONFIG.G8_APPS_SCRIPT_URL && !CONFIG.USE_DEMO) {
-                        toggleConfig();
-                        showNotification('Setup Required', 'Please configure your data sources to get started');
-                    }
-                }, 1000);
-            }
-        });
-
-        // Close modal when clicking outside
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('modal');
-            if (modal) {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        closeModal();
-                    }
-                });
-            }
-        });
-
         // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
@@ -2365,28 +2426,11 @@
 - Demo data fallback
 - Responsive design
 - PWA support
+- Auto-hide header on mobile scroll
+- Improved modal functionality
 
 Ready to analyze global forex markets!
         `);
     </script>
 </body>
-</html>            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+</html>
