@@ -272,6 +272,16 @@
             cursor: pointer;
         }
 
+        /* Hide only the full header's app-toggle, keep mini-header's visible */
+        .header .header-content .app-toggle {
+            display: none !important;
+        }
+        
+        /* Ensure mini-header app-toggle remains visible */
+        .mini-header .mini-app-toggle {
+            display: flex !important;
+        }
+
         /* ================ BACKDROP OVERLAY (NEW) ================ */
         .header-backdrop {
             display: none;
@@ -2591,3 +2601,4 @@ Ready to test the new mini-header system!
 </html>
 
         
+
