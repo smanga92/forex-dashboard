@@ -28,7 +28,8 @@
             --text-secondary: #b0bec5;
             --border: #2a2a3e;
             --shadow: rgba(0, 0, 0, 0.3);
-            --header-height: 80px; /* Define header height variable */
+            --header-height: 80px;
+            --mini-header-height: 50px;
         }
         
         body {
@@ -37,28 +38,141 @@
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
-            padding-top: var(--header-height); /* Add padding to prevent content jumping */
+            padding-top: var(--mini-header-height); /* Changed to mini-header height */
         }
 
-        /* ================ ENHANCED HEADER WITH AUTO-HIDE ================ */
+        /* ================ MINI HEADER (NEW) ================ */
+        .mini-header {
+            background: rgba(26, 26, 46, 0.98);
+            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(15px);
+            padding: 0.5rem 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000; /* Higher than full header */
+            border-bottom: 1px solid var(--accent);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            height: var(--mini-header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            /* PWA safe area support */
+            padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+            height: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
+        }
+
+        .mini-header:hover {
+            background: rgba(26, 26, 46, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .mini-header:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+
+        .mini-logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--success);
+            flex-shrink: 0;
+        }
+
+        .mini-app-toggle {
+            display: flex;
+            background: var(--secondary);
+            border-radius: 8px;
+            padding: 0.15rem;
+            border: 1px solid var(--accent);
+            flex: 1;
+            max-width: 300px;
+            margin: 0 1rem;
+        }
+
+        .mini-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+            font-weight: 600;
+            flex: 1;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mini-toggle-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .mini-toggle-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            color: white;
+            box-shadow: 0 2px 8px rgba(15, 76, 117, 0.4);
+        }
+
+        .header-caret {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .mini-header[aria-expanded="true"] .header-caret {
+            transform: rotate(180deg);
+            color: var(--success);
+        }
+
+        /* Mobile adjustments for mini-header */
+        @media (max-width: 768px) {
+            .mini-header {
+                padding: 0.4rem 0.8rem;
+                padding-top: calc(0.4rem + env(safe-area-inset-top, 0px));
+            }
+
+            .mini-logo {
+                font-size: 0.9rem;
+            }
+
+            .mini-toggle-btn {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        /* ================ ENHANCED HEADER (MODIFIED) ================ */
         .header {
             background: rgba(26, 26, 46, 0.95);
             -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
             padding: 1rem 2rem;
             position: fixed;
-            top: 0;
+            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px)); /* Position below mini-header */
             left: 0;
             right: 0;
-            z-index: 1000;
+            z-index: 1500; /* Lower than mini-header but higher than content */
             border-bottom: 2px solid var(--accent);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             height: var(--header-height);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             will-change: transform;
+            transform: translateY(-100%); /* Hidden by default */
         }
 
-        /* Auto-hide states */
+        /* Full header visible state */
+        .header.header-visible {
+            transform: translateY(0);
+        }
+
+        /* Remove old auto-hide classes - not needed anymore */
         .header.header-hidden {
             transform: translateY(-100%);
         }
@@ -91,26 +205,10 @@
 
         /* Mobile header improvements */
         @media (max-width: 768px) {
-            :root {
-                --header-height: 70px;
-            }
-
-            body {
-                padding-top: var(--header-height);
-            }
-            
             .header {
                 height: var(--header-height);
                 padding: 0.5rem 1rem;
-            }
-
-            .header.header-hidden {
-                transform: translateY(-100%);
-            }
-
-            /* When header is shown on mobile, it takes minimal space */
-            .header:not(.header-hidden) {
-                background: rgba(26, 26, 46, 0.98);
+                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
             }
             
             .header-content {
@@ -171,7 +269,26 @@
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--success);
-            cursor: pointer; /* Make logo clickable to toggle header */
+            cursor: pointer;
+        }
+
+        /* ================ BACKDROP OVERLAY (NEW) ================ */
+        .header-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1400; /* Below header but above content */
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            cursor: pointer;
+        }
+
+        .header-backdrop.show {
+            display: block;
         }
         
         /* ================ APP TOGGLE ================ */
@@ -350,7 +467,7 @@
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
-                padding-top: 1rem; /* Reduced since header auto-hides */
+                padding-top: 1rem;
             }
         }
         
@@ -584,7 +701,7 @@
             transition: all 0.3s ease;
             font-size: 0.9rem;
             line-height: 1.4;
-            user-select: none; /* Prevent text selection issues */
+            user-select: none;
         }
         
         .clickable-info:hover {
@@ -631,7 +748,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 3000; /* Higher than header */
+            z-index: 3000;
             -webkit-backdrop-filter: blur(5px);
             backdrop-filter: blur(5px);
         }
@@ -860,9 +977,10 @@
         }
         
         /* ================ NOTIFICATION STYLES ================ */
+
         .notification-popup {
             position: fixed;
-            top: 80px;
+            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 10px);
             right: 20px;
             background: var(--secondary);
             border: 1px solid var(--success);
@@ -927,13 +1045,38 @@
             .header {
                 transition: none;
             }
+            
+            .mini-header .header-caret {
+                transition: none;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Mini Header (Always Visible) -->
+    <div class="mini-header" id="miniHeader" role="button" tabindex="0" aria-expanded="false" aria-controls="header" aria-label="Toggle main navigation">
+        <div class="mini-logo">📊 Multi-Dashboard Forex Analysis</div>
+        
+        <!-- Duplicated App Toggle for Mini Header -->
+        <div class="mini-app-toggle">
+            <button class="mini-toggle-btn active" onclick="switchApp('forex')" id="miniForexBtn" aria-label="Switch to Forex Analysis dashboard">
+                📈 Forex
+            </button>
+            <button class="mini-toggle-btn" onclick="switchApp('g8')" id="miniG8Btn" aria-label="Switch to G8 Fundamentals dashboard">
+                🌍 G8
+            </button>
+        </div>
+        
+        <div class="header-caret" aria-hidden="true">▼</div>
+    </div>
+
+    <!-- Backdrop Overlay -->
+    <div class="header-backdrop" id="headerBackdrop"></div>
+
+    <!-- Full Header (Slide Down) -->
     <div class="header" id="header">
         <div class="header-content">
-            <div class="logo" onclick="toggleHeaderOnMobile()" role="button" tabindex="0" aria-label="Toggle header">📊 Multi-Dashboard Forex Analysis</div>
+            <div class="logo">📊 Multi-Dashboard Forex Analysis</div>
             
             <!-- App Toggle Buttons -->
             <div class="app-toggle">
@@ -1075,107 +1218,97 @@
         let refreshInterval;
         let connectionStatus = 'connecting';
         let isRefreshing = false;
+        let headerVisible = false; // Track full header state
 
-        // ================ AUTO-HIDE HEADER FUNCTIONALITY ================ 
-        let lastScrollTop = 0;
-        let scrollTimeout;
-        let isScrolling = false;
-        let headerVisible = true;
-        let isMobile = window.innerWidth <= 768;
-
-        function initAutoHideHeader() {
-            const header = document.getElementById('header');
+        // ================ MINI HEADER FUNCTIONALITY (NEW) ================
+        function miniHeaderToggle() {
+            const fullHeader = document.getElementById('header');
+            const miniHeader = document.getElementById('miniHeader');
+            const backdrop = document.getElementById('headerBackdrop');
             
-            // Update mobile detection on resize
-            window.addEventListener('resize', () => {
-                isMobile = window.innerWidth <= 768;
-            });
-
-            // Throttled scroll handler for better performance
-            window.addEventListener('scroll', () => {
-                if (!scrollTimeout) {
-                    scrollTimeout = setTimeout(() => {
-                        handleScroll();
-                        scrollTimeout = null;
-                    }, 10); // Very responsive on mobile
-                }
-            });
-
-            // Handle scroll start/end
-            window.addEventListener('scroll', () => {
-                if (!isScrolling) {
-                    isScrolling = true;
-                    header.classList.add('scrolling');
-                }
-                
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    isScrolling = false;
-                    header.classList.remove('scrolling');
-                }, 150);
-            });
-        }
-
-        function handleScroll() {
-            if (!isMobile) return; // Only auto-hide on mobile
-            
-            const header = document.getElementById('header');
-            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-            const scrollDelta = currentScroll - lastScrollTop;
-            
-            // Minimum scroll distance before hiding/showing
-            const minScrollDelta = 5;
-            
-            if (Math.abs(scrollDelta) < minScrollDelta) {
-                return;
-            }
-            
-            // Show header when at the very top
-            if (currentScroll <= 10) {
-                showHeader();
-            }
-            // Hide header when scrolling down
-            else if (scrollDelta > 0 && headerVisible) {
+            if (headerVisible) {
+                // Hide full header
                 hideHeader();
-            }
-            // Show header when scrolling up
-            else if (scrollDelta < 0 && !headerVisible) {
+            } else {
+                // Show full header
                 showHeader();
             }
-            
-            lastScrollTop = currentScroll;
-        }
-
-        function hideHeader() {
-            if (!isMobile) return;
-            
-            const header = document.getElementById('header');
-            header.classList.add('header-hidden');
-            headerVisible = false;
-            
-            // Reduce body padding when header is hidden
-            document.body.style.paddingTop = '0px';
         }
 
         function showHeader() {
-            if (!isMobile) return;
+            const fullHeader = document.getElementById('header');
+            const miniHeader = document.getElementById('miniHeader');
+            const backdrop = document.getElementById('headerBackdrop');
             
-            const header = document.getElementById('header');
-            header.classList.remove('header-hidden');
+            fullHeader.classList.add('header-visible');
+            backdrop.classList.add('show');
+            miniHeader.setAttribute('aria-expanded', 'true');
             headerVisible = true;
             
-            // Restore body padding when header is visible
-            document.body.style.paddingTop = 'var(--header-height)';
+            // Focus management - move focus to first control in full header
+            setTimeout(() => {
+                const firstControl = fullHeader.querySelector('button, input, select');
+                if (firstControl) {
+                    firstControl.focus();
+                }
+            }, 100);
+        }
+
+        function hideHeader() {
+            const fullHeader = document.getElementById('header');
+            const miniHeader = document.getElementById('miniHeader');
+            const backdrop = document.getElementById('headerBackdrop');
+            
+            fullHeader.classList.remove('header-visible');
+            backdrop.classList.remove('show');
+            miniHeader.setAttribute('aria-expanded', 'false');
+            headerVisible = false;
+            
+            // Return focus to mini header
+            miniHeader.focus();
+        }
+
+        // Initialize mini header event listeners
+        function initMiniHeader() {
+            const miniHeader = document.getElementById('miniHeader');
+            const backdrop = document.getElementById('headerBackdrop');
+            
+            // Click handler
+            miniHeader.addEventListener('click', miniHeaderToggle);
+            
+            // Keyboard handler
+            miniHeader.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    miniHeaderToggle();
+                }
+            });
+            
+            // Backdrop click handler
+            backdrop.addEventListener('click', hideHeader);
+            
+            // ESC key handler
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && headerVisible) {
+                    hideHeader();
+                }
+            });
+        }
+
+        // ================ MODIFIED AUTO-HIDE HEADER FUNCTIONALITY ================ 
+        // Remove old auto-hide functionality since we now use mini-header + toggle
+        function initAutoHideHeader() {
+            // No longer needed - header is controlled by mini-header toggle
+            console.log('Auto-hide header disabled - using mini-header toggle instead');
+        }
+
+        function handleScroll() {
+            // No longer needed - header state controlled by user interaction
         }
 
         function toggleHeaderOnMobile() {
-            if (!isMobile) return;
-            
-            if (headerVisible) {
-                hideHeader();
-            } else {
-                showHeader();
-            }
+            // Redirect to mini header toggle
+            miniHeaderToggle();
         }
 
         // ================ MODAL FUNCTIONALITY FIXES ================ 
@@ -1209,17 +1342,20 @@
             document.body.style.overflow = 'auto';
         }
 
-        // ================ APP SWITCHING ================ 
+        // ================ MODIFIED APP SWITCHING ================ 
         function switchApp(appType) {
             CONFIG.CURRENT_APP = appType;
             
-            // Update button states
+            // Update button states in both headers
             document.getElementById('forexBtn').classList.toggle('active', appType === 'forex');
             document.getElementById('g8Btn').classList.toggle('active', appType === 'g8');
+            document.getElementById('miniForexBtn').classList.toggle('active', appType === 'forex');
+            document.getElementById('miniG8Btn').classList.toggle('active', appType === 'g8');
             
-            // Update page title
-            const title = appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals Analysis';
+            // Update page title in both headers
+            const title = appType === 'forex' ? 'Multi-Dashboard Forex Analysis' : 'G8 Fundamentals Analysis';
             document.querySelector('.logo').innerHTML = `📊 ${title}`;
+            document.querySelector('.mini-logo').innerHTML = `📊 ${title}`;
             
             // Clear current data and load new
             allData = [];
@@ -1231,7 +1367,8 @@
             // Load data for selected app
             loadData();
             
-            showNotification(`Switched to ${title}`, 'Loading data for selected dashboard...');
+            // Do NOT auto-open the full header on dashboard switch
+            showNotification(`Switched to ${appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals'}`, 'Loading data for selected dashboard...');
         }
 
         function updateFiltersForApp(appType) {
@@ -1268,7 +1405,8 @@
         // ================ INITIALIZATION ================ 
         document.addEventListener('DOMContentLoaded', function() {
             setupPWA();
-            initAutoHideHeader(); // Initialize auto-hide header
+            initMiniHeader(); // Initialize mini header functionality
+            initAutoHideHeader(); // This now does nothing but kept for compatibility
             
             // Initialize accessibility attributes
             const pairFilter = document.getElementById('pairFilter');
@@ -1513,9 +1651,6 @@
                 setRefreshButtonState(false);
             }
         }
-
-        // [Continue with rest of the JavaScript functions...]
-        // I'll provide the remaining functions in the next part to ensure completeness
 
         // ================ DATA FETCHING ================ 
         async function fetchDataFromSheets() {
@@ -2335,7 +2470,7 @@
             popup.className = 'notification-popup';
             popup.style.cssText = `
                 position: fixed;
-                top: 80px;
+                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 10px);
                 right: 20px;
                 background: var(--secondary);
                 border: 1px solid var(--success);
@@ -2393,6 +2528,10 @@
                 if (configPanel && configPanel.classList.contains('show')) {
                     toggleConfig();
                 }
+                // ESC also closes the full header
+                if (headerVisible) {
+                    hideHeader();
+                }
             }
         });
 
@@ -2408,29 +2547,47 @@
             }
         });
 
+        // Handle window resize to update mobile detection
+        window.addEventListener('resize', function() {
+            // Update body padding based on header visibility
+            if (window.innerWidth <= 768) {
+                document.body.style.paddingTop = 'var(--mini-header-height)';
+            } else {
+                document.body.style.paddingTop = 'var(--mini-header-height)';
+            }
+        });
+
         console.log(`
-🚀 MULTI-DASHBOARD FOREX ANALYSIS SYSTEM LOADED
-==============================================
+🚀 MINI-HEADER + SLIDE-DOWN FULL HEADER IMPLEMENTED
+================================================
 
-📊 Available Dashboards:
-1. Forex Analysis - Traditional forex sentiment & analysis
-2. G8 Fundamentals - Central bank rates & economic data
+📱 New Features:
+✅ Always-visible mini-header with headline & dashboard selector
+✅ Slide-down full header with all controls (hidden by default)
+✅ Click/tap mini-header to toggle full header
+✅ Backdrop overlay for easy dismissal
+✅ Keyboard accessibility (Enter/Space to toggle, ESC to close)
+✅ Focus management between headers
+✅ PWA safe-area support for notched devices
+✅ Preserves existing header functionality
 
-🔗 Pre-configured URLs:
-- Forex: ${CONFIG.FOREX_APPS_SCRIPT_URL}
-- G8: ${CONFIG.G8_APPS_SCRIPT_URL}
+🎯 Implementation Details:
+- Mini-header: Fixed at top, never hidden, contains logo + app toggle + caret
+- Full header: Positioned below mini-header, slides up/down on toggle
+- Dashboard switching: Updates both headers, doesn't auto-open full header
+- Auto-hide removed: Header state now controlled by user interaction
+- Minimal changes: Existing functions preserved, new toggle system added
 
-✨ Features:
-- Seamless dashboard switching
-- Individual configuration for each dashboard
-- Demo data fallback
-- Responsive design
-- PWA support
-- Auto-hide header on mobile scroll
-- Improved modal functionality
+🔧 Key Functions Added:
+- initMiniHeader() - Sets up event listeners
+- miniHeaderToggle() - Handles header show/hide
+- showHeader() / hideHeader() - Controls full header visibility
+- Focus management for accessibility
 
-Ready to analyze global forex markets!
+Ready to test the new mini-header system!
         `);
     </script>
 </body>
 </html>
+
+        
