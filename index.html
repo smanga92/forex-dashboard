@@ -28,9 +28,8 @@
             --text-secondary: #b0bec5;
             --border: #2a2a3e;
             --shadow: rgba(0, 0, 0, 0.3);
+            --header-height: 80px;
             --mini-header-height: 50px;
-            --expanded-controls-height: 60px;
-            --container-max-width: 1600px;
         }
         
         body {
@@ -39,17 +38,10 @@
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
-            padding-top: var(--mini-header-height);
+            padding-top: var(--mini-header-height); /* Changed to mini-header height */
         }
 
-        /* Desktop body adjustments */
-        @media (min-width: 1200px) {
-            body {
-                padding-top: 70px; /* Larger padding on desktop */
-            }
-        }
-
-        /* ================ ORIGINAL MINI HEADER WITH TOGGLE ================ */
+        /* ================ MINI HEADER (NEW) ================ */
         .mini-header {
             background: rgba(26, 26, 46, 0.98);
             -webkit-backdrop-filter: blur(15px);
@@ -59,7 +51,7 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 2000;
+            z-index: 2000; /* Higher than full header */
             border-bottom: 1px solid var(--accent);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
             height: var(--mini-header-height);
@@ -68,18 +60,9 @@
             justify-content: space-between;
             cursor: pointer;
             transition: all 0.3s ease;
+            /* PWA safe area support */
             padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
             height: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
-        }
-
-        /* Desktop enhancements for mini-header */
-        @media (min-width: 1200px) {
-            .mini-header {
-                height: 70px;
-                height: calc(70px + env(safe-area-inset-top, 0px));
-                padding: 1rem 2rem;
-                padding-top: calc(1rem + env(safe-area-inset-top, 0px));
-            }
         }
 
         .mini-header:hover {
@@ -99,13 +82,6 @@
             flex-shrink: 0;
         }
 
-        /* Desktop logo enhancement */
-        @media (min-width: 1200px) {
-            .mini-logo {
-                font-size: 1.5rem;
-            }
-        }
-
         .mini-app-toggle {
             display: flex;
             background: var(--secondary);
@@ -115,16 +91,6 @@
             flex: 1;
             max-width: 300px;
             margin: 0 1rem;
-        }
-
-        /* Desktop app toggle enhancement */
-        @media (min-width: 1200px) {
-            .mini-app-toggle {
-                max-width: 400px;
-                margin: 0 2rem;
-                border-radius: 12px;
-                padding: 0.25rem;
-            }
         }
 
         .mini-toggle-btn {
@@ -141,15 +107,6 @@
             white-space: nowrap;
             position: relative;
             overflow: hidden;
-        }
-
-        /* Desktop toggle button enhancement */
-        @media (min-width: 1200px) {
-            .mini-toggle-btn {
-                padding: 0.75rem 1.25rem;
-                font-size: 0.9rem;
-                border-radius: 8px;
-            }
         }
 
         .mini-toggle-btn:hover {
@@ -191,77 +148,213 @@
             }
         }
 
-        /* ================ EXPANDED CONTROLS (SLIDE DOWN) ================ */
-        .expanded-controls {
+        /* ================ ENHANCED HEADER (MODIFIED) ================ */
+        .header {
             background: rgba(26, 26, 46, 0.95);
             -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
             position: fixed;
-            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
+            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px)); /* Position below mini-header */
             left: 0;
             right: 0;
-            z-index: 1500;
+            z-index: 1500; /* Lower than mini-header but higher than content */
             border-bottom: 2px solid var(--accent);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            height: var(--expanded-controls-height);
+            height: var(--header-height);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(-100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 2rem;
+            will-change: transform;
+            transform: translateY(-100%); /* Hidden by default */
         }
 
-        @media (min-width: 1200px) {
-            .expanded-controls {
-                top: calc(70px + env(safe-area-inset-top, 0px));
-            }
-        }
-
-        .expanded-controls.show {
+        /* Full header visible state */
+        .header.header-visible {
             transform: translateY(0);
         }
 
-        .controls-content {
+        /* Remove old auto-hide classes - not needed anymore */
+        .header.header-hidden {
+            transform: translateY(-100%);
+        }
+
+        .header.header-compact {
+            padding: 0.5rem 2rem;
+            height: 60px;
+        }
+
+        .header.header-compact .header-content {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header.header-compact .logo {
+            font-size: 1.2rem;
+        }
+
+        .header.header-compact .controls,
+        .header.header-compact .advanced-controls {
+            display: none;
+        }
+
+        .header.header-compact .app-toggle {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 1rem;
+        }
+
+        /* Mobile header improvements */
+        @media (max-width: 768px) {
+            .header {
+                height: var(--header-height);
+                padding: 0.5rem 1rem;
+                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+            }
+            
+            .logo {
+                font-size: 1rem;
+                text-align: center;
+                line-height: 1.2;
+                order: 1;
+            }
+            
+            .app-toggle {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+                order: 2;
+            }
+            
+            .toggle-btn {
+                flex: 1;
+                min-width: auto;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Hide secondary controls on mobile to save space */
+            .connection-status,
+            .advanced-controls,
+            .last-update,
+            .controls {
+                display: none;
+            }
+            
+            /* Make sure currency cards don't get hidden behind header */
+            .currency-grid {
+                margin-top: 0.5rem;
+            }
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            height: 100%;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--success);
+            cursor: pointer;
+        }
+
+        /* Hide only the full header's app-toggle, keep mini-header's visible */
+        .header .header-content .app-toggle {
+            display: none !important;
+        }
+        
+        /* Ensure mini-header app-toggle remains visible */
+        .mini-header .mini-app-toggle {
+            display: flex !important;
+        }
+
+        /* ================ BACKDROP OVERLAY (NEW) ================ */
+        .header-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1400; /* Below header but above content */
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            cursor: pointer;
+        }
+
+        .header-backdrop.show {
+            display: block;
+        }
+        
+        /* ================ APP TOGGLE ================ */
+        .app-toggle {
+            display: flex;
+            background: var(--secondary);
+            border-radius: 12px;
+            padding: 0.25rem;
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 140px;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .toggle-btn:hover {
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+        
+        .toggle-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            color: white;
+            box-shadow: 0 4px 15px rgba(15, 76, 117, 0.4);
+        }
+        
+        .toggle-btn.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+        }
+        
+        .controls {
             display: flex;
             gap: 1rem;
             align-items: center;
             flex-wrap: wrap;
-            justify-content: center;
         }
-
-        .connection-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-        }
-
-        .connection-status.online {
-            background: rgba(0, 255, 136, 0.2);
-            color: var(--success);
-        }
-
-        .connection-status.offline {
-            background: rgba(255, 71, 87, 0.2);
-            color: var(--danger);
-        }
-
-        .connection-status.demo {
-            background: rgba(255, 167, 38, 0.2);
-            color: var(--warning);
-        }
-
-        .connection-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-            animation: pulse 2s infinite;
-        }
-
+        
         .refresh-btn {
             background: var(--accent);
             border: none;
@@ -274,82 +367,120 @@
             gap: 0.5rem;
             transition: all 0.3s ease;
         }
-
+        
         .refresh-btn:hover {
             background: #0e3f66;
             transform: translateY(-2px);
         }
-
+        
         .refresh-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-
-        .feature-btn {
-            background: var(--secondary);
-            border: 1px solid var(--accent);
-            color: var(--text-primary);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
+        
+        .last-update {
             font-size: 0.8rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
+            color: var(--text-secondary);
         }
-
-        .feature-btn:hover {
-            background: var(--accent);
-            transform: translateY(-1px);
-        }
-
-        /* ================ BACKDROP OVERLAY ================ */
-        .controls-backdrop {
+        
+        /* ================ CONFIG PANEL ================ */
+        .config-panel {
+            background: var(--secondary);
+            border: 1px solid var(--warning);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 1400;
-            -webkit-backdrop-filter: blur(2px);
-            backdrop-filter: blur(2px);
-            cursor: pointer;
         }
-
-        .controls-backdrop.show {
+        
+        .config-panel.show {
             display: block;
         }
-
-        /* ================ ENHANCED CONTAINER & LAYOUT ================ */
+        
+        .config-title {
+            color: var(--warning);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .config-group {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(26, 26, 46, 0.5);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .config-group-title {
+            color: var(--success);
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .config-input {
+            background: var(--primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .config-input:focus {
+            border-color: var(--accent);
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px rgba(15, 76, 117, 0.2);
+        }
+        
+        .config-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .config-btn {
+            background: var(--success);
+            color: var(--primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .config-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+        
+        .config-btn.secondary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        /* ================ MAIN CONTAINER ================ */
         .container {
-            max-width: var(--container-max-width);
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
-
-        @media (min-width: 1200px) {
-            .container {
-                padding: 3rem 2rem;
-            }
-        }
-
-        @media (min-width: 1600px) {
-            .container {
-                padding: 3rem 3rem;
-            }
-        }
-
+        
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
+                padding-top: 1rem;
             }
         }
-
-        /* ================ FILTERS (DESKTOP OPTIMIZED) ================ */
+        
         .filters {
             display: flex;
             gap: 1rem;
@@ -357,81 +488,46 @@
             flex-wrap: wrap;
             position: relative;
         }
-
-        @media (min-width: 1200px) {
-            .filters {
-                background: rgba(22, 33, 62, 0.6);
-                padding: 1.5rem;
-                border-radius: 16px;
-                border: 1px solid #3a3a4e;
-                backdrop-filter: blur(10px);
-                gap: 1.5rem;
-            }
+        
+        /* Hidden labels for accessibility */
+        .filters::before {
+            content: 'Currency pair filter';
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
-
+        
         .filter-input {
             background: var(--secondary);
-            border: 1px solid #2a2a3e;
+            border: 1px solid var(--border);
             color: var(--text-primary);
             padding: 0.5rem 1rem;
             border-radius: 8px;
             min-width: 200px;
         }
-
-        @media (min-width: 1200px) {
-            .filter-input {
-                min-width: 250px;
-                padding: 0.75rem 1rem;
-                border-radius: 10px;
-                font-size: 0.9rem;
-            }
-        }
-
+        
         .filter-input:focus {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
             border-color: var(--accent);
         }
-
-        @media (max-width: 768px) {
-            .filters {
-                flex-direction: column;
-            }
-
-            .filter-input {
-                min-width: 100%;
-            }
-        }
-
-        /* ================ ORIGINAL CURRENCY CARDS (RESTORED FONT SIZES) ================ */
+        
+        /* ================ CURRENCY CARDS ================ */
         .currency-grid {
             display: grid;
             gap: 1.5rem;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
         }
-
-        @media (min-width: 1200px) {
-            .currency-grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 2rem;
-            }
-        }
-
-        @media (min-width: 1600px) {
-            .currency-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .currency-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .currency-card, .g8-card {
+        
+        .currency-card {
             background: rgba(22, 33, 62, 0.8);
-            border: 1px solid #2a2a3e;
+            border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1.5rem;
             -webkit-backdrop-filter: blur(10px);
@@ -440,18 +536,8 @@
             position: relative;
             overflow: hidden;
         }
-
-        @media (min-width: 1200px) {
-            .currency-card, .g8-card {
-                background: rgba(22, 33, 62, 0.85);
-                border: 1px solid #3a3a4e;
-                padding: 2rem;
-                backdrop-filter: blur(15px);
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            }
-        }
-
-        .currency-card::before, .g8-card::before {
+        
+        .currency-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -460,50 +546,25 @@
             height: 4px;
             background: linear-gradient(90deg, var(--success), var(--accent));
         }
-
-        .currency-card:hover, .g8-card:hover {
+        
+        .currency-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px var(--shadow);
         }
-
-        @media (min-width: 1200px) {
-            .currency-card:hover, .g8-card:hover {
-                transform: translateY(-8px);
-                box-shadow: 0 20px 60px var(--shadow);
-                border-color: var(--success);
-            }
-        }
-
+        
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
         }
-
-        @media (min-width: 1200px) {
-            .card-header {
-                margin-bottom: 1.5rem;
-                padding-bottom: 1rem;
-                border-bottom: 1px solid #2a2a3e;
-            }
-        }
-
+        
         .pair-name {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--success);
         }
-
-        @media (min-width: 1200px) {
-            .pair-name {
-                font-size: 1.8rem;
-                font-weight: 800;
-                letter-spacing: -0.02em;
-                text-shadow: 0 2px 4px rgba(0, 255, 136, 0.2);
-            }
-        }
-
+        
         .bias-badge {
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
@@ -511,130 +572,128 @@
             font-weight: 600;
             text-transform: uppercase;
         }
-
-        @media (min-width: 1200px) {
-            .bias-badge {
-                padding: 0.5rem 1rem;
-                font-size: 0.75rem;
-                font-weight: 700;
-                letter-spacing: 0.05em;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-            }
+        
+        .bias-long { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+        .bias-short { background: rgba(255, 71, 87, 0.2); color: var(--danger); }
+        .bias-neutral { background: rgba(255, 167, 38, 0.2); color: var(--warning); }
+        
+        /* ================ G8 SPECIFIC STYLES ================ */
+        .g8-card {
+            background: linear-gradient(135deg, rgba(22, 33, 62, 0.9), rgba(26, 26, 46, 0.8));
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            padding: 1.5rem;
+            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-
-        .bias-long { 
-            background: rgba(0, 255, 136, 0.2); 
-            color: var(--success); 
+        
+        .g8-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1976d2, #0d47a1);
         }
-
-        @media (min-width: 1200px) {
-            .bias-long { 
-                background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.1));
-                border: 1px solid rgba(0, 255, 136, 0.3);
-            }
+        
+        .g8-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--shadow);
+            border-color: var(--success);
         }
-
-        .bias-short { 
-            background: rgba(255, 71, 87, 0.2); 
-            color: var(--danger); 
+        
+        .g8-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
         }
-
-        @media (min-width: 1200px) {
-            .bias-short { 
-                background: linear-gradient(135deg, rgba(255, 71, 87, 0.2), rgba(255, 71, 87, 0.1));
-                border: 1px solid rgba(255, 71, 87, 0.3);
-            }
+        
+        .currency-flag {
+            font-size: 1.8rem;
         }
-
-        .bias-neutral { 
-            background: rgba(255, 167, 38, 0.2); 
-            color: var(--warning); 
+        
+        .currency-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-left: 0.5rem;
         }
-
-        @media (min-width: 1200px) {
-            .bias-neutral { 
-                background: linear-gradient(135deg, rgba(255, 167, 38, 0.2), rgba(255, 167, 38, 0.1));
-                border: 1px solid rgba(255, 167, 38, 0.3);
-            }
+        
+        .g8-section {
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: rgba(15, 76, 117, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
         }
-
-        /* ================ SENTIMENT DISPLAY (ORIGINAL SIZES) ================ */
+        
+        .g8-section-title {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .g8-data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .g8-data-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .g8-data-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+        .trend-neutral { color: var(--warning); }
+        
         .sentiment-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 1rem;
         }
-
-        @media (min-width: 1200px) {
-            .sentiment-row {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 1rem;
-                margin-bottom: 2rem;
-                background: rgba(15, 76, 117, 0.1);
-                padding: 1.5rem;
-                border-radius: 12px;
-                border: 1px solid #2a2a3e;
-            }
-        }
-
+        
         .sentiment-item {
             text-align: center;
             flex: 1;
         }
-
+        
         .sentiment-label {
             font-size: 0.8rem;
             color: var(--text-secondary);
             margin-bottom: 0.25rem;
         }
-
-        @media (min-width: 1200px) {
-            .sentiment-label {
-                color: #8a8a8a;
-                text-transform: uppercase;
-                letter-spacing: 0.1em;
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-            }
-        }
-
+        
         .sentiment-value {
             font-size: 1.2rem;
             font-weight: 600;
         }
-
-        @media (min-width: 1200px) {
-            .sentiment-value {
-                font-size: 1.5rem;
-                font-weight: 800;
-                letter-spacing: -0.02em;
-            }
-        }
-
+        
         .long-value { color: var(--success); }
         .short-value { color: var(--danger); }
-
-        @media (min-width: 1200px) {
-            .long-value { 
-                text-shadow: 0 2px 4px rgba(0, 255, 136, 0.2);
-            }
-            .short-value { 
-                text-shadow: 0 2px 4px rgba(255, 71, 87, 0.2);
-            }
-        }
-
-        /* ================ INFO SECTIONS (ORIGINAL SIZES) ================ */
+        
         .info-section {
             margin: 1rem 0;
         }
-
-        @media (min-width: 1200px) {
-            .info-section {
-                margin: 1.5rem 0;
-            }
-        }
-
+        
         .section-title {
             font-size: 0.9rem;
             color: var(--text-secondary);
@@ -642,17 +701,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
-        @media (min-width: 1200px) {
-            .section-title {
-                font-size: 0.85rem;
-                color: #8a8a8a;
-                margin-bottom: 0.75rem;
-                letter-spacing: 0.1em;
-                font-weight: 700;
-            }
-        }
-
+        
         .clickable-info {
             background: rgba(15, 76, 117, 0.3);
             border: 1px solid var(--accent);
@@ -664,288 +713,42 @@
             line-height: 1.4;
             user-select: none;
         }
-
-        @media (min-width: 1200px) {
-            .clickable-info {
-                background: rgba(15, 76, 117, 0.15);
-                border: 1px solid #2a2a3e;
-                border-radius: 10px;
-                padding: 1rem;
-                line-height: 1.5;
-            }
-        }
-
+        
         .clickable-info:hover {
             background: rgba(15, 76, 117, 0.5);
             transform: scale(1.02);
         }
 
-        @media (min-width: 1200px) {
-            .clickable-info:hover {
-                background: rgba(15, 76, 117, 0.25);
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(15, 76, 117, 0.2);
-                border-color: var(--accent);
-            }
-        }
-
         .clickable-info:active {
             transform: scale(0.98);
         }
-
-        /* ================ G8 SPECIFIC STYLES (ORIGINAL SIZES) ================ */
-        .g8-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #2a2a3e;
-        }
-
-        @media (min-width: 1200px) {
-            .g8-header {
-                margin-bottom: 1.5rem;
-                padding-bottom: 1rem;
-            }
-        }
-
-        .currency-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--success);
-            margin-left: 0.5rem;
-        }
-
-        @media (min-width: 1200px) {
-            .currency-name {
-                font-size: 1.6rem;
-                font-weight: 800;
-                letter-spacing: -0.02em;
-                text-shadow: 0 2px 4px rgba(0, 255, 136, 0.2);
-            }
-        }
-
-        .g8-section {
-            margin: 1rem 0;
-            padding: 0.75rem;
-            background: rgba(15, 76, 117, 0.1);
-            border-radius: 8px;
-            border-left: 3px solid var(--accent);
-        }
-
-        @media (min-width: 1200px) {
-            .g8-section {
-                margin: 1.5rem 0;
-                padding: 1rem;
-                border-radius: 10px;
-            }
-        }
-
-        .g8-section-title {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-
-        @media (min-width: 1200px) {
-            .g8-section-title {
-                font-size: 0.8rem;
-                color: #8a8a8a;
-                margin-bottom: 0.75rem;
-                letter-spacing: 0.1em;
-                font-weight: 700;
-            }
-        }
-
-        .g8-data-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .g8-data-label {
-            font-size: 0.9rem;
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
             color: var(--text-secondary);
         }
-
-        .g8-data-value {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .trend-up { color: var(--success); }
-        .trend-down { color: var(--danger); }
-        .trend-neutral { color: var(--warning); }
-
-        @media (min-width: 1200px) {
-            .trend-up { 
-                text-shadow: 0 1px 2px rgba(0, 255, 136, 0.3);
-            }
-            .trend-down { 
-                text-shadow: 0 1px 2px rgba(255, 71, 87, 0.3);
-            }
-            .trend-neutral { 
-                text-shadow: 0 1px 2px rgba(255, 167, 38, 0.3);
-            }
-        }
-
-        /* ================ CONFIG PANEL ================ */
-        .config-panel {
-            background: var(--secondary);
-            border: 1px solid var(--warning);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: none;
-        }
-
-        @media (min-width: 1200px) {
-            .config-panel {
-                background: rgba(22, 33, 62, 0.95);
-                border: 2px solid var(--warning);
-                border-radius: 16px;
-                padding: 2rem;
-                margin-bottom: 3rem;
-                backdrop-filter: blur(15px);
-                box-shadow: 0 20px 60px var(--shadow);
-            }
-        }
-
-        .config-panel.show {
-            display: block;
-        }
-
-        .config-title {
-            color: var(--warning);
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        @media (min-width: 1200px) {
-            .config-title {
-                font-size: 1.4rem;
-                margin-bottom: 1.5rem;
-                gap: 0.75rem;
-                font-weight: 700;
-            }
-        }
-
-        .config-group {
-            margin-bottom: 1.5rem;
+        
+        .error {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
             padding: 1rem;
-            background: rgba(26, 26, 46, 0.5);
             border-radius: 8px;
-            border: 1px solid #2a2a3e;
+            margin-bottom: 1rem;
+            text-align: center;
         }
-
-        @media (min-width: 1200px) {
-            .config-group {
-                margin-bottom: 2rem;
-                padding: 1.5rem;
-                background: rgba(26, 26, 46, 0.7);
-                border-radius: 12px;
-            }
-        }
-
-        .config-group-title {
-            color: var(--success);
-            font-size: 0.95rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-
-        @media (min-width: 1200px) {
-            .config-group-title {
-                font-size: 1rem;
-                margin-bottom: 1rem;
-                font-weight: 700;
-            }
-        }
-
-        .config-input {
-            background: var(--primary);
-            border: 1px solid #2a2a3e;
-            color: var(--text-primary);
-            padding: 0.75rem;
+        
+        .warning {
+            background: rgba(255, 167, 38, 0.1);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+            padding: 1rem;
             border-radius: 8px;
-            width: 100%;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: center;
         }
-
-        @media (min-width: 1200px) {
-            .config-input {
-                border: 1px solid #3a3a4e;
-                padding: 1rem;
-                border-radius: 10px;
-                margin-bottom: 0.75rem;
-            }
-        }
-
-        .config-input:focus {
-            border-color: var(--accent);
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-            box-shadow: 0 0 0 2px rgba(15, 76, 117, 0.2);
-        }
-
-        @media (min-width: 1200px) {
-            .config-input:focus {
-                outline: none;
-                box-shadow: 0 0 0 3px rgba(15, 76, 117, 0.2);
-            }
-        }
-
-        .config-buttons {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .config-btn {
-            background: var(--success);
-            color: var(--primary);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        @media (min-width: 1200px) {
-            .config-btn {
-                padding: 0.75rem 1.5rem;
-                border-radius: 8px;
-                font-size: 0.9rem;
-            }
-        }
-
-    .config-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
-        }
-
-        @media (min-width: 1200px) {
-            .config-btn:hover {
-                box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
-            }
-        }
-
-        .config-btn.secondary {
-            background: var(--accent);
-            color: white;
-        }
-
+        
         /* ================ MODAL ================ */
         .modal {
             display: none;
@@ -959,7 +762,7 @@
             -webkit-backdrop-filter: blur(5px);
             backdrop-filter: blur(5px);
         }
-
+        
         .modal-content {
             position: absolute;
             top: 50%;
@@ -971,46 +774,25 @@
             max-width: 90vw;
             max-height: 80vh;
             overflow-y: auto;
-            border: 1px solid #2a2a3e;
+            border: 1px solid var(--border);
             min-width: 320px;
             box-sizing: border-box;
         }
-
-        @media (min-width: 1200px) {
-            .modal-content {
-                border: 1px solid #3a3a4e;
-                min-width: 400px;
-                box-shadow: 0 20px 60px var(--shadow);
-            }
-        }
-
+        
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            border-bottom: 1px solid #2a2a3e;
+            border-bottom: 1px solid var(--border);
             padding-bottom: 1rem;
         }
-
-        @media (min-width: 1200px) {
-            .modal-header {
-                margin-bottom: 1.5rem;
-            }
-        }
-
+        
         .modal-title {
             font-size: 1.3rem;
             color: var(--success);
         }
-
-        @media (min-width: 1200px) {
-            .modal-title {
-                font-size: 1.4rem;
-                font-weight: 700;
-            }
-        }
-
+        
         .close-btn {
             background: none;
             border: none;
@@ -1021,26 +803,114 @@
             border-radius: 50%;
             transition: all 0.3s ease;
         }
-
+        
         .close-btn:hover {
             background: var(--accent);
             color: white;
         }
-
+        
         .modal-body {
             line-height: 1.6;
             word-wrap: break-word;
             overflow-wrap: break-word;
             hyphens: auto;
         }
-
+        
         .modal-body p {
             margin-bottom: 1rem;
             font-size: 0.95rem;
             line-height: 1.5;
         }
-
+        
+        /* ================ ADVANCED FEATURES STYLES ================ */
+        .advanced-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .feature-btn {
+            background: var(--secondary);
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .feature-btn:hover {
+            background: var(--accent);
+            transform: translateY(-1px);
+        }
+        
+        .feature-btn.active {
+            background: var(--success);
+            color: var(--primary);
+        }
+        
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            margin-right: 1rem;
+        }
+        
+        .connection-status.online {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+        }
+        
+        .connection-status.offline {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--danger);
+        }
+        
+        .connection-status.demo {
+            background: rgba(255, 167, 38, 0.2);
+            color: var(--warning);
+        }
+        
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* ================ RESPONSIVE DESIGN ================ */
         @media (max-width: 768px) {
+            .currency-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-input {
+                min-width: 100%;
+            }
+            
+            .sentiment-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
             .modal-content {
                 padding: 1rem;
                 max-width: 90vw;
@@ -1053,7 +923,7 @@
                 margin: 0;
                 box-sizing: border-box;
             }
-
+            
             .modal-body {
                 font-size: 0.9rem;
                 line-height: 1.5;
@@ -1062,80 +932,47 @@
                 word-wrap: break-word;
                 overflow-wrap: break-word;
             }
-
+            
             .modal-body p {
                 margin-bottom: 0.75rem;
                 padding: 0;
             }
-
+            
             .modal-title {
                 font-size: 1.1rem;
                 line-height: 1.3;
                 margin-bottom: 0.5rem;
                 word-wrap: break-word;
             }
-
+            
             .modal-header {
                 padding-bottom: 0.75rem;
                 margin-bottom: 0.75rem;
             }
-        }
-
-        /* ================ UTILITY CLASSES ================ */
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-secondary);
-        }
-
-        @media (min-width: 1200px) {
-            .loading {
-                padding: 3rem;
+            
+            .pair-name {
+                font-size: 1.2rem;
             }
         }
-
-        .error {
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
+        
         @media (min-width: 1200px) {
-            .error {
-                background: rgba(255, 71, 87, 0.15);
-                padding: 1.5rem;
-                border-radius: 16px;
-                margin-bottom: 2rem;
-                font-weight: 500;
+            .currency-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
-
-        .warning {
-            background: rgba(255, 167, 38, 0.1);
-            border: 1px solid var(--warning);
-            color: var(--warning);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            text-align: center;
+        
+        /* ================ ANIMATIONS ================ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        @media (min-width: 1200px) {
-            .warning {
-                background: rgba(255, 167, 38, 0.15);
-                padding: 1.5rem;
-                border-radius: 16px;
-                margin-bottom: 2rem;
-                font-weight: 500;
-            }
+        
+        .currency-card, .g8-card {
+            animation: fadeIn 0.5s ease forwards;
         }
-
+        
         .spinner {
-            border: 3px solid #2a2a3e;
+            border: 3px solid var(--border);
             border-top: 3px solid var(--success);
             border-radius: 50%;
             width: 40px;
@@ -1143,40 +980,39 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-
-        @media (min-width: 1200px) {
-            .spinner {
-                width: 50px;
-                height: 50px;
-            }
-        }
-
-        /* ================ ANIMATIONS ================ */
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* ================ NOTIFICATION STYLES ================ */
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .notification-popup {
+            position: fixed;
+            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 10px);
+            right: 20px;
+            background: var(--secondary);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 1rem;
+            max-width: 300px;
+            z-index: 1500;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 10px 30px var(--shadow);
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .currency-card, .g8-card {
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        @media (min-width: 1200px) {
-            .currency-card, .g8-card {
-                animation: fadeIn 0.6s ease forwards;
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
-
+        
         /* ================ ACCESSIBILITY IMPROVEMENTS ================ */
         .visually-hidden {
             position: absolute;
@@ -1189,21 +1025,24 @@
             white-space: nowrap;
             border: 0;
         }
-
+        
+        /* Focus indicators */
         button:focus,
         input:focus,
         select:focus {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
         }
-
+        
+        /* High contrast support */
         @media (prefers-contrast: high) {
             :root {
                 --border: #ffffff;
                 --text-secondary: #ffffff;
             }
         }
-
+        
+        /* Reduced motion support */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -1212,7 +1051,11 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
-
+            
+            .header {
+                transition: none;
+            }
+            
             .mini-header .header-caret {
                 transition: none;
             }
@@ -1220,10 +1063,11 @@
     </style>
 </head>
 <body>
-    <!-- Original Mini Header with Toggle -->
-    <div class="mini-header" id="miniHeader" role="button" tabindex="0" aria-expanded="false" aria-controls="expandedControls" aria-label="Toggle controls">
+    <!-- Mini Header (Always Visible) -->
+    <div class="mini-header" id="miniHeader" role="button" tabindex="0" aria-expanded="false" aria-controls="header" aria-label="Toggle main navigation">
         <div class="mini-logo">📊 Multi-Dashboard Forex Analysis</div>
         
+        <!-- Duplicated App Toggle for Mini Header -->
         <div class="mini-app-toggle">
             <button class="mini-toggle-btn active" onclick="switchApp('forex')" id="miniForexBtn" aria-label="Switch to Forex Analysis dashboard">
                 📈 Forex
@@ -1236,27 +1080,44 @@
         <div class="header-caret" aria-hidden="true">▼</div>
     </div>
 
-    <!-- Expanded Controls (Slide Down) -->
-    <div class="expanded-controls" id="expandedControls">
-        <div class="controls-content">
-            <div class="connection-status" id="connectionStatus">
-                <div class="connection-dot"></div>
-                <span id="connectionText">Connecting...</span>
+    <!-- Backdrop Overlay -->
+    <div class="header-backdrop" id="headerBackdrop"></div>
+
+    <!-- Full Header (Slide Down) -->
+    <div class="header" id="header">
+        <div class="header-content">
+            <div class="logo">📊 Multi-Dashboard Forex Analysis</div>
+            
+            <!-- App Toggle Buttons -->
+            <div class="app-toggle">
+                <button class="toggle-btn active" onclick="switchApp('forex')" id="forexBtn">
+                    📈 Forex Analysis
+                </button>
+                <button class="toggle-btn" onclick="switchApp('g8')" id="g8Btn">
+                    🌍 G8 Fundamentals
+                </button>
             </div>
-            <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
-                🔄 Refresh
-            </button>
-            <button class="feature-btn" onclick="toggleConfig()">
-                ⚙️ Setup
-            </button>
-            <button class="feature-btn" onclick="testConnection()">
-                🔍 Test
-            </button>
+
+            <div class="controls">
+                <div class="connection-status" id="connectionStatus">
+                    <div class="connection-dot"></div>
+                    <span id="connectionText">Connecting...</span>
+                </div>
+                <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
+                    🔄 Refresh
+                </button>
+                <div class="advanced-controls">
+                    <button class="feature-btn" onclick="toggleConfig()">
+                        ⚙️ Setup
+                    </button>
+                    <button class="feature-btn" onclick="testConnection()">
+                        🔍 Test
+                    </button>
+                </div>
+                <div class="last-update" id="lastUpdate">Last update: --</div>
+            </div>
         </div>
     </div>
-
-    <!-- Backdrop Overlay -->
-    <div class="controls-backdrop" id="controlsBackdrop"></div>
 
     <div class="container">
         <!-- Configuration Panel -->
@@ -1335,7 +1196,7 @@
     </div>
     
     <script>
-        /* ================ RESTORED ORIGINAL JAVASCRIPT WITH TOGGLE FUNCTIONALITY ================ */
+        /* ================ JAVASCRIPT FUNCTIONALITY ================ */
         
         // Enhanced Configuration for Multi-Dashboard Support
         let CONFIG = {
@@ -1367,60 +1228,60 @@
         let refreshInterval;
         let connectionStatus = 'connecting';
         let isRefreshing = false;
-        let controlsVisible = false; // Track expanded controls state
+        let headerVisible = false; // Track full header state
 
-        // ================ RESTORED MINI HEADER TOGGLE FUNCTIONALITY ================ 
+        // ================ MINI HEADER FUNCTIONALITY (NEW) ================
         function miniHeaderToggle() {
-            const expandedControls = document.getElementById('expandedControls');
+            const fullHeader = document.getElementById('header');
             const miniHeader = document.getElementById('miniHeader');
-            const backdrop = document.getElementById('controlsBackdrop');
+            const backdrop = document.getElementById('headerBackdrop');
             
-            if (controlsVisible) {
-                // Hide expanded controls
-                hideExpandedControls();
+            if (headerVisible) {
+                // Hide full header
+                hideHeader();
             } else {
-                // Show expanded controls
-                showExpandedControls();
+                // Show full header
+                showHeader();
             }
         }
 
-        function showExpandedControls() {
-            const expandedControls = document.getElementById('expandedControls');
+        function showHeader() {
+            const fullHeader = document.getElementById('header');
             const miniHeader = document.getElementById('miniHeader');
-            const backdrop = document.getElementById('controlsBackdrop');
+            const backdrop = document.getElementById('headerBackdrop');
             
-            expandedControls.classList.add('show');
+            fullHeader.classList.add('header-visible');
             backdrop.classList.add('show');
             miniHeader.setAttribute('aria-expanded', 'true');
-            controlsVisible = true;
+            headerVisible = true;
             
-            // Focus management
+            // Focus management - move focus to first control in full header
             setTimeout(() => {
-                const firstControl = expandedControls.querySelector('button');
+                const firstControl = fullHeader.querySelector('button, input, select');
                 if (firstControl) {
                     firstControl.focus();
                 }
             }, 100);
         }
 
-        function hideExpandedControls() {
-            const expandedControls = document.getElementById('expandedControls');
+        function hideHeader() {
+            const fullHeader = document.getElementById('header');
             const miniHeader = document.getElementById('miniHeader');
-            const backdrop = document.getElementById('controlsBackdrop');
+            const backdrop = document.getElementById('headerBackdrop');
             
-            expandedControls.classList.remove('show');
+            fullHeader.classList.remove('header-visible');
             backdrop.classList.remove('show');
             miniHeader.setAttribute('aria-expanded', 'false');
-            controlsVisible = false;
+            headerVisible = false;
             
             // Return focus to mini header
             miniHeader.focus();
         }
 
         // Initialize mini header event listeners
-        function initMiniHeaderToggle() {
+        function initMiniHeader() {
             const miniHeader = document.getElementById('miniHeader');
-            const backdrop = document.getElementById('controlsBackdrop');
+            const backdrop = document.getElementById('headerBackdrop');
             
             // Click handler
             miniHeader.addEventListener('click', miniHeaderToggle);
@@ -1434,26 +1295,76 @@
             });
             
             // Backdrop click handler
-            backdrop.addEventListener('click', hideExpandedControls);
+            backdrop.addEventListener('click', hideHeader);
             
             // ESC key handler
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && controlsVisible) {
-                    hideExpandedControls();
+                if (e.key === 'Escape' && headerVisible) {
+                    hideHeader();
                 }
             });
         }
 
-        // ================ APP SWITCHING (ORIGINAL FUNCTIONALITY) ================ 
+        // ================ MODIFIED AUTO-HIDE HEADER FUNCTIONALITY ================ 
+        // Remove old auto-hide functionality since we now use mini-header + toggle
+        function initAutoHideHeader() {
+            // No longer needed - header is controlled by mini-header toggle
+            console.log('Auto-hide header disabled - using mini-header toggle instead');
+        }
+
+        function handleScroll() {
+            // No longer needed - header state controlled by user interaction
+        }
+
+        function toggleHeaderOnMobile() {
+            // Redirect to mini header toggle
+            miniHeaderToggle();
+        }
+
+        // ================ MODAL FUNCTIONALITY FIXES ================ 
+        function handleModalClick(event) {
+            // Only close if clicked on the modal backdrop (not the content)
+            if (event.target === event.currentTarget) {
+                closeModal();
+            }
+        }
+
+        function showModal(title, content) {
+            // Clean the content to prevent JavaScript injection
+            const cleanTitle = escapeHtml(title);
+            const cleanContent = escapeHtml(content);
+            
+            document.getElementById('modal-title').innerHTML = cleanTitle;
+            document.getElementById('modal-body').innerHTML = `<p>${cleanContent}</p>`;
+            document.getElementById('modal').style.display = 'block';
+            
+            // Focus on modal for accessibility
+            document.getElementById('modal').focus();
+            
+            // Prevent body scrolling when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            
+            // Restore body scrolling
+            document.body.style.overflow = 'auto';
+        }
+
+        // ================ MODIFIED APP SWITCHING ================ 
         function switchApp(appType) {
             CONFIG.CURRENT_APP = appType;
             
-            // Update button states
+            // Update button states in both headers
+            document.getElementById('forexBtn').classList.toggle('active', appType === 'forex');
+            document.getElementById('g8Btn').classList.toggle('active', appType === 'g8');
             document.getElementById('miniForexBtn').classList.toggle('active', appType === 'forex');
             document.getElementById('miniG8Btn').classList.toggle('active', appType === 'g8');
             
-            // Update page title
+            // Update page title in both headers
             const title = appType === 'forex' ? 'Multi-Dashboard Forex Analysis' : 'G8 Fundamentals Analysis';
+            document.querySelector('.logo').innerHTML = `📊 ${title}`;
             document.querySelector('.mini-logo').innerHTML = `📊 ${title}`;
             
             // Clear current data and load new
@@ -1466,6 +1377,7 @@
             // Load data for selected app
             loadData();
             
+            // Do NOT auto-open the full header on dashboard switch
             showNotification(`Switched to ${appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals'}`, 'Loading data for selected dashboard...');
         }
 
@@ -1484,6 +1396,7 @@
                     <option value="NEUTRAL">Neutral Only</option>
                 `;
                 biasFilter.setAttribute('aria-label', 'Filter by trading bias');
+                biasFilter.setAttribute('title', 'Select trading bias to filter');
             } else {
                 pairFilter.placeholder = 'Filter by currency or country...';
                 pairFilter.setAttribute('aria-label', 'Filter by currency or country');
@@ -1495,13 +1408,15 @@
                     <option value="NEUTRAL">Neutral Only</option>
                 `;
                 biasFilter.setAttribute('aria-label', 'Filter by market bias');
+                biasFilter.setAttribute('title', 'Select market bias to filter');
             }
         }
 
         // ================ INITIALIZATION ================ 
         document.addEventListener('DOMContentLoaded', function() {
             setupPWA();
-            initMiniHeaderToggle(); // Initialize the toggle functionality
+            initMiniHeader(); // Initialize mini header functionality
+            initAutoHideHeader(); // This now does nothing but kept for compatibility
             
             // Initialize accessibility attributes
             const pairFilter = document.getElementById('pairFilter');
@@ -1512,6 +1427,7 @@
             }
             if (biasFilter) {
                 biasFilter.setAttribute('aria-label', 'Filter by trading bias');
+                biasFilter.setAttribute('title', 'Select trading bias to filter');
             }
             
             const hasConfig = loadConfig();
@@ -1529,10 +1445,8 @@
                 }, 1000);
             }
         });
-
-        // ================ ALL OTHER FUNCTIONS FROM ORIGINAL VERSION ================ 
-        // (Including loadConfig, saveConfigToStorage, loadData, etc. - keeping original logic exactly)
-
+        
+        // ================ CONFIGURATION MANAGEMENT ================ 
         function loadConfig() {
             // Check URL parameters first
             const urlParams = new URLSearchParams(window.location.search);
@@ -1668,9 +1582,7 @@
             }
         }
 
-        // ================ ALL OTHER FUNCTIONS REMAIN THE SAME ================ 
-        // (Including loadData, fetchDataFromSheets, parseData, renderData, etc.)
-        
+        // ================ DATA LOADING ================ 
         async function loadData(retryCount = 0) {
             if (isRefreshing) {
                 console.log('Already refreshing, skipping...');
@@ -1750,16 +1662,15 @@
             }
         }
 
-        // [Continue with all the remaining functions exactly as they were in the original version...]
-        // Including: fetchDataFromSheets, parseData, getDemoData, renderData, etc.
-        // The rest of the JavaScript remains exactly the same as in the working version
-
+        // ================ DATA FETCHING ================ 
         async function fetchDataFromSheets() {
             let lastError = null;
             
+            // Get URLs based on current app
             const appsScriptUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_APPS_SCRIPT_URL : CONFIG.G8_APPS_SCRIPT_URL;
             const csvUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_CSV_URL : CONFIG.G8_CSV_URL;
 
+            // Try Apps Script first if configured
             if (appsScriptUrl) {
                 try {
                     console.log(`Trying ${CONFIG.CURRENT_APP} Apps Script...`);
@@ -1783,6 +1694,7 @@
                 }
             }
 
+            // Try CSV with CORS proxy if configured
             if (csvUrl) {
                 try {
                     console.log(`Trying ${CONFIG.CURRENT_APP} CSV with CORS proxy...`);
@@ -2268,52 +2180,51 @@
             `;
         }
 
-        // ================ MODAL FUNCTIONALITY ================ 
-        function handleModalClick(event) {
-            // Only close if clicked on the modal backdrop (not the content)
-            if (event.target === event.currentTarget) {
-                closeModal();
-            }
-        }
-
-        function showModal(title, content) {
-            // Clean the content to prevent JavaScript injection
-            const cleanTitle = escapeHtml(title);
-            const cleanContent = escapeHtml(content);
-            
-            document.getElementById('modal-title').innerHTML = cleanTitle;
-            document.getElementById('modal-body').innerHTML = `<p>${cleanContent}</p>`;
-            document.getElementById('modal').style.display = 'block';
-            
-            // Focus on modal for accessibility
-            document.getElementById('modal').focus();
-            
-            // Prevent body scrolling when modal is open
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-            
-            // Restore body scrolling
-            document.body.style.overflow = 'auto';
-        }
-
+        // ================ IMPROVED MODAL CLICK HANDLING ================ 
         // Add event delegation for clickable info elements
-        document.addEventListener('click', function(e) {
-            const clickableInfo = e.target.closest('.clickable-info');
-            if (clickableInfo) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const title = clickableInfo.getAttribute('data-modal-title');
-                const content = clickableInfo.getAttribute('data-modal-content');
-                
-                if (title && content) {
-                    showModal(title, content);
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(e) {
+                const clickableInfo = e.target.closest('.clickable-info');
+                if (clickableInfo) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const title = clickableInfo.getAttribute('data-modal-title');
+                    const content = clickableInfo.getAttribute('data-modal-content');
+                    
+                    if (title && content) {
+                        showModal(title, content);
+                    }
                 }
-            }
+            });
         });
+
+        // ================ UTILITY FUNCTIONS ================ 
+        function cleanTextForModal(text) {
+            if (!text) return 'No information available';
+            // Remove any potentially problematic characters and ensure proper escaping
+            return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;').trim();
+        }
+
+        function getBiasClass(bias) {
+            if (bias.includes('BULLISH') || bias.includes('LONG')) return 'bias-long';
+            if (bias.includes('BEARISH') || bias.includes('SHORT')) return 'bias-short';
+            return 'bias-neutral';
+        }
+
+        function getBiasLabel(bias) {
+            if (bias.includes('BULLISH')) return 'BULLISH';
+            if (bias.includes('BEARISH')) return 'BEARISH';
+            if (bias.includes('LONG')) return 'LONG';
+            if (bias.includes('SHORT')) return 'SHORT';
+            return 'NEUTRAL';
+        }
+
+        function getTrendClass(trend) {
+            if (trend.includes('↗️') || trend.includes('↑')) return 'trend-up';
+            if (trend.includes('↘️') || trend.includes('↓')) return 'trend-down';
+            return 'trend-neutral';
+        }
 
         // ================ FILTERING ================ 
         function filterData() {
@@ -2342,7 +2253,39 @@
             renderData();
         }
 
-        // ================ CONNECTION TESTING ================ 
+        // Add this function to help debug the data structure
+        function debugDataStructure() {
+            if (allData.length > 0) {
+                console.log('=== DEBUG: Data Structure Analysis ===');
+                console.log('Current App:', CONFIG.CURRENT_APP);
+                console.log('Total Items:', allData.length);
+                
+                // Show first complete item
+                console.log('FIRST COMPLETE ITEM:');
+                console.table(allData[0]);
+                
+                if (CONFIG.CURRENT_APP === 'forex') {
+                    console.log('=== FOREX SENTIMENT VALUES CHECK ===');
+                    allData.slice(0, 3).forEach((item, index) => {
+                        console.log(`Item ${index + 1} (${item.Pair}):`);
+                        console.log(`  Raw Long Value: "${item['Retail Sentiment Long%']}" (type: ${typeof item['Retail Sentiment Long%']})`);
+                        console.log(`  Raw Short Value: "${item['Retail Sentiment Short%']}" (type: ${typeof item['Retail Sentiment Short%']})`);
+                        console.log(`  Parsed Long: ${parseFloat(item['Retail Sentiment Long%']) || 0}`);
+                        console.log(`  Parsed Short: ${parseFloat(item['Retail Sentiment Short%']) || 0}`);
+                    });
+                }
+                
+                // Show all field names and first few values
+                console.log('=== ALL FIELDS AND VALUES ===');
+                Object.keys(allData[0]).forEach(key => {
+                    const values = allData.slice(0, 2).map(item => item[key]);
+                    console.log(`${key}: [${values.map(v => `"${v}"`).join(', ')}]`);
+                });
+            } else {
+                console.log('No data available for debugging');
+            }
+        }
+        
         async function testConnection() {
             if (CONFIG.USE_DEMO) {
                 showNotification('Demo Mode', 'Using demo data - connection test not needed');
@@ -2350,6 +2293,9 @@
             }
         
             showNotification('Testing Connections...', 'Checking data sources and analyzing structure');
+            
+            // Test current app's data source
+            await testDataSource();
             
             const forexConfigured = CONFIG.FOREX_APPS_SCRIPT_URL || CONFIG.FOREX_CSV_URL;
             const g8Configured = CONFIG.G8_APPS_SCRIPT_URL || CONFIG.G8_CSV_URL;
@@ -2401,67 +2347,54 @@
             }
         
             showNotification('Connection Test Results', results.join('\n'));
+            console.log('Check the browser console for detailed data structure analysis');
         }
 
-        // ================ UTILITY FUNCTIONS ================ 
-        function debugDataStructure() {
-            if (allData.length > 0) {
-                console.log('=== DEBUG: Data Structure Analysis ===');
-                console.log('Current App:', CONFIG.CURRENT_APP);
-                console.log('Total Items:', allData.length);
+        async function testDataSource() {
+            console.log('=== TESTING DATA SOURCE ===');
+            console.log('Current App:', CONFIG.CURRENT_APP);
+            
+            const appsScriptUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_APPS_SCRIPT_URL : CONFIG.G8_APPS_SCRIPT_URL;
+            const csvUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_CSV_URL : CONFIG.G8_CSV_URL;
+            
+            console.log('Apps Script URL:', appsScriptUrl);
+            console.log('CSV URL:', csvUrl);
+            
+            try {
+                const response = await fetch(appsScriptUrl + '?t=' + Date.now());
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
                 
-                // Show first complete item
-                console.log('FIRST COMPLETE ITEM:');
-                console.table(allData[0]);
+                const responseText = await response.text();
+                console.log('Response text (first 500 chars):', responseText.substring(0, 500));
                 
-                if (CONFIG.CURRENT_APP === 'forex') {
-                    console.log('=== FOREX SENTIMENT VALUES CHECK ===');
-                    allData.slice(0, 3).forEach((item, index) => {
-                        console.log(`Item ${index + 1} (${item.Pair}):`);
-                        console.log(`  Raw Long Value: "${item['Retail Sentiment Long%']}" (type: ${typeof item['Retail Sentiment Long%']})`);
-                        console.log(`  Raw Short Value: "${item['Retail Sentiment Short%']}" (type: ${typeof item['Retail Sentiment Short%']})`);
-                        console.log(`  Parsed Long: ${parseFloat(item['Retail Sentiment Long%']) || 0}`);
-                        console.log(`  Parsed Short: ${parseFloat(item['Retail Sentiment Short%']) || 0}`);
-                    });
+                // Try to parse and see what we get
+                try {
+                    const jsonData = JSON.parse(responseText);
+                    console.log('JSON parsed successfully');
+                    console.log('Data type:', typeof jsonData);
+                    console.log('Is array:', Array.isArray(jsonData));
+                    if (Array.isArray(jsonData) && jsonData.length > 0) {
+                        console.log('First item keys:', Object.keys(jsonData[0]));
+                        console.log('First item:', jsonData[0]);
+                    }
+                } catch (e) {
+                    console.log('Not valid JSON, might be CSV');
+                    const lines = responseText.split('\n');
+                    console.log('Lines count:', lines.length);
+                    if (lines.length > 0) {
+                        console.log('First line (header):', lines[0]);
+                        if (lines.length > 1) {
+                            console.log('Second line (first data):', lines[1]);
+                        }
+                    }
                 }
                 
-                // Show all field names and first few values
-                console.log('=== ALL FIELDS AND VALUES ===');
-                Object.keys(allData[0]).forEach(key => {
-                    const values = allData.slice(0, 2).map(item => item[key]);
-                    console.log(`${key}: [${values.map(v => `"${v}"`).join(', ')}]`);
-                });
-            } else {
-                console.log('No data available for debugging');
+            } catch (error) {
+                console.error('Test failed:', error);
             }
         }
-
-        function cleanTextForModal(text) {
-            if (!text) return 'No information available';
-            // Remove any potentially problematic characters and ensure proper escaping
-            return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;').trim();
-        }
-
-        function getBiasClass(bias) {
-            if (bias.includes('BULLISH') || bias.includes('LONG')) return 'bias-long';
-            if (bias.includes('BEARISH') || bias.includes('SHORT')) return 'bias-short';
-            return 'bias-neutral';
-        }
-
-        function getBiasLabel(bias) {
-            if (bias.includes('BULLISH')) return 'BULLISH';
-            if (bias.includes('BEARISH')) return 'BEARISH';
-            if (bias.includes('LONG')) return 'LONG';
-            if (bias.includes('SHORT')) return 'SHORT';
-            return 'NEUTRAL';
-        }
-
-        function getTrendClass(trend) {
-            if (trend.includes('↗️') || trend.includes('↑')) return 'trend-up';
-            if (trend.includes('↘️') || trend.includes('↓')) return 'trend-down';
-            return 'trend-neutral';
-        }
-
+        
         function truncateText(text, maxLength) {
             if (!text || text.length <= maxLength) return text || 'No data available';
             return text.substring(0, maxLength) + '...';
@@ -2470,13 +2403,6 @@
         function escapeHtml(text) {
             if (!text) return '';
             return text.replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        function updateLastUpdateTime() {
-            // Since we removed the last update display from the UI, this is now just for logging
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            console.log(`Data updated at: ${timeString}`);
         }
 
         function setRefreshButtonState(disabled) {
@@ -2505,6 +2431,15 @@
             const errorContainer = document.getElementById('error-container');
             if (errorContainer) {
                 errorContainer.innerHTML = '';
+            }
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const updateEl = document.getElementById('lastUpdate');
+            if (updateEl) {
+                updateEl.textContent = `Last update: ${timeString}`;
             }
         }
 
@@ -2545,30 +2480,29 @@
             popup.className = 'notification-popup';
             popup.style.cssText = `
                 position: fixed;
-                top: calc(var(--header-height-desktop) + 20px);
+                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 10px);
                 right: 20px;
                 background: var(--secondary);
                 border: 1px solid var(--success);
                 border-radius: 12px;
-                padding: 1.5rem;
-                max-width: 350px;
+                padding: 1rem;
+                max-width: 300px;
                 z-index: 1500;
-                animation: slideInRight 0.4s ease;
-                box-shadow: 0 10px 40px var(--shadow);
-                backdrop-filter: blur(10px);
+                animation: slideInRight 0.3s ease;
+                box-shadow: 0 10px 30px var(--shadow);
             `;
             
             popup.innerHTML = `
-                <div style="font-weight: 700; margin-bottom: 0.75rem; color: var(--success); font-size: 1rem;">${title}</div>
-                <div style="font-size: 0.9rem; color: var(--text-secondary); white-space: pre-line; line-height: 1.5;">${body}</div>
+                <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--success);">${title}</div>
+                <div style="font-size: 0.9rem; color: var(--text-secondary); white-space: pre-line;">${body}</div>
             `;
             
             document.body.appendChild(popup);
             
             setTimeout(() => {
-                popup.style.animation = 'slideOutRight 0.4s ease forwards';
-                setTimeout(() => popup.remove(), 400);
-            }, 5000);
+                popup.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => popup.remove(), 300);
+            }, 4000);
         }
 
         // ================ PWA SETUP ================ 
@@ -2576,7 +2510,7 @@
             const manifest = {
                 name: "Multi-Dashboard Forex Analysis",
                 short_name: "ForexMulti",
-                description: "Professional dual forex analysis dashboards with seamless switching",
+                description: "Dual forex analysis dashboards with seamless switching",
                 start_url: "./",
                 display: "standalone",
                 background_color: "#1a1a2e",
@@ -2604,6 +2538,10 @@
                 if (configPanel && configPanel.classList.contains('show')) {
                     toggleConfig();
                 }
+                // ESC also closes the full header
+                if (headerVisible) {
+                    hideHeader();
+                }
             }
         });
 
@@ -2619,38 +2557,47 @@
             }
         });
 
+        // Handle window resize to update mobile detection
+        window.addEventListener('resize', function() {
+            // Update body padding based on header visibility
+            if (window.innerWidth <= 768) {
+                document.body.style.paddingTop = 'var(--mini-header-height)';
+            } else {
+                document.body.style.paddingTop = 'var(--mini-header-height)';
+            }
+        });
+
         console.log(`
-🚀 STREAMLINED MULTI-DASHBOARD FOREX ANALYSIS
-============================================
+🚀 MINI-HEADER + SLIDE-DOWN FULL HEADER IMPLEMENTED
+================================================
 
-✅ Completed Optimizations:
-- Removed full header completely - only mini-header remains
-- Enhanced desktop layout with professional typography
-- Increased mini-header size to 70px on desktop
-- Improved container max-width to 1600px for large screens
-- Enhanced card layouts with better spacing and shadows
-- Professional color scheme with improved gradients
-- Optimized grid layouts for 3-4 columns on wide screens
-- Enhanced filters with backdrop blur effects
-- Improved modal and notification systems
-- Better mobile responsiveness maintained
+📱 New Features:
+✅ Always-visible mini-header with headline & dashboard selector
+✅ Slide-down full header with all controls (hidden by default)
+✅ Click/tap mini-header to toggle full header
+✅ Backdrop overlay for easy dismissal
+✅ Keyboard accessibility (Enter/Space to toggle, ESC to close)
+✅ Focus management between headers
+✅ PWA safe-area support for notched devices
+✅ Preserves existing header functionality
 
-🎯 Key Features:
-- Clean mini-header with dashboard switching
-- Professional desktop-first design
-- Enhanced typography and spacing
-- Improved accessibility and focus management
-- Streamlined JavaScript with removed header toggle logic
-- Better visual hierarchy and corporate appearance
+🎯 Implementation Details:
+- Mini-header: Fixed at top, never hidden, contains logo + app toggle + caret
+- Full header: Positioned below mini-header, slides up/down on toggle
+- Dashboard switching: Updates both headers, doesn't auto-open full header
+- Auto-hide removed: Header state now controlled by user interaction
+- Minimal changes: Existing functions preserved, new toggle system added
 
-Ready for professional desktop use!
+🔧 Key Functions Added:
+- initMiniHeader() - Sets up event listeners
+- miniHeaderToggle() - Handles header show/hide
+- showHeader() / hideHeader() - Controls full header visibility
+- Focus management for accessibility
+
+Ready to test the new mini-header system!
         `);
     </script>
 </body>
 </html>
 
-
-
-                
-
-
+        
