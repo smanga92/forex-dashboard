@@ -1902,13 +1902,6 @@
             const bias = data['AI Bias'] || 'No analysis available';
             const target = data['Target'] || data['Next Meeting'] || 'N/A';
             
-            // Get currency flag
-            const flags = {
-                'USD': '🇺🇸', 'EUR': '🇪🇺', 'GBP': '🇬🇧', 'JPY': '🇯🇵',
-                'AUD': '🇦🇺', 'CAD': '🇨🇦', 'CHF': '🇨🇭', 'NZD': '🇳🇿'
-            };
-            const flag = flags[currency.substring(0, 3)] || '🏳️';
-            
             const safeBias = escapeHtml(bias);
             const safeMetaAnalysis = escapeHtml(metaAnalysis);
             
@@ -1916,7 +1909,6 @@
                 <div class="g8-card">
                     <div class="g8-header">
                         <div style="display: flex; align-items: center;">
-                            <div class="currency-flag">${flag}</div>
                             <div>
                                 <div class="currency-name">${currency}</div>
                                 <div style="font-size: 0.9rem; color: var(--text-secondary);">${country}</div>
@@ -2379,6 +2371,7 @@ Ready to analyze global forex markets!
     </script>
 </body>
 </html>            
+
 
 
 
