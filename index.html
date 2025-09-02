@@ -1080,136 +1080,101 @@
         let lastScrollTop = 0;
         let scrollTimeout;
         let isScrolling = false;
-        let headerExpanded = true;
+        let headerVisible = true;
         let isMobile = window.innerWidth <= 768;
-        
+
         function initAutoHideHeader() {
+            const header = document.getElementById('header');
+            
             // Update mobile detection on resize
             window.addEventListener('resize', () => {
-                const wasMobile = isMobile;
                 isMobile = window.innerWidth <= 768;
-                
-                // If switching from mobile to desktop, reset header
-                if (wasMobile && !isMobile) {
-                    showFullHeader();
-                }
             });
-        
+
             // Throttled scroll handler for better performance
             window.addEventListener('scroll', () => {
-                if (!isMobile) return; // Only work on mobile
-                
                 if (!scrollTimeout) {
                     scrollTimeout = setTimeout(() => {
                         handleScroll();
                         scrollTimeout = null;
-                    }, 10);
+                    }, 10); // Very responsive on mobile
                 }
             });
 
-            // Handle window resize for responsive behavior
-            window.addEventListener('resize', function() {
-                const newIsMobile = window.innerWidth <= 768;
-                
-                // If switching from mobile to desktop, ensure full header is shown
-                if (isMobile && !newIsMobile) {
-                    showFullHeader();
-                }
-                
-                isMobile = newIsMobile;
-            });
-            
-            // Handle visibility change for auto-refresh
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    if (refreshInterval) {
-                        clearInterval(refreshInterval);
-                    }
-                } else {
-                    startAutoRefresh();
-                    // Refresh data when page becomes visible again
-                    if (!isRefreshing) {
-                        loadData();
-                    }
-                }
-            });
-        
-            // Handle scroll start/end detection
-            let scrollEndTimeout;
+            // Handle scroll start/end
             window.addEventListener('scroll', () => {
-                if (!isMobile) return;
-                
                 if (!isScrolling) {
                     isScrolling = true;
+                    header.classList.add('scrolling');
                 }
                 
-                clearTimeout(scrollEndTimeout);
-                scrollEndTimeout = setTimeout(() => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
                     isScrolling = false;
+                    header.classList.remove('scrolling');
                 }, 150);
             });
         }
-        
+
         function handleScroll() {
-            if (!isMobile) return;
+            if (!isMobile) return; // Only auto-hide on mobile
             
+            const header = document.getElementById('header');
             const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
             const scrollDelta = currentScroll - lastScrollTop;
             
-            // Minimum scroll distance before triggering changes
+            // Minimum scroll distance before hiding/showing
             const minScrollDelta = 5;
             
             if (Math.abs(scrollDelta) < minScrollDelta) {
                 return;
             }
             
-            // Show full header when at the very top
+            // Show header when at the very top
             if (currentScroll <= 10) {
-                showFullHeader();
+                showHeader();
             }
-            // Collapse header when scrolling in any direction
-            else if (Math.abs(scrollDelta) > minScrollDelta && headerExpanded) {
-                collapseHeader();
+            // Hide header when scrolling down
+            else if (scrollDelta > 0 && headerVisible) {
+                hideHeader();
+            }
+            // Show header when scrolling up
+            else if (scrollDelta < 0 && !headerVisible) {
+                showHeader();
             }
             
-            lastScrollTop = Math.max(0, currentScroll); // Prevent negative values
+            lastScrollTop = currentScroll;
         }
-        
-        function collapseHeader() {
+
+        function hideHeader() {
             if (!isMobile) return;
             
             const header = document.getElementById('header');
-            if (header) {
-                header.classList.add('header-compact');
-                headerExpanded = false;
-                
-                // Adjust body padding for compact header
-                document.body.style.paddingTop = '60px';
-            }
+            header.classList.add('header-hidden');
+            headerVisible = false;
+            
+            // Reduce body padding when header is hidden
+            document.body.style.paddingTop = '0px';
         }
-        
-        function showFullHeader() {
+
+        function showHeader() {
+            if (!isMobile) return;
+            
             const header = document.getElementById('header');
-            if (header) {
-                header.classList.remove('header-compact');
-                headerExpanded = true;
-                
-                // Restore full body padding
-                if (isMobile) {
-                    document.body.style.paddingTop = '80px';
-                } else {
-                    document.body.style.paddingTop = 'var(--header-height)';
-                }
-            }
+            header.classList.remove('header-hidden');
+            headerVisible = true;
+            
+            // Restore body padding when header is visible
+            document.body.style.paddingTop = 'var(--header-height)';
         }
-        
+
         function toggleHeaderOnMobile() {
             if (!isMobile) return;
             
-            if (headerExpanded) {
-                collapseHeader();
+            if (headerVisible) {
+                hideHeader();
             } else {
-                showFullHeader();
+                showHeader();
             }
         }
 
@@ -1226,28 +1191,19 @@
             const cleanTitle = escapeHtml(title);
             const cleanContent = escapeHtml(content);
             
-            const modalTitle = document.getElementById('modal-title');
-            const modalBody = document.getElementById('modal-body');
-            const modal = document.getElementById('modal');
+            document.getElementById('modal-title').innerHTML = cleanTitle;
+            document.getElementById('modal-body').innerHTML = `<p>${cleanContent}</p>`;
+            document.getElementById('modal').style.display = 'block';
             
-            if (modalTitle && modalBody && modal) {
-                modalTitle.innerHTML = cleanTitle;
-                modalBody.innerHTML = `<p>${cleanContent}</p>`;
-                modal.style.display = 'block';
-                
-                // Focus on modal for accessibility
-                modal.focus();
-                
-                // Prevent body scrolling when modal is open
-                document.body.style.overflow = 'hidden';
-            }
+            // Focus on modal for accessibility
+            document.getElementById('modal').focus();
+            
+            // Prevent body scrolling when modal is open
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
-            const modal = document.getElementById('modal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
+            document.getElementById('modal').style.display = 'none';
             
             // Restore body scrolling
             document.body.style.overflow = 'auto';
@@ -1258,23 +1214,12 @@
             CONFIG.CURRENT_APP = appType;
             
             // Update button states
-            const forexBtn = document.getElementById('forexBtn');
-            const g8Btn = document.getElementById('g8Btn');
+            document.getElementById('forexBtn').classList.toggle('active', appType === 'forex');
+            document.getElementById('g8Btn').classList.toggle('active', appType === 'g8');
             
-            if (forexBtn && g8Btn) {
-                forexBtn.classList.toggle('active', appType === 'forex');
-                g8Btn.classList.toggle('active', appType === 'g8');
-            }
-            
-            // Update page title - keep the logo text updated
-            const logoElement = document.querySelector('.logo');
-            if (logoElement) {
-                if (appType === 'forex') {
-                    logoElement.innerHTML = '📊 Forex Analysis';
-                } else {
-                    logoElement.innerHTML = '📊 G8 Fundamentals';
-                }
-            }
+            // Update page title
+            const title = appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals Analysis';
+            document.querySelector('.logo').innerHTML = `📊 ${title}`;
             
             // Clear current data and load new
             allData = [];
@@ -1286,8 +1231,6 @@
             // Load data for selected app
             loadData();
             
-            // Show notification
-            const title = appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals Analysis';
             showNotification(`Switched to ${title}`, 'Loading data for selected dashboard...');
         }
 
@@ -1323,54 +1266,37 @@
         }
 
         // ================ INITIALIZATION ================ 
-            document.addEventListener('DOMContentLoaded', function() {
-        setupPWA();
-        initAutoHideHeader(); // Initialize auto-hide header functionality
-        
-        // Initialize accessibility attributes
-        const pairFilter = document.getElementById('pairFilter');
-        const biasFilter = document.getElementById('biasFilter');
-        
-        if (pairFilter) {
-            pairFilter.setAttribute('aria-label', 'Filter by currency pair');
-        }
-        if (biasFilter) {
-            biasFilter.setAttribute('aria-label', 'Filter by trading bias');
-            biasFilter.setAttribute('title', 'Select trading bias to filter');
-        }
-        
-        // Add click event delegation for modal functionality
-        document.addEventListener('click', function(e) {
-            const clickableInfo = e.target.closest('.clickable-info');
-            if (clickableInfo) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const title = clickableInfo.getAttribute('data-modal-title');
-                const content = clickableInfo.getAttribute('data-modal-content');
-                
-                if (title && content) {
-                    showModal(title, content);
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPWA();
+            initAutoHideHeader(); // Initialize auto-hide header
+            
+            // Initialize accessibility attributes
+            const pairFilter = document.getElementById('pairFilter');
+            const biasFilter = document.getElementById('biasFilter');
+            
+            if (pairFilter) {
+                pairFilter.setAttribute('aria-label', 'Filter by currency pair');
+            }
+            if (biasFilter) {
+                biasFilter.setAttribute('aria-label', 'Filter by trading bias');
+                biasFilter.setAttribute('title', 'Select trading bias to filter');
+            }
+            
+            const hasConfig = loadConfig();
+            
+            if (hasConfig) {
+                console.log('Configuration loaded, starting app...');
+                loadData();
+                startAutoRefresh();
+            } else {
+                setTimeout(() => {
+                    if (!CONFIG.FOREX_APPS_SCRIPT_URL && !CONFIG.G8_APPS_SCRIPT_URL && !CONFIG.USE_DEMO) {
+                        toggleConfig();
+                        showNotification('Setup Required', 'Please configure your data sources to get started');
+                    }
+                }, 1000);
             }
         });
-        
-        // Load configuration and start app
-        const hasConfig = loadConfig();
-        
-        if (hasConfig) {
-            console.log('Configuration loaded, starting app...');
-            loadData();
-            startAutoRefresh();
-        } else {
-            setTimeout(() => {
-                if (!CONFIG.FOREX_APPS_SCRIPT_URL && !CONFIG.G8_APPS_SCRIPT_URL && !CONFIG.USE_DEMO) {
-                    toggleConfig();
-                    showNotification('Setup Required', 'Please configure your data sources to get started');
-                }
-            }, 1000);
-        }
-    });
         
         // ================ CONFIGURATION MANAGEMENT ================ 
         function loadConfig() {
@@ -2324,16 +2250,14 @@
             }
         }
         
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
         function truncateText(text, maxLength) {
             if (!text || text.length <= maxLength) return text || 'No data available';
             return text.substring(0, maxLength) + '...';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/'/g, "&#39;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
         function setRefreshButtonState(disabled) {
@@ -2464,15 +2388,23 @@
         // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                const modal = document.getElementById('modal');
-                if (modal && modal.style.display === 'block') {
-                    closeModal();
-                }
-                
+                closeModal();
                 const configPanel = document.getElementById('configPanel');
                 if (configPanel && configPanel.classList.contains('show')) {
                     toggleConfig();
                 }
+            }
+        });
+
+        // Handle visibility change for auto-refresh
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                }
+            } else {
+                startAutoRefresh();
+                loadData();
             }
         });
 
@@ -2502,4 +2434,3 @@ Ready to analyze global forex markets!
     </script>
 </body>
 </html>
-
