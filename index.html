@@ -302,14 +302,17 @@
         @media (min-width: 769px) {
             .header {
                 top: var(--mini-header-height) !important;
-                transform: none !important; /* Override transform when visible on desktop */
+                /* Remove the transform override - let the animation work */
             }
             
             .header.header-visible {
-                transform: none !important; /* Ensure no transform interference */
+                transform: translateY(0) !important; /* Allow slide down animation */
+            }
+            
+            .header.header-hidden {
+                transform: translateY(-100%) !important; /* Allow slide up animation */
             }
         }
-
         /* Mobile header improvements */
         @media (max-width: 768px) {
             .header {
@@ -2680,5 +2683,6 @@ Ready to test the new mini-header system!
     </script>
 </body>
 </html>
+
 
 
