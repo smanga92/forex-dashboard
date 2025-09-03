@@ -51,7 +51,7 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1400; /* Changed from 1600 to 1400 */
+            z-index: 2000; /* Always on top */
             border-bottom: 1px solid var(--accent);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
             height: var(--mini-header-height);
@@ -249,18 +249,19 @@
             background: rgba(26, 26, 46, 0.95);
             -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
-            padding: 1.5rem 3rem 1rem 2rem;
+            padding: 1.5rem 2rem 1rem 2rem;
             position: fixed;
-            top: var(--mini-header-height);
+            top: 0; /* Start from the very top */
             left: 0;
             right: 0;
-            z-index: 1500; /* Higher than mini-header */
+            z-index: 1900; /* Below mini-header but above backdrop */
             border-bottom: 2px solid var(--accent);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            height: var(--header-height);
+            height: calc(var(--header-height) + var(--mini-header-height)); /* Taller to accommodate mini-header space */
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             will-change: transform;
-            transform: translateY(-100%);
+            transform: translateY(-100%); /* Hide by default */
+            padding-top: calc(var(--mini-header-height) + 1rem); /* Push content below mini-header */
         }
         
         .header.header-visible {
@@ -301,12 +302,9 @@
         /* Mobile header improvements */
         @media (max-width: 768px) {
             .header {
-                top: calc(100px + env(safe-area-inset-top, 0px));
-                padding: 1.5rem 2rem 1rem 1rem; /* Changed from 1rem - adds extra top padding */
-                height: auto;
-                min-height: 80px;
+                height: calc(var(--header-height) + 100px); /* Account for taller mobile mini-header */
+                padding-top: calc(100px + 1rem); /* More space on mobile */
             }
-        }
             
             .header-content {
                 flex-direction: column;
@@ -346,7 +344,6 @@
                 margin-top: 0.5rem;
             }
         }
-        
         .header-content {
             max-width: 1400px;
             margin: 0 auto;
@@ -374,7 +371,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.3);
-            z-index: 1450; /* Between mini-header and full header */
+            z-index: 1800; /* Below both headers */
             -webkit-backdrop-filter: blur(2px);
             backdrop-filter: blur(2px);
             cursor: pointer;
@@ -2671,6 +2668,7 @@ Ready to test the new mini-header system!
 </html>
 
         
+
 
 
 
