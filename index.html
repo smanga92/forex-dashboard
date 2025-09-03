@@ -301,8 +301,7 @@
         /* Desktop-only fix for full header positioning */
         @media (min-width: 769px) {
             .header {
-                top: var(--mini-header-height) !important;
-                /* Remove the transform override - let the animation work */
+                top: calc(var(--mini-header-height) - 5px) !important; /* Adjust this value to move header up/down */
             }
             
             .header.header-visible {
@@ -310,7 +309,7 @@
             }
             
             .header.header-hidden {
-                transform: translateY(-100%) !important; /* Allow slide up animation */
+                transform: translateY(-150%) !important; /* Allow slide up animation */
             }
         }
         /* Mobile header improvements */
@@ -2683,6 +2682,7 @@ Ready to test the new mini-header system!
     </script>
 </body>
 </html>
+
 
 
 
