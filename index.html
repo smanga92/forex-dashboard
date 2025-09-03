@@ -249,21 +249,20 @@
             background: rgba(26, 26, 46, 0.95);
             -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
-            padding: 1.5rem 4rem 1rem 2rem;
+            padding: 1.5rem 3rem 1rem 2rem; /* Changed from 1rem 2rem - adds extra top padding */
             position: fixed;
-            top: 0; /* Start from the very top */
+            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
             left: 0;
             right: 0;
-            z-index: 1900; /* Below mini-header but above backdrop */
+            z-index: 1400;
             border-bottom: 2px solid var(--accent);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            height: calc(var(--header-height) + var(--mini-header-height)); /* Taller to accommodate mini-header space */
+            height: var(--header-height);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             will-change: transform;
-            transform: translateY(-100%); /* Hide by default */
-            padding-top: calc(var(--mini-header-height) + 1rem); /* Push content below mini-header */
+            transform: translateY(-100%);
         }
-        
+                
         .header.header-visible {
             transform: translateY(0); /* Show when active */
         }
@@ -302,9 +301,12 @@
         /* Mobile header improvements */
         @media (max-width: 768px) {
             .header {
-                height: calc(var(--header-height) + 100px); /* Account for taller mobile mini-header */
-                padding-top: calc(100px + 3rem); /* More space on mobile */
+                top: calc(100px + env(safe-area-inset-top, 0px));
+                padding: 1.5rem 2rem 1rem 1rem; /* Changed from 1rem - adds extra top padding */
+                height: auto;
+                min-height: 80px;
             }
+        }
             
             .header-content {
                 flex-direction: column;
@@ -2668,6 +2670,7 @@ Ready to test the new mini-header system!
 </html>
 
         
+
 
 
 
