@@ -352,7 +352,7 @@
             max-width: 1400px;
             margin: 0 auto;
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Center the controls since no logo */
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
@@ -1170,7 +1170,6 @@
     <!-- Full Header (Slide Down) -->
     <div class="header" id="header">
         <div class="header-content">
-            <div class="logo">📊 Multi-Dashboard Forex Analysis</div>
             
             <!-- REMOVED: App Toggle Buttons - they're now only in mini-header -->
     
@@ -1435,10 +1434,9 @@
             // Update button states only in mini-header
             document.getElementById('miniForexBtn').classList.toggle('active', appType === 'forex');
             document.getElementById('miniG8Btn').classList.toggle('active', appType === 'g8');
-            
-            // Update page title in both headers
+
+            // Update page title only in mini-header
             const title = appType === 'forex' ? 'Multi-Dashboard Forex Analysis' : 'G8 Fundamentals Analysis';
-            document.querySelector('.logo').innerHTML = `📊 ${title}`;
             document.querySelector('.mini-logo').innerHTML = `📊 ${title}`;
             
             // Clear current data and load new
@@ -2674,6 +2672,7 @@ Ready to test the new mini-header system!
 </html>
 
         
+
 
 
 
