@@ -133,62 +133,81 @@
         /* Mobile adjustments for mini-header */
         @media (max-width: 768px) {
             .mini-header {
-                padding: 0.6rem 0.5rem; /* Reduced horizontal padding */
-                padding-top: calc(0.6rem + env(safe-area-inset-top, 0px));
-                flex-wrap: nowrap; /* Prevent wrapping */
+                padding: 0.8rem 1rem;
+                padding-top: calc(0.8rem + env(safe-area-inset-top, 0px));
+                flex-direction: column; /* Stack vertically */
+                align-items: center; /* Center everything */
+                justify-content: center;
+                text-align: center;
+                gap: 0.6rem;
+                height: auto; /* Allow natural height */
+                min-height: calc(var(--mini-header-height) + 20px); /* Slightly taller */
             }
         
             .mini-logo {
-                font-size: 0.9rem; /* Smaller on mobile */
-                min-width: 0; /* Allow shrinking */
-                flex-shrink: 1; /* Allow logo to shrink if needed */
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                max-width: 25%; /* Limit logo width */
+                font-size: 1.1rem;
+                order: 1; /* Title first */
+                margin: 0;
             }
         
             .mini-app-toggle {
-                margin: 0 0.5rem; /* Reduced margins */
-                max-width: none; /* Remove max-width constraint */
-                flex: 1; /* Take available space */
-                min-width: 0; /* Allow shrinking */
+                order: 2; /* Toggle buttons below title */
+                width: 80%; /* Not full width, looks better centered */
+                max-width: 280px;
+                margin: 0;
             }
-
-                .mini-toggle-btn {
-                padding: 0.4rem 0.3rem; /* More compact padding */
-                font-size: 0.7rem; /* Smaller font */
-                min-width: 0; /* Allow shrinking */
-                flex: 1; /* Equal width distribution */
+        
+            .mini-toggle-btn {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.8rem;
+                flex: 1;
             }
         
             .header-caret {
+                order: 3; /* Caret at bottom */
                 font-size: 0.9rem;
-                flex-shrink: 0; /* Don't shrink the caret */
-                margin-left: 0.25rem;
+                margin-top: 0.2rem;
+            }
+
+            .controls {
+                order: 2;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            /* Make sure controls are visible on mobile */
+            .connection-status,
+            .advanced-controls,
+            .last-update {
+                display: flex !important; /* Force visibility */
+                font-size: 0.8rem;
             }
         }
 
         /* Extra small screens (very narrow phones) */
         @media (max-width: 480px) {
             .mini-header {
-                padding: 0.5rem 0.25rem; /* Even tighter padding */
+                padding: 0.6rem 0.8rem;
+                padding-top: calc(0.6rem + env(safe-area-inset-top, 0px));
+                gap: 0.4rem;
             }
             
             .mini-logo {
-                font-size: 0.8rem;
-                max-width: 20%; /* Even smaller logo space */
+                font-size: 1rem;
             }
             
             .mini-app-toggle {
-                margin: 0 0.25rem; /* Minimal margins */
+                width: 90%; /* Slightly wider on very small screens */
             }
             
             .mini-toggle-btn {
-                padding: 0.3rem 0.2rem; /* Very compact */
-                font-size: 0.65rem;
+                padding: 0.5rem 0.6rem;
+                font-size: 0.75rem;
             }
-            
+        }
             .header-caret {
                 font-size: 0.8rem;
             }
@@ -232,10 +251,10 @@
             backdrop-filter: blur(15px);
             padding: 1rem 2rem;
             position: fixed;
-            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px)); /* Position below mini-header */
+            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 20px); /* Add gap */
             left: 0;
             right: 0;
-            z-index: 1500; /* Lower than mini-header but higher than content */
+            z-index: 1500;
             border-bottom: 2px solid var(--accent);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             height: var(--header-height);
@@ -243,10 +262,9 @@
             will-change: transform;
             transform: translateY(-100%); /* Hidden by default */
         }
-
-        /* Full header visible state */
+        
         .header.header-visible {
-            transform: translateY(0);
+            transform: translateY(0); /* Show when active */
         }
 
         /* Remove old auto-hide classes - not needed anymore */
@@ -283,23 +301,21 @@
         /* Mobile header improvements */
         @media (max-width: 768px) {
             .header {
-                height: var(--header-height);
-                padding: 0.5rem 1rem;
-                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
+                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 40px); /* More gap on mobile */
+                padding: 1rem;
+                height: auto; /* Allow natural height */
+                min-height: 80px;
             }
             
             .header-content {
                 flex-direction: column;
-                gap: 0.5rem;
+                gap: 1rem;
                 align-items: center;
                 justify-content: center;
-                height: 100%;
             }
             
             .logo {
                 font-size: 1rem;
-                text-align: center;
-                line-height: 1.2;
                 order: 1;
             }
             
@@ -2656,6 +2672,7 @@ Ready to test the new mini-header system!
 </html>
 
         
+
 
 
 
