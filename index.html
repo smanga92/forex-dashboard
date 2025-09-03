@@ -251,10 +251,10 @@
             backdrop-filter: blur(15px);
             padding: 1rem 2rem;
             position: fixed;
-            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 30px); /* Add more gap */
+            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px)); /* Remove the +30px gap */
             left: 0;
             right: 0;
-            z-index: 1500;
+            z-index: 1400; /* Lower than mini-header which is 2000 */
             border-bottom: 2px solid var(--accent);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             height: var(--header-height);
@@ -301,8 +301,8 @@
         /* Mobile header improvements */
         @media (max-width: 768px) {
             .header {
-                /* Since mini-header is taller on mobile (stacked layout), add more space */
-                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 60px);
+                /* Position directly below mini-header on mobile */
+                top: calc(100px + env(safe-area-inset-top, 0px)); /* Fixed height for mobile mini-header */
                 padding: 1rem;
                 height: auto;
                 min-height: 80px;
@@ -2674,6 +2674,7 @@ Ready to test the new mini-header system!
 </html>
 
         
+
 
 
 
