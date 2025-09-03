@@ -18,21 +18,20 @@
         }
         
         :root {
-        --mini-header-height: 72px; /* adjust if your mini-header is taller/shorter */
-        --primary: #1a1a2e;
-        --secondary: #16213e;
-        --accent: #0f4c75;
-        --success: #00ff88;
-        --danger: #ff4757;
-        --warning: #ffa726;
-        --text-primary: #ffffff;
-        --text-secondary: #b0bec5;
-        --border: #2a2a3e;
-        --shadow: rgba(0, 0, 0, 0.3);
-        --header-height: 80px;
-        --mini-header-height: 70
-            px; /* Increased from 50px to 70px */
-    }
+            --mini-header-height: 72px; /* adjust if your mini-header is taller/shorter */
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f4c75;
+            --success: #00ff88;
+            --danger: #ff4757;
+            --warning: #ffa726;
+            --text-primary: #ffffff;
+            --text-secondary: #b0bec5;
+            --border: #2a2a3e;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --header-height: 80px;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -52,7 +51,7 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1600;
+            z-index: 1002; /* Fixed z-index hierarchy */
             border-bottom: 1px solid var(--accent);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
             height: var(--mini-header-height);
@@ -63,14 +62,6 @@
             transition: all 0.3s ease;
             padding-top: calc(0.75rem + env(safe-area-inset-top, 0px)); /* Updated */
             height: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
-        }
-
-        .mini-header {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          z-index: 9999; /* above the full header */
         }
 
         .mini-header:hover {
@@ -216,7 +207,7 @@
                 padding: 0.5rem 0.6rem;
                 font-size: 0.75rem;
             }
-        }
+            
             .header-caret {
                 font-size: 0.8rem;
             }
@@ -263,7 +254,7 @@
             top: var(--mini-header-height); /* Simplified - remove the calc for now */
             left: 0;
             right: 0;
-            z-index: 1500;
+            z-index: 1001; /* Fixed z-index hierarchy */
             border-bottom: 2px solid var(--accent);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             height: var(--header-height);
@@ -307,13 +298,16 @@
             margin: 0 1rem;
         }
 
-        /* On desktop, push full header below mini-header */
+        /* Desktop-only fix for full header positioning */
         @media (min-width: 769px) {
-          #header.header {
-            top: var(--mini-header-height) !important;
-            position: fixed !important;
-            z-index: 9998; /* keep it above content but below mini-header if needed */
-          }
+            .header {
+                top: var(--mini-header-height) !important;
+                transform: none !important; /* Override transform when visible on desktop */
+            }
+            
+            .header.header-visible {
+                transform: none !important; /* Ensure no transform interference */
+            }
         }
 
         /* Mobile header improvements */
@@ -324,7 +318,6 @@
                 height: auto;
                 min-height: 80px;
             }
-        }
             
             .header-content {
                 flex-direction: column;
@@ -392,7 +385,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.3);
-            z-index: 1450; /* Below header but above content */
+            z-index: 1000; /* Fixed z-index hierarchy */
             -webkit-backdrop-filter: blur(2px);
             backdrop-filter: blur(2px);
             cursor: pointer;
@@ -637,10 +630,6 @@
             position: relative;
             overflow: hidden;
         }
-
-        .mini-header { border: 2px solid red !important; }
-        #header.header { border: 2px solid blue !important; }
-
         
         .currency-card::before {
             content: '';
@@ -2691,4 +2680,5 @@ Ready to test the new mini-header system!
     </script>
 </body>
 </html>
+
 
