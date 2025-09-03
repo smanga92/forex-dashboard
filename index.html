@@ -251,7 +251,7 @@
             backdrop-filter: blur(15px);
             padding: 1rem 2rem;
             position: fixed;
-            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 20px); /* Add gap */
+            top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 30px); /* Add more gap */
             left: 0;
             right: 0;
             z-index: 1500;
@@ -260,7 +260,7 @@
             height: var(--header-height);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             will-change: transform;
-            transform: translateY(-100%); /* Hidden by default */
+            transform: translateY(-100%);
         }
         
         .header.header-visible {
@@ -301,11 +301,13 @@
         /* Mobile header improvements */
         @media (max-width: 768px) {
             .header {
-                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 40px); /* More gap on mobile */
+                /* Since mini-header is taller on mobile (stacked layout), add more space */
+                top: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px) + 60px);
                 padding: 1rem;
-                height: auto; /* Allow natural height */
+                height: auto;
                 min-height: 80px;
             }
+        }
             
             .header-content {
                 flex-direction: column;
@@ -2672,6 +2674,7 @@ Ready to test the new mini-header system!
 </html>
 
         
+
 
 
 
