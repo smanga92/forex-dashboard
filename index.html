@@ -243,8 +243,7 @@
             /* Hide secondary controls on mobile to save space */
             .connection-status,
             .advanced-controls,
-            .last-update,
-            .controls {
+            .last-update {
                 display: none;
             }
             
@@ -270,16 +269,6 @@
             font-weight: 700;
             color: var(--success);
             cursor: pointer;
-        }
-
-        /* Hide only the full header's app-toggle, keep mini-header's visible */
-        .header .header-content .app-toggle {
-            display: none !important;
-        }
-        
-        /* Ensure mini-header app-toggle remains visible */
-        .mini-header .mini-app-toggle {
-            display: flex !important;
         }
 
         /* ================ BACKDROP OVERLAY (NEW) ================ */
@@ -1088,16 +1077,8 @@
         <div class="header-content">
             <div class="logo">📊 Multi-Dashboard Forex Analysis</div>
             
-            <!-- App Toggle Buttons -->
-            <div class="app-toggle">
-                <button class="toggle-btn active" onclick="switchApp('forex')" id="forexBtn">
-                    📈 Forex Analysis
-                </button>
-                <button class="toggle-btn" onclick="switchApp('g8')" id="g8Btn">
-                    🌍 G8 Fundamentals
-                </button>
-            </div>
-
+            <!-- REMOVED: App Toggle Buttons - they're now only in mini-header -->
+    
             <div class="controls">
                 <div class="connection-status" id="connectionStatus">
                     <div class="connection-dot"></div>
@@ -1356,9 +1337,7 @@
         function switchApp(appType) {
             CONFIG.CURRENT_APP = appType;
             
-            // Update button states in both headers
-            document.getElementById('forexBtn').classList.toggle('active', appType === 'forex');
-            document.getElementById('g8Btn').classList.toggle('active', appType === 'g8');
+            // Update button states only in mini-header
             document.getElementById('miniForexBtn').classList.toggle('active', appType === 'forex');
             document.getElementById('miniG8Btn').classList.toggle('active', appType === 'g8');
             
@@ -1377,10 +1356,9 @@
             // Load data for selected app
             loadData();
             
-            // Do NOT auto-open the full header on dashboard switch
+            // Show notification
             showNotification(`Switched to ${appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals'}`, 'Loading data for selected dashboard...');
         }
-
         function updateFiltersForApp(appType) {
             const pairFilter = document.getElementById('pairFilter');
             const biasFilter = document.getElementById('biasFilter');
@@ -2601,3 +2579,4 @@ Ready to test the new mini-header system!
 </html>
 
         
+
