@@ -18,20 +18,21 @@
         }
         
         :root {
-            --primary: #1a1a2e;
-            --secondary: #16213e;
-            --accent: #0f4c75;
-            --success: #00ff88;
-            --danger: #ff4757;
-            --warning: #ffa726;
-            --text-primary: #ffffff;
-            --text-secondary: #b0bec5;
-            --border: #2a2a3e;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --header-height: 80px;
-            --mini-header-height: 70px; /* Clean definition */
-        }
-        
+        --mini-header-height: 40px; /* adjust if your mini-header is taller/shorter */
+        --primary: #1a1a2e;
+        --secondary: #16213e;
+        --accent: #0f4c75;
+        --success: #00ff88;
+        --danger: #ff4757;
+        --warning: #ffa726;
+        --text-primary: #ffffff;
+        --text-secondary: #b0bec5;
+        --border: #2a2a3e;
+        --shadow: rgba(0, 0, 0, 0.3);
+        --header-height: 80px;
+        --mini-header-height: 70
+            px; /* Increased from 50px to 70px */
+    }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -251,7 +252,7 @@
             backdrop-filter: blur(15px);
             padding: 1.5rem 3rem 1rem 2rem;
             position: fixed;
-            top: 0; /* Default: mobile behavior */
+            top: var(--mini-header-height); /* Simplified - remove the calc for now */
             left: 0;
             right: 0;
             z-index: 1500;
@@ -264,14 +265,7 @@
         }
         
         .header.header-visible {
-            transform: translateY(0);
-        }
-        
-        /* Desktop: position below mini-header */
-        @media (min-width: 769px) {
-            .header {
-                top: var(--mini-header-height);
-            }
+            transform: translateY(0); /* Show when active */
         }
 
         /* Remove old auto-hide classes - not needed anymore */
@@ -308,11 +302,12 @@
         /* Mobile header improvements */
         @media (max-width: 768px) {
             .header {
-                top: 0 !important; /* Force mobile to use top: 0 */
-                padding: 1.5rem 2rem 1rem 1rem;
+                top: calc(100px + env(safe-area-inset-top, 0px));
+                padding: 1.5rem 2rem 1rem 1rem; /* Changed from 1rem - adds extra top padding */
                 height: auto;
                 min-height: 80px;
             }
+        }
             
             .header-content {
                 flex-direction: column;
@@ -369,6 +364,14 @@
             font-weight: 700;
             color: var(--success);
             cursor: pointer;
+        }
+
+        /* Desktop override: make the full header drop below the mini-header */
+        @media (min-width: 769px) {
+          .header,
+          .full-header {
+            top: var(--mini-header-height) !important;
+          }
         }
 
         /* ================ BACKDROP OVERLAY (NEW) ================ */
@@ -2675,5 +2678,3 @@ Ready to test the new mini-header system!
     </script>
 </body>
 </html>
-
-
