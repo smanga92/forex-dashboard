@@ -46,12 +46,12 @@
             background: rgba(26, 26, 46, 0.98);
             -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
-            padding: 0.75rem 1.5rem; /* Increased padding */
+            padding: 0.75rem 1.5rem;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1600;
+            z-index: 1400; /* Changed from 1600 to 1400 */
             border-bottom: 1px solid var(--accent);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
             height: var(--mini-header-height);
@@ -60,7 +60,7 @@
             justify-content: space-between;
             cursor: pointer;
             transition: all 0.3s ease;
-            padding-top: calc(0.75rem + env(safe-area-inset-top, 0px)); /* Updated */
+            padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
             height: calc(var(--mini-header-height) + env(safe-area-inset-top, 0px));
         }
 
@@ -251,10 +251,10 @@
             backdrop-filter: blur(15px);
             padding: 1.5rem 3rem 1rem 2rem;
             position: fixed;
-            top: var(--mini-header-height); /* Simplified - remove the calc for now */
+            top: var(--mini-header-height);
             left: 0;
             right: 0;
-            z-index: 1500;
+            z-index: 1500; /* Higher than mini-header */
             border-bottom: 2px solid var(--accent);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             height: var(--header-height);
@@ -374,7 +374,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.3);
-            z-index: 1450; /* Below header but above content */
+            z-index: 1450; /* Between mini-header and full header */
             -webkit-backdrop-filter: blur(2px);
             backdrop-filter: blur(2px);
             cursor: pointer;
@@ -2671,6 +2671,7 @@ Ready to test the new mini-header system!
 </html>
 
         
+
 
 
 
