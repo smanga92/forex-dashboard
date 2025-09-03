@@ -251,7 +251,7 @@
             backdrop-filter: blur(15px);
             padding: 1.5rem 3rem 1rem 2rem;
             position: fixed;
-            top: 0; /* Mobile: expand from very top */
+            top: 0; /* Default: mobile behavior */
             left: 0;
             right: 0;
             z-index: 1500;
@@ -266,7 +266,7 @@
         .header.header-visible {
             transform: translateY(0);
         }
-
+        
         /* Desktop: position below mini-header */
         @media (min-width: 769px) {
             .header {
@@ -308,7 +308,7 @@
         /* Mobile header improvements */
         @media (max-width: 768px) {
             .header {
-                top: 0; /* Explicit: expand from very top on mobile */
+                top: 0 !important; /* Force mobile to use top: 0 */
                 padding: 1.5rem 2rem 1rem 1rem;
                 height: auto;
                 min-height: 80px;
@@ -2675,4 +2675,5 @@ Ready to test the new mini-header system!
     </script>
 </body>
 </html>
+
 
