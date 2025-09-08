@@ -2761,6 +2761,38 @@ function extractTrend(data) {
             });
         }
 
+        // Add this function to your HTML dashboard code
+        async function debugAppsScriptResponse() {
+            try {
+                console.log('=== DEBUGGING APPS SCRIPT RESPONSE ===');
+                
+                const response = await fetch(CONFIG.BIAS_APPS_SCRIPT_URL + '?t=' + Date.now());
+                const rawText = await response.text();
+                
+                console.log('Raw response (first 500 chars):', rawText.substring(0, 500));
+                
+                const jsonData = JSON.parse(rawText);
+                console.log('Parsed JSON data:', jsonData);
+                
+                if (jsonData.length > 0) {
+                    console.log('First item keys:', Object.keys(jsonData[0]));
+                    console.log('First item data:', jsonData[0]);
+                }
+                
+                // Check what fields are actually available
+                if (jsonData.length > 0) {
+                    const availableFields = Object.keys(jsonData[0]);
+                    console.log('Available fields from your Apps Script:');
+                    availableFields.forEach(field => {
+                        console.log(`  - "${field}": "${jsonData[0][field]}"`);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Debug failed:', error);
+            }
+        }
+
         // ================ PWA SETUP (CONTINUED) ================ 
         function setupPWA() {
             const manifest = {
@@ -2853,6 +2885,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
