@@ -2006,6 +2006,13 @@
             return parseInt(data['Stability Days'] || 0);
         }
 
+        // MISSING FUNCTION: Bias Direction Classification
+        function getBiasDirection(score) {
+            if (score > 0.15) return 'BULLISH';
+            if (score < -0.15) return 'BEARISH';
+            return 'NEUTRAL';
+        }
+
         function extractEventCount(data) {
             if (data['Recent Events (30d)']) {
                 return parseInt(data['Recent Events (30d)']);
@@ -2490,6 +2497,7 @@ Ready for deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
