@@ -2074,7 +2074,22 @@
         }
 
         function extractCorrelation(data) {
-            return (Math.random() - 0.5) * 2;
+            // Extract real correlation from your Apps Script data
+            const metaText = data['Meta-Analysis'] || '';
+            
+            // Look for "Correlation vs USD: [number]" pattern
+            const correlationMatch = metaText.match(/Correlation vs USD:\s*([-\d.]+)/);
+            if (correlationMatch) {
+                return parseFloat(correlationMatch[1]) || 0;
+            }
+            
+            // Fallback: check if there's a direct "Correlation" field
+            if (data['Correlation vs USD']) {
+                return parseFloat(data['Correlation vs USD']) || 0;
+            }
+            
+            // If no real data found, return 0 instead of random
+            return 0;
         }
 
         function getBiasDirection(score) {
@@ -2557,5 +2572,6 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
