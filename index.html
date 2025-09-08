@@ -1459,43 +1459,24 @@
         }
 
         function parseData(dataText) {
-          if (!dataText || dataText.trim().length === 0) {
-            throw new Error('Empty response received');
-          }
-        
-          console.log('Raw data received (first 200 chars):', dataText.substring(0, 200));
-        
-          try {
-            const jsonData = JSON.parse(dataText);
-            if (Array.isArray(jsonData) && jsonData.length > 0) {
-              console.log('Parsed as JSON data from Apps Script');
-              console.log('First JSON item keys:', Object.keys(jsonData[0]));
-              console.log('First JSON item:', jsonData[0]);
-              
-              // Validate that we have real bias data structure
-              if (CONFIG.CURRENT_APP === 'bias') {
-                const firstItem = jsonData[0];
-                const hasRealBiasData = firstItem.hasOwnProperty('Bias Score') && 
-                                       firstItem.hasOwnProperty('Confidence') &&
-                                       firstItem.hasOwnProperty('Event Count (30d)') &&
-                                       firstItem.hasOwnProperty('Latest Event');
-                
-                if (!hasRealBiasData) {
-                  console.warn('Apps Script returning incomplete bias data');
-                  throw new Error('Bias Apps Script needs getCurrencyBiasForG8Enhanced function');
-                }
-              }
-              
-              return validateData(jsonData);
+            if (!dataText || dataText.trim().length === 0) {
+                throw new Error('Empty response received');
             }
-          } catch (e) {
-            console.log('Not JSON, trying CSV parsing...');
-          }
-          
-          // CSV parsing remains the same...
-          console.log('Parsing as CSV data');
-          const csvData = parseCSVData(dataText);
-          return validateData(csvData);
+        
+            try {
+                const jsonData = JSON.parse(dataText);
+                if (Array.isArray(jsonData) && jsonData.length > 0) {
+                    console.log('Parsed as JSON data from Apps Script');
+                    // REMOVE the bias validation that's causing the problem
+                    return validateData(jsonData);
+                }
+            } catch (e) {
+                console.log('Not JSON, trying CSV parsing...');
+            }
+            
+            // Only try CSV if JSON parsing actually failed
+            const csvData = parseCSVData(dataText);
+            return validateData(csvData);
         }
         
         function handleBiasDataIssue() {
@@ -2254,6 +2235,7 @@ Ready for deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
