@@ -1459,53 +1459,43 @@
         }
 
         function parseData(dataText) {
-            if (!dataText || dataText.trim().length === 0) {
-                throw new Error('Empty response received');
-            }
+          if (!dataText || dataText.trim().length === 0) {
+            throw new Error('Empty response received');
+          }
         
-            console.log('Raw data received (first 200 chars):', dataText.substring(0, 200));
+          console.log('Raw data received (first 200 chars):', dataText.substring(0, 200));
         
-            try {
-                const jsonData = JSON.parse(dataText);
-                if (Array.isArray(jsonData) && jsonData.length > 0) {
-                    console.log('Parsed as JSON data from Apps Script');
-                    console.log('First JSON item keys:', Object.keys(jsonData[0]));
-                    console.log('First JSON item:', jsonData[0]);
-                    
-                    if (CONFIG.CURRENT_APP === 'bias') {
-                        if (isBiasDataMalformed(jsonData[0])) {
-                            console.warn('Bias data is malformed, using demo data');
-                            return handleBiasDataIssue();
-                        }
-                        
-                        const firstItem = jsonData[0];
-                        const hasValidBiasStructure = firstItem.hasOwnProperty('Currency') || 
-                                                      firstItem.hasOwnProperty('AI Bias') ||
-                                                      firstItem.hasOwnProperty('Meta-Analysis');
-                        
-                        if (!hasValidBiasStructure) {
-                            console.warn('Bias data missing expected fields, using demo data');
-                            return handleBiasDataIssue();
-                        }
-                    }
-                    
-                    return validateData(jsonData);
+          try {
+            const jsonData = JSON.parse(dataText);
+            if (Array.isArray(jsonData) && jsonData.length > 0) {
+              console.log('Parsed as JSON data from Apps Script');
+              console.log('First JSON item keys:', Object.keys(jsonData[0]));
+              console.log('First JSON item:', jsonData[0]);
+              
+              // Validate that we have real bias data structure
+              if (CONFIG.CURRENT_APP === 'bias') {
+                const firstItem = jsonData[0];
+                const hasRealBiasData = firstItem.hasOwnProperty('Bias Score') && 
+                                       firstItem.hasOwnProperty('Confidence') &&
+                                       firstItem.hasOwnProperty('Event Count (30d)') &&
+                                       firstItem.hasOwnProperty('Latest Event');
+                
+                if (!hasRealBiasData) {
+                  console.warn('Apps Script returning incomplete bias data');
+                  throw new Error('Bias Apps Script needs getCurrencyBiasForG8Enhanced function');
                 }
-            } catch (e) {
-                console.log('Not JSON, trying CSV parsing...');
+              }
+              
+              return validateData(jsonData);
             }
-            
-            console.log('Parsing as CSV data');
-            const csvData = parseCSVData(dataText);
-            console.log('First CSV item keys:', csvData.length > 0 ? Object.keys(csvData[0]) : 'No data');
-            console.log('First CSV item:', csvData.length > 0 ? csvData[0] : 'No data');
-            
-            if (CONFIG.CURRENT_APP === 'bias' && csvData.length > 0 && isBiasDataMalformed(csvData[0])) {
-                console.warn('Bias CSV data appears malformed, using demo data');
-                return handleBiasDataIssue();
-            }
-            
-            return validateData(csvData);
+          } catch (e) {
+            console.log('Not JSON, trying CSV parsing...');
+          }
+          
+          // CSV parsing remains the same...
+          console.log('Parsing as CSV data');
+          const csvData = parseCSVData(dataText);
+          return validateData(csvData);
         }
         
         function handleBiasDataIssue() {
@@ -1520,19 +1510,11 @@
         
         // FIXED: Much more permissive bias data validation
         function isBiasDataMalformed(dataItem) {
-            if (!dataItem || typeof dataItem !== 'object') return true;
-            
-            const keys = Object.keys(dataItem);
-            if (keys.length === 0) return true;
-            
-            // Much more permissive - just check for basic currency field
-            const hasCurrency = keys.some(key => 
-                key.toLowerCase().includes('currency') ||
-                key.toLowerCase().includes('cur')
-            );
-            
-            // Don't be too strict about other fields
-            return !hasCurrency;
+          if (!dataItem || typeof dataItem !== 'object') return true;
+          
+          // Check for required real data fields
+          const requiredFields = ['Currency', 'Bias Score', 'Confidence', 'Direction'];
+          return !requiredFields.every(field => dataItem.hasOwnProperty(field));
         }
 
         function validateData(data) {
@@ -1646,108 +1628,7 @@
                 }
             ];
         }
-
-        function getBiasAnalysisDemoData() {
-            return [
-                {
-                    "Currency": "USD",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "Country": "United States",
-                    "Central Bank": "Federal Reserve",
-                    "Interest Rate": "5.25%",
-                    "Previous": "5.50%",
-                    "Trend": "↘️",
-                    "Next Meeting": "Dec 2024",
-                    "Meta-Analysis": "Strong bearish bias (-0.182) with high confidence (74%). Direction stable for 30 days, indicating established trend. Federal Reserve policy stance and global reserve currency status key factors.",
-                    "AI Bias": "BEARISH - Economic surprises consistently disappoint forecasts, weakening momentum. High conviction signal"
-                },
-                {
-                    "Currency": "EUR",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "Country": "Euro Area",
-                    "Central Bank": "European Central Bank",
-                    "Interest Rate": "4.25%",
-                    "Previous": "4.50%",
-                    "Trend": "↘️",
-                    "Next Meeting": "Dec 2024",
-                    "Meta-Analysis": "Weak bullish bias (0.268) with moderate confidence (61%). Recent directional change (6 days), trend developing. ECB monetary policy and eurozone economic cohesion drive sentiment.",
-                    "AI Bias": "NEUTRAL - Economic data in line with expectations. Monitor for confirmation"
-                },
-                {
-                    "Currency": "GBP",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "Country": "United Kingdom",
-                    "Central Bank": "Bank of England",
-                    "Interest Rate": "5.00%",
-                    "Previous": "5.25%",
-                    "Trend": "↘️",
-                    "Next Meeting": "Dec 2024",
-                    "Meta-Analysis": "Moderate bullish bias (0.834) with moderate confidence (64%). Recent directional change (1 days), trend developing. Bank of England decisions and UK economic indicators primary drivers.",
-                    "AI Bias": "NEUTRAL - Economic data in line with expectations. Monitor for confirmation"
-                },
-                {
-                    "Currency": "JPY",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "Country": "Japan",
-                    "Central Bank": "Bank of Japan",
-                    "Interest Rate": "-0.10%",
-                    "Previous": "-0.10%",
-                    "Trend": "→",
-                    "Next Meeting": "Dec 2024",
-                    "Meta-Analysis": "Moderate bearish bias (-0.658) with low confidence (42%). Recent directional change (2 days), trend developing. Bank of Japan ultra-loose policy and intervention risks influence direction.",
-                    "AI Bias": "NEUTRAL - Economic data in line with expectations. Monitor for confirmation"
-                },
-                {
-                    "Currency": "AUD",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "Country": "Australia",
-                    "Central Bank": "Reserve Bank of Australia",
-                    "Interest Rate": "4.35%",
-                    "Previous": "4.10%",
-                    "Trend": "↗️",
-                    "Next Meeting": "Dec 2024",
-                    "Meta-Analysis": "Weak bullish bias (0.475) with high confidence (71%). Direction stable for 30 days, indicating established trend. RBA policy and commodity prices, especially iron ore, affect outlook.",
-                    "AI Bias": "NEUTRAL - Economic data in line with expectations"
-                },
-                {
-                    "Currency": "CAD",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "Country": "Canada",
-                    "Central Bank": "Bank of Canada",
-                    "Interest Rate": "5.00%",
-                    "Previous": "4.75%",
-                    "Trend": "↗️",
-                    "Next Meeting": "Dec 2024",
-                    "Meta-Analysis": "Strong bearish bias (-2.349) with high confidence (78%). Direction stable for 30 days, indicating established trend. Bank of Canada stance and oil prices drive currency sentiment.",
-                    "AI Bias": "BEARISH - Economic surprises consistently disappoint forecasts, weakening momentum. High conviction signal"
-                },
-                {
-                    "Currency": "CHF",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "Country": "Switzerland",
-                    "Central Bank": "Swiss National Bank",
-                    "Interest Rate": "1.75%",
-                    "Previous": "1.75%",
-                    "Trend": "→",
-                    "Next Meeting": "Dec 2024",
-                    "Meta-Analysis": "Moderate bullish bias (2.000) with moderate confidence (52%). Direction stable for 30 days, indicating established trend. SNB stability focus and safe-haven demand key considerations.",
-                    "AI Bias": "BULLISH - Economic surprises consistently exceed forecasts, strengthening momentum"
-                },
-                {
-                    "Currency": "NZD",
-                    "Date": new Date().toISOString().split('T')[0],
-                    "Country": "New Zealand",
-                    "Central Bank": "Reserve Bank of New Zealand",
-                    "Interest Rate": "5.50%",
-                    "Previous": "5.25%",
-                    "Trend": "↗️",
-                    "Next Meeting": "Dec 2024",
-                    "Meta-Analysis": "Strong bullish bias (3.052) with moderate confidence (65%). Direction stable for 30 days, indicating established trend. RBNZ policy and dairy prices influence currency direction.",
-                    "AI Bias": "BULLISH - Economic surprises consistently exceed forecasts, strengthening momentum. High conviction signal"
-                }
-            ];
-        }
-
+        
         // ================ UI RENDERING ================ 
         function renderData() {
             const grid = document.getElementById('currency-grid');
@@ -1839,353 +1720,224 @@
 
         // ================ FIXED BIAS CARD (NO DETAILED ASSESSMENT) ================ 
         function createAdvancedBiasCard(data) {
-            let currency = data['Currency'] || 'N/A';
-            currency = currency.replace(/\s*(EU|GB|US|JP|AU|CA|CH|NZ)\s*$/i, '').trim();
-            currency = currency.replace(/\s*🇪🇺|🇬🇧|🇺🇸|🇯🇵|🇦🇺|🇨🇦|🇨🇭|🇳🇿\s*/g, '').trim();
-            
-            const meta = CURRENCY_META[currency] || { flag: '💱', country: 'Unknown' };
-            const metaAnalysis = data['Meta-Analysis'] || data['AI Meta-Analysis'] || 'Analysis not available';
-            const bias = data['AI Bias'] || 'No analysis available';
-            
-            // FIXED: Extract ALL real data from your Apps Script
-            const biasScore = parseFloat(extractBiasScore(data)) || 0;
-            const confidence = parseFloat(extractConfidence(data)) || 0;
-            const direction = getBiasDirection(biasScore);
-            const stabilityDays = extractStabilityDays(data) || 0;
-            const eventCount = extractEventCount(data) || 0;
-            const latestEvent = extractLatestEvent(data) || 'No recent events';
-            const highestImpactEvent = extractHighestImpactEvent(data) || 'Not available';
-            const correlation = extractCorrelation(data) || 0;
-            const pattern = extractPattern(data) || 'ANALYZING';
-            const weeklyChange = extract7DayChange(data) || 0;
-            const trend = extractTrend(data) || 'STABLE';
+          let currency = data['Currency'] || 'N/A';
+          currency = currency.replace(/\s*(EU|GB|US|JP|AU|CA|CH|NZ)\s*$/i, '').trim();
+          
+          const meta = CURRENCY_META[currency] || { flag: '💱', country: 'Unknown' };
+          const metaAnalysis = data['Meta-Analysis'] || 'Analysis not available';
+          const bias = data['AI Bias'] || 'No analysis available';
+          
+          // Extract ALL real data
+          const biasScore = extractBiasScore(data);
+          const confidence = extractConfidence(data);
+          const direction = getBiasDirection(data);
+          const stabilityDays = extractStabilityDays(data);
+          const eventCount = extractEventCount(data);
+          const latestEvent = extractLatestEvent(data);
+          const highestImpactEvent = extractHighestImpactEvent(data);
+          const correlation = extractCorrelation(data);
+          const pattern = extractPattern(data);
+          const weeklyChange = extract7DayChange(data);
+          const trend = extractTrend(data);
+          
+          // Real correlation analysis
+          const correlationStrength = data['Correlation Strength'] || (Math.abs(correlation) > 0.5 ? 'Strong' : Math.abs(correlation) > 0.3 ? 'Moderate' : 'Weak');
+          const correlationDirection = data['Correlation Direction'] || (correlation > 0 ? 'Positive' : correlation < 0 ? 'Negative' : 'Neutral');
+          
+          const confidenceClass = confidence > 70 ? 'confidence-high' : confidence > 50 ? 'confidence-medium' : 'confidence-low';
+          const biasClass = direction.toLowerCase();
         
-            const confidenceClass = confidence > 70 ? 'confidence-high' : confidence > 50 ? 'confidence-medium' : 'confidence-low';
-            const biasClass = direction.toLowerCase();
-        
-            // Determine correlation strength
-            const correlationStrength = Math.abs(correlation) > 0.5 ? 'Strong' : Math.abs(correlation) > 0.3 ? 'Moderate' : 'Weak';
-            const correlationDirection = correlation > 0 ? 'Positive' : correlation < 0 ? 'Negative' : 'Neutral';
-        
-            return `
-                <div class="bias-card ${biasClass}">
-                    <div class="currency-header">
-                        <div class="currency-info">
-                            <div class="currency-flag">${meta.flag}</div>
-                            <div class="currency-details">
-                                <h3>${currency}</h3>
-                                <div class="currency-country">${meta.country}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="bias-indicator ${biasClass}">
-                            <div class="bias-score ${biasClass}">${biasScore.toFixed(4)}</div>
-                            <div class="bias-label">${direction}</div>
-                        </div>
-                    </div>
-        
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-value ${confidenceClass}">${confidence.toFixed(0)}%</div>
-                            <div class="metric-label">Confidence</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value">${stabilityDays}</div>
-                            <div class="metric-label">Stable Days</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value">${eventCount}</div>
-                            <div class="metric-label">Events (30d)</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value">${Math.abs(correlation).toFixed(3)}</div>
-                            <div class="metric-label">USD Correlation</div>
-                        </div>
-                    </div>
-        
-                    <div class="analysis-section">
-                        <div class="section-header">
-                            <div class="section-title">🎯 Economic Analysis</div>
-                            <div class="section-subtitle">Meta-analysis assessment</div>
-                        </div>
-                        <div style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
-                            ${metaAnalysis}
-                        </div>
-                    </div>
-        
-                    <div class="analysis-section">
-                        <div class="section-title">📊 Market Dynamics</div>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 0.75rem 0;">
-                            <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                                <div style="font-size: 1.1rem; font-weight: 600; color: var(--success);">${trend}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Current Trend</div>
-                            </div>
-                            <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                                <div style="font-size: 1.1rem; font-weight: 600; color: var(--accent);">${pattern}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">vs USD Pattern</div>
-                            </div>
-                            <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                                <div style="font-size: 1.1rem; font-weight: 600; color: ${weeklyChange >= 0 ? 'var(--success)' : 'var(--danger)'};">${weeklyChange > 0 ? '+' : ''}${(weeklyChange * 100).toFixed(2)}%</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">7-Day Change</div>
-                            </div>
-                            <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                                <div style="font-size: 1.1rem; font-weight: 600; color: var(--warning);">${correlationStrength}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">${correlationDirection} Corr</div>
-                            </div>
-                        </div>
-                    </div>
-        
-                    <div class="analysis-section">
-                        <div class="section-title">📈 Recent Events</div>
-                        <div style="background: rgba(26, 26, 46, 0.5); border-radius: 8px; padding: 1rem; border: 1px solid var(--border);">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Latest Event:</span>
-                                <span style="font-size: 0.9rem; font-weight: 600;">${latestEvent}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Highest Impact:</span>
-                                <span style="font-size: 0.9rem; font-weight: 600;">${highestImpactEvent}</span>
-                            </div>
-                        </div>
-                    </div>
+          return `
+            <div class="bias-card ${biasClass}">
+              <div class="currency-header">
+                <div class="currency-info">
+                  <div class="currency-flag">${meta.flag}</div>
+                  <div class="currency-details">
+                    <h3>${currency}</h3>
+                    <div class="currency-country">${meta.country}</div>
+                  </div>
                 </div>
-            `;
+                
+                <div class="bias-indicator ${biasClass}">
+                  <div class="bias-score ${biasClass}">${biasScore.toFixed(4)}</div>
+                  <div class="bias-label">${direction}</div>
+                </div>
+              </div>
+        
+              <div class="metrics-grid">
+                <div class="metric-card">
+                  <div class="metric-value ${confidenceClass}">${confidence.toFixed(0)}%</div>
+                  <div class="metric-label">Confidence</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-value">${stabilityDays}</div>
+                  <div class="metric-label">Stable Days</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-value">${eventCount}</div>
+                  <div class="metric-label">Events (30d)</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-value">${Math.abs(correlation).toFixed(3)}</div>
+                  <div class="metric-label">USD Correlation</div>
+                </div>
+              </div>
+        
+              <div class="analysis-section">
+                <div class="section-header">
+                  <div class="section-title">🎯 Economic Analysis</div>
+                  <div class="section-subtitle">Meta-analysis assessment</div>
+                </div>
+                <div style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
+                  ${metaAnalysis}
+                </div>
+              </div>
+        
+              <div class="analysis-section">
+                <div class="section-title">📊 Market Dynamics</div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 0.75rem 0;">
+                  <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: var(--success);">${trend}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Current Trend</div>
+                  </div>
+                  <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: var(--accent);">${pattern}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">vs USD Pattern</div>
+                  </div>
+                  <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: ${weeklyChange >= 0 ? 'var(--success)' : 'var(--danger)'};">${weeklyChange > 0 ? '+' : ''}${(weeklyChange * 100).toFixed(2)}%</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">7-Day Change</div>
+                  </div>
+                  <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: var(--warning);">${correlationStrength}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${correlationDirection} Corr</div>
+                  </div>
+                </div>
+              </div>
+        
+              <div class="analysis-section">
+                <div class="section-title">📈 Recent Events</div>
+                <div style="background: rgba(26, 26, 46, 0.5); border-radius: 8px; padding: 1rem; border: 1px solid var(--border);">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">Latest Event:</span>
+                    <span style="font-size: 0.9rem; font-weight: 600;">${latestEvent}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">Highest Impact:</span>
+                    <span style="font-size: 0.9rem; font-weight: 600;">${highestImpactEvent}</span>
+                  </div>
+                </div>
+              </div>
+        
+              <div class="analysis-section">
+                <div class="section-title">🏦 Central Bank Info</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.75rem 0;">
+                  <div style="text-align: center; padding: 0.5rem; background: rgba(15, 76, 117, 0.1); border-radius: 6px;">
+                    <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">${data['Interest Rate'] || 'N/A'}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary);">Current Rate</div>
+                  </div>
+                  <div style="text-align: center; padding: 0.5rem; background: rgba(15, 76, 117, 0.1); border-radius: 6px;">
+                    <div style="font-size: 1rem; font-weight: 600; color: var(--text-secondary);">${data['Previous'] || 'N/A'}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary);">Previous</div>
+                  </div>
+                  <div style="text-align: center; padding: 0.5rem; background: rgba(15, 76, 117, 0.1); border-radius: 6px;">
+                    <div style="font-size: 1rem; font-weight: 600; color: var(--accent);">${data['Next Meeting'] || 'TBD'}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary);">Next Meeting</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
         }
 
         // ================ FIXED DATA EXTRACTION FUNCTIONS ================ 
         function extractBiasScore(data) {
-            const metaText = data['Meta-Analysis'] || '';
-            const match = metaText.match(/bias \(([+-]?\d*\.?\d+)\)/i);
-            if (match) {
-                return parseFloat(match[1]);
-            }
-            
-            if (data['Bias Score']) {
-                return parseFloat(data['Bias Score']);
-            }
-            
-            return 0;
+          if (data['Bias Score'] !== undefined) {
+            return parseFloat(data['Bias Score']);
+          }
+          return 0;
         }
         
         function extractConfidence(data) {
-            const metaText = data['Meta-Analysis'] || '';
-            const match = metaText.match(/confidence \((\d+)%\)/i);
-            if (match) {
-                return parseFloat(match[1]);
-            }
-            
-            if (data['Confidence']) {
-                const conf = parseFloat(data['Confidence']);
-                return conf > 1 ? conf : conf * 100; // Handle both 0.74 and 74 formats
-            }
-            
-            return 0;
+          if (data['Confidence Percentage'] !== undefined) {
+            return parseFloat(data['Confidence Percentage']);
+          }
+          if (data['Confidence'] !== undefined) {
+            const conf = parseFloat(data['Confidence']);
+            return conf > 1 ? conf : conf * 100;
+          }
+          return 50;
         }
         
         function extractStabilityDays(data) {
-            const metaText = data['Meta-Analysis'] || '';
-            
-            // Look for "stable for X days"
-            let match = metaText.match(/stable for (\d+) days/i);
-            if (match) {
-                return parseInt(match[1]);
-            }
-            
-            // Look for "directional change (X days)"
-            match = metaText.match(/directional change \((\d+) days?\)/i);
-            if (match) {
-                return parseInt(match[1]);
-            }
-            
-            // Look for "Recent directional change (X days)"
-            match = metaText.match(/Recent directional change \((\d+) days?\)/i);
-            if (match) {
-                return parseInt(match[1]);
-            }
-            
-            return parseInt(data['Stability Days'] || 0);
+          if (data['Stability Days'] !== undefined) {
+            return parseInt(data['Stability Days']);
+          }
+          return 0;
         }
-
-        // MISSING FUNCTION: Bias Direction Classification
-        function getBiasDirection(score) {
-            if (score > 0.15) return 'BULLISH';
-            if (score < -0.15) return 'BEARISH';
-            return 'NEUTRAL';
+        
+        function getBiasDirection(data) {
+          if (data['Direction']) {
+            return data['Direction'];
+          }
+          const score = extractBiasScore(data);
+          if (score > 0.15) return 'BULLISH';
+          if (score < -0.15) return 'BEARISH';
+          return 'NEUTRAL';
         }
-
+        
         function extractEventCount(data) {
-            if (data['Recent Events (30d)']) {
-                return parseInt(data['Recent Events (30d)']);
-            }
-            
-            // Use real data from Reports sheet
-            const currency = (data['Currency'] || '').trim();
-            const totalEvents = 1719;
-            const currencies = 8;
-            const avgPerCurrency = Math.floor(totalEvents / currencies);
-            
-            // Distribute based on currency activity (USD gets more)
-            const eventDistribution = {
-                'USD': Math.floor(avgPerCurrency * 1.3),
-                'EUR': Math.floor(avgPerCurrency * 1.1), 
-                'GBP': Math.floor(avgPerCurrency * 1.0),
-                'JPY': Math.floor(avgPerCurrency * 0.8),
-                'AUD': Math.floor(avgPerCurrency * 0.9),
-                'CAD': Math.floor(avgPerCurrency * 0.8),
-                'CHF': Math.floor(avgPerCurrency * 0.7),
-                'NZD': Math.floor(avgPerCurrency * 0.8)
-            };
-            
-            return eventDistribution[currency] || avgPerCurrency;
+          if (data['Event Count (30d)'] !== undefined) {
+            return parseInt(data['Event Count (30d)']);
+          }
+          return 0;
         }
         
         function extractLatestEvent(data) {
-            if (data['Latest Event']) {
-                return data['Latest Event'];
-            }
-            
-            // Currency-specific recent events
-            const currency = data['Currency'] || '';
-            const events = {
-                'USD': 'Fed Minutes Release',
-                'EUR': 'ECB Policy Decision', 
-                'GBP': 'BoE Rate Decision',
-                'JPY': 'BoJ Policy Update',
-                'AUD': 'RBA Minutes',
-                'CAD': 'BoC Statement',
-                'CHF': 'SNB Assessment',
-                'NZD': 'RBNZ Decision'
-            };
-            
-            return events[currency] || 'Economic Data Release';
+          if (data['Latest Event']) {
+            return data['Latest Event'];
+          }
+          return 'No recent events';
         }
         
         function extractHighestImpactEvent(data) {
-            if (data['Highest Impact Event']) {
-                return data['Highest Impact Event'];
-            }
-            
-            // Currency-specific high impact events
-            const currency = data['Currency'] || '';
-            const highImpactEvents = {
-                'USD': 'NFP Employment Report',
-                'EUR': 'ECB Press Conference',
-                'GBP': 'UK GDP Release',
-                'JPY': 'BoJ Governor Speech',
-                'AUD': 'RBA Governor Speech',
-                'CAD': 'Bank of Canada Decision',
-                'CHF': 'SNB Intervention',
-                'NZD': 'RBNZ Policy Review'
-            };
-            
-            return highImpactEvents[currency] || 'Central Bank Decision';
+          if (data['Highest Impact Event']) {
+            return data['Highest Impact Event'];
+          }
+          return 'No high impact events';
         }
         
         function extractCorrelation(data) {
-            const currency = (data['Currency'] || '').trim();
-            
-            // Real correlations from your Reports sheet correlation matrix
-            const realCorrelations = {
-                'USD': 1.00,
-                'EUR': -0.35,  // Not 0.342
-                'GBP': -0.19,  // Not 0.285  
-                'JPY': -0.44,  // Not 0.167
-                'AUD': 0.15,   // Matches your current
-                'CAD': 0.03,   // Not 0.089
-                'CHF': 0.17,   // Not 0.234
-                'NZD': -0.03   // Not -0.156
-            };
-            
-            return realCorrelations[currency] || 0;
+          if (data['USD Correlation'] !== undefined) {
+            return parseFloat(data['USD Correlation']);
+          }
+          return 0;
         }
-
         function extract7DayChange(data) {
-            if (data['7d Change']) {
-                return parseFloat(data['7d Change']);
-            }
-            
-            if (data['Weekly Change']) {
-                return parseFloat(data['Weekly Change']);
-            }
-            
-            // Calculate based on bias score (more realistic)
-            const biasScore = extractBiasScore(data);
-            const confidence = extractConfidence(data);
-            
-            // Convert bias to realistic weekly change
-            return (biasScore * confidence / 100) * 0.02; // Scale factor for weekly change
+          if (data['Weekly Change Percentage'] !== undefined) {
+            return parseFloat(data['Weekly Change Percentage']) / 100;
+          }
+          if (data['7d Change'] !== undefined) {
+            return parseFloat(data['7d Change']);
+          }
+          return 0;
         }
-
+        
         function extractTrend(data) {
-            if (data['Trend']) {
-                return data['Trend'];
-            }
-            
-            // Derive from 7-day change
-            const change = extract7DayChange(data);
-            if (change > 0.01) return 'STRENGTHENING';
-            if (change < -0.01) return 'WEAKENING';
-            return 'STABLE';
+          if (data['Trend Direction']) {
+            return data['Trend Direction'];
+          }
+          const change = extract7DayChange(data);
+          if (change > 0.01) return 'STRENGTHENING';
+          if (change < -0.01) return 'WEAKENING';
+          return 'STABLE';
         }
-
+        
         function extractPattern(data) {
-            // First check for direct pattern field
-            if (data['Pattern vs USD']) {
-                return data['Pattern vs USD'];
-            }
-            
-            if (data['Pattern Type']) {
-                return data['Pattern Type'];
-            }
-            
-            // Extract from Pattern Recognition Engine based on currency
-            const currency = (data['Currency'] || '').trim();
-            
-            // Real patterns from your Pattern Recognition Engine sheet
-            const patternEngine = {
-                'USD': 'BASELINE',           // USD is the base currency
-                'EUR': 'CONVERGENCE',        // USD/EUR: CONVERGENCE from your sheet
-                'GBP': 'MEAN_REVERSION',     // USD/GBP: MEAN_REVERSION from your sheet  
-                'JPY': 'TREND_FOLLOWING',    // USD/JPY: TREND_FOLLOWING from your sheet
-                'AUD': 'COMMODITY_LINKED',   // AUD typically follows commodities
-                'CAD': 'OIL_CORRELATION',    // CAD correlated with oil prices
-                'CHF': 'SAFE_HAVEN',         // CHF is safe-haven currency
-                'NZD': 'RISK_SENTIMENT'      // NZD follows risk appetite
-            };
-            
-            // If we have a pattern from your engine, use it
-            if (patternEngine[currency]) {
-                return patternEngine[currency];
-            }
-            
-            // Fallback: Derive pattern from bias score and correlation
-            const biasScore = extractBiasScore(data);
-            const correlation = extractCorrelation(data);
-            const confidence = extractConfidence(data);
-            
-            // High confidence patterns
-            if (confidence > 70) {
-                if (Math.abs(biasScore) > 0.2) {
-                    // Strong bias with high confidence
-                    return correlation > 0.3 ? 'STRONG_CORRELATION' : 
-                           correlation < -0.3 ? 'STRONG_DIVERGENCE' : 'TREND_CONTINUATION';
-                }
-            }
-            
-            // Medium confidence patterns  
-            if (confidence > 50) {
-                if (Math.abs(biasScore) > 0.1) {
-                    return Math.abs(correlation) > 0.2 ? 'MODERATE_TREND' : 'RANGE_BOUND';
-                }
-            }
-            
-            // Low confidence or neutral bias
-            if (Math.abs(correlation) > 0.3) {
-                return correlation > 0 ? 'WEAK_CORRELATION' : 'WEAK_DIVERGENCE';
-            }
-            
-            // Default fallback
-            return 'CONSOLIDATION';
+          if (data['Pattern vs USD']) {
+            return data['Pattern vs USD'];
+          }
+          return 'ANALYZING';
         }
 
         // ================ CONNECTION TESTING ================ 
@@ -2497,6 +2249,7 @@ Ready for deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
