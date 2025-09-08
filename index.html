@@ -1512,9 +1512,11 @@
         function isBiasDataMalformed(dataItem) {
           if (!dataItem || typeof dataItem !== 'object') return true;
           
-          // Check for required real data fields
-          const requiredFields = ['Currency', 'Bias Score', 'Confidence', 'Direction'];
-          return !requiredFields.every(field => dataItem.hasOwnProperty(field));
+          // Just check for the fields your Apps Script actually returns
+          const hasBasicFields = dataItem.hasOwnProperty('Currency') && 
+                                dataItem.hasOwnProperty('Meta-Analysis');
+          
+          return !hasBasicFields;
         }
 
         function validateData(data) {
@@ -2249,6 +2251,7 @@ Ready for deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
