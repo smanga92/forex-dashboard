@@ -1957,11 +1957,10 @@
 
         // ================ FIXED DATA EXTRACTION FUNCTIONS ================ 
         function extractBiasScore(data) {
-            // Your demo data shows the bias score is embedded in Meta-Analysis text
             const metaText = data['Meta-Analysis'] || '';
             const match = metaText.match(/bias \(([+-]?\d*\.?\d+)\)/i);
             if (match) {
-                return parseFloat(match[1]) || 0;
+                return parseFloat(match[1]); // Don't multiply or divide
             }
             return parseFloat(data['Bias Score'] || 0);
         }
@@ -1977,12 +1976,20 @@
         }
         
         function extractStabilityDays(data) {
-            // Extract stability days from Meta-Analysis
             const metaText = data['Meta-Analysis'] || '';
-            const match = metaText.match(/stable for (\d+) days/i);
+            
+            // Look for "stable for X days"
+            let match = metaText.match(/stable for (\d+) days/i);
             if (match) {
-                return parseInt(match[1]) || 0;
+                return parseInt(match[1]);
             }
+            
+            // Look for "directional change (X days)"
+            match = metaText.match(/directional change \((\d+) days?\)/i);
+            if (match) {
+                return parseInt(match[1]);
+            }
+            
             return parseInt(data['Stability Days'] || 0);
         }
 
@@ -2007,14 +2014,6 @@
             return parseFloat(data['USD Correlation'] || 0.15); // Small default for display
         }
 
-        function extract7DayChange(data) {
-            // Parse from AI Bias field for direction hints
-            const bias = data['AI Bias'] || '';
-            if (bias.includes('strengthening')) return 0.05;
-            if (bias.includes('weakening')) return -0.05;
-            return parseFloat(data['7d Change'] || 0);
-        }
-        
         function extractTrend(data) {
             return data['Trend'] || 'STABLE';
         }
@@ -2368,3 +2367,4 @@ Ready for deployment! 🚀
     </script>
 </body>
 </html>
+
