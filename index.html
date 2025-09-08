@@ -1512,13 +1512,16 @@
         function isBiasDataMalformed(dataItem) {
           if (!dataItem || typeof dataItem !== 'object') return true;
           
-          // Just check for the fields your Apps Script actually returns
+          // Just check for basic fields that exist
           const hasBasicFields = dataItem.hasOwnProperty('Currency') && 
                                 dataItem.hasOwnProperty('Meta-Analysis');
           
           return !hasBasicFields;
         }
-
+        
+        function getBiasAnalysisDemoData() {
+          return []; // Return empty array to avoid undefined error
+        }
         function validateData(data) {
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('No valid data found');
@@ -2251,6 +2254,7 @@ Ready for deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
