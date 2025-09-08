@@ -1049,6 +1049,7 @@
     
     <script>
         // Enhanced Configuration for Multi-Dashboard Support
+        // ================ CONFIGURATION UPDATES ================ 
         let CONFIG = {
             // Forex Analysis URLs
             FOREX_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby9EfAuvKyL-gFE2gi8c-0EfaWetoKdsC53gcT76oOmQEpQO71je055gAOAEg-IBY3_LQ/exec',
@@ -1061,8 +1062,8 @@
             // Current app state
             CURRENT_APP: 'forex', // 'forex' or 'bias'
             
-            // Runtime configuration
-            REFRESH_INTERVAL: 60 * 60 * 1000, // 1 hour
+            // Runtime configuration - REDUCED REFRESH INTERVALS
+            REFRESH_INTERVAL: 5 * 60 * 1000, // Changed from 1 hour to 5 minutes for both dashboards
             RETRY_ATTEMPTS: 3,
             RETRY_DELAY: 2000,
             USE_DEMO: false,
@@ -1893,6 +1894,7 @@
         }
 
         // ================ ENHANCED BIAS CARD CREATION ================ 
+        // ================ FIXED BIAS CARD CREATION ================ 
         function createAdvancedBiasCard(data) {
             let currency = data['Currency'] || 'N/A';
             currency = currency.replace(/\s*(EU|GB|US|JP|AU|CA|CH|NZ)\s*$/i, '').trim();
@@ -1910,13 +1912,13 @@
             const eventCount = extractEventCount(data) || 0;
             const latestEvent = extractLatestEvent(data) || 'No recent events';
             const correlation = extractCorrelation(data) || 0;
-
+        
             const confidenceClass = confidence > 70 ? 'confidence-high' : confidence > 50 ? 'confidence-medium' : 'confidence-low';
             const biasClass = direction.toLowerCase();
-
+        
             const safeBias = cleanTextForModal(bias);
             const safeMetaAnalysis = cleanTextForModal(metaAnalysis);
-
+        
             return `
                 <div class="bias-card ${biasClass}">
                     <div class="currency-header">
@@ -1929,11 +1931,11 @@
                         </div>
                         
                         <div class="bias-indicator ${biasClass}">
-                            <div class="bias-score ${biasClass}">${biasScore.toFixed(3)}</div>
+                            <div class="bias-score ${biasClass}">${biasScore.toFixed(4)}</div>
                             <div class="bias-label">${direction}</div>
                         </div>
                     </div>
-
+        
                     <div class="metrics-grid">
                         <div class="metric-card">
                             <div class="metric-value ${confidenceClass}">${confidence.toFixed(0)}%</div>
@@ -1952,7 +1954,7 @@
                             <div class="metric-label">USD Correlation</div>
                         </div>
                     </div>
-
+        
                     <div class="analysis-section">
                         <div class="section-header">
                             <div class="section-title">🎯 Economic Analysis</div>
@@ -1962,7 +1964,7 @@
                             ${metaAnalysis}
                         </div>
                     </div>
-
+        
                     <div class="analysis-section">
                         <div class="section-title">📊 Recent Activity</div>
                         <div style="display: flex; justify-content: space-between; margin: 0.75rem 0;">
@@ -1980,7 +1982,7 @@
                             </div>
                         </div>
                     </div>
-
+        
                     <div class="expandable-content" data-currency="${currency}">
                         <div class="expand-header">
                             <span>🤖 AI Assessment</span>
@@ -1989,7 +1991,7 @@
                         <div class="expanded-details">
                             <p><strong>AI Analysis:</strong> ${bias}</p>
                             <p><strong>Latest Event:</strong> ${latestEvent}</p>
-                            <p><strong>Bias Strength:</strong> ${Math.abs(biasScore * 100).toFixed(1)}% ${direction.toLowerCase()}</p>
+                            <p><strong>Raw Bias Score:</strong> ${biasScore.toFixed(4)} (${direction.toLowerCase()})</p>
                         </div>
                     </div>
                 </div>
@@ -2380,3 +2382,4 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
