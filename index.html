@@ -1168,9 +1168,9 @@
             <button class="mini-toggle-btn active" onclick="switchApp('forex')" id="miniForexBtn" aria-label="Switch to Forex Analysis dashboard">
                 📈 Forex
             </button>
-            <button class="mini-toggle-btn" onclick="switchApp('g8')" id="miniG8Btn" aria-label="Switch to G8 Fundamentals dashboard">
-                🌍 G8
-            </button>
+            <button class="mini-toggle-btn" onclick="switchApp('bias')" id="miniBiasBtn" aria-label="Switch to Currency Bias dashboard">
+            📊 Bias
+        </button>
         </div>
         
         <div class="header-caret" aria-hidden="true">▼</div>
@@ -1231,17 +1231,18 @@
             </div>
 
             <!-- G8 Fundamentals Configuration -->
+            <!-- Currency Bias Configuration (replace the G8 section) -->
             <div class="config-group">
-                <div class="config-group-title">🌍 G8 Fundamentals Dashboard</div>
+                <div class="config-group-title">📊 Currency Bias Analysis Dashboard</div>
                 <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
-                    Google Apps Script Web App URL (Recommended):
+                    Currency Bias Apps Script Web App URL:
                 </label>
-                <input type="url" class="config-input" id="g8AppsScriptUrl" placeholder="https://script.google.com/macros/s/YOUR_G8_SCRIPT_ID/exec">
+                <input type="url" class="config-input" id="biasAppsScriptUrl" placeholder="https://script.google.com/macros/s/YOUR_BIAS_SCRIPT_ID/exec">
                 
                 <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
                     Or CSV Export URL (Fallback):
                 </label>
-                <input type="url" class="config-input" id="g8CsvUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_G8_SHEET_ID/export?format=csv&gid=0">
+                <input type="url" class="config-input" id="biasCsvUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_BIAS_SHEET_ID/export?format=csv&gid=0">
             </div>
             
             <div class="config-buttons">
@@ -1522,7 +1523,7 @@
                 startAutoRefresh();
             } else {
                 setTimeout(() => {
-                    if (!CONFIG.FOREX_APPS_SCRIPT_URL && !CONFIG.G8_APPS_SCRIPT_URL && !CONFIG.USE_DEMO) {
+                    if (!CONFIG.FOREX_APPS_SCRIPT_URL && !CONFIG.BIAS_APPS_SCRIPT_URL && !CONFIG.USE_DEMO) { // CHANGED from G8_APPS_SCRIPT_URL
                         toggleConfig();
                         showNotification('Setup Required', 'Please configure your data sources to get started');
                     }
@@ -1712,10 +1713,10 @@
             } catch (error) {
                 console.error('Error loading data:', error);
                 
-                // For G8 data issues, fall back to demo immediately
-                if (CONFIG.CURRENT_APP === 'g8' && retryCount === 0) {
-                    console.log('G8 data issue detected, using demo data...');
-                    showError(`G8 data source issue detected. Using demo data. Configure proper G8 sheet structure.`);
+                // For Currency Bias data issues, fall back to demo immediately
+                if (CONFIG.CURRENT_APP === 'bias' && retryCount === 0) {
+                    console.log('Bias data issue detected, using demo data...');
+                    showError(`Bias data source issue detected. Using demo data. Configure proper Currency Bias sheet structure.`);
                     allData = getDemoData();
                     filteredData = [...allData];
                     renderData();
@@ -2411,13 +2412,12 @@
         
             showNotification('Testing Connections...', 'Checking data sources and analyzing structure');
             
-            // Test current app's data source
             await testDataSource();
             
             const forexConfigured = CONFIG.FOREX_APPS_SCRIPT_URL || CONFIG.FOREX_CSV_URL;
-            const g8Configured = CONFIG.G8_APPS_SCRIPT_URL || CONFIG.G8_CSV_URL;
+            const biasConfigured = CONFIG.BIAS_APPS_SCRIPT_URL || CONFIG.BIAS_CSV_URL; // CHANGED from g8Configured
         
-            if (!forexConfigured && !g8Configured) {
+            if (!forexConfigured && !biasConfigured) { // CHANGED from g8Configured
                 showNotification('No Configuration', 'Please configure data source URLs first');
                 toggleConfig();
                 return;
@@ -2444,22 +2444,22 @@
                 }
             }
         
-            // Test G8 dashboard
-            if (g8Configured) {
+            // Test Bias dashboard (CHANGED from G8)
+            if (biasConfigured) { // CHANGED from g8Configured
                 try {
                     const originalApp = CONFIG.CURRENT_APP;
-                    CONFIG.CURRENT_APP = 'g8';
-                    const g8Data = await fetchDataFromSheets();
-                    const parsedG8Data = parseData(g8Data);
+                    CONFIG.CURRENT_APP = 'bias'; // CHANGED from 'g8'
+                    const biasData = await fetchDataFromSheets(); // CHANGED from g8Data
+                    const parsedBiasData = parseData(biasData); // CHANGED from parsedG8Data
                     CONFIG.CURRENT_APP = originalApp;
                     
-                    if (parsedG8Data && parsedG8Data.length > 0) {
-                        results.push(`G8 Dashboard: ✅ Found ${parsedG8Data.length} items`);
+                    if (parsedBiasData && parsedBiasData.length > 0) { // CHANGED
+                        results.push(`Bias Dashboard: ✅ Found ${parsedBiasData.length} items`); // CHANGED
                     } else {
-                        results.push('G8 Dashboard: ⚠️ Connected but no data found');
+                        results.push('Bias Dashboard: ⚠️ Connected but no data found'); // CHANGED
                     }
                 } catch (error) {
-                    results.push(`G8 Dashboard: ❌ ${error.message}`);
+                    results.push(`Bias Dashboard: ❌ ${error.message}`); // CHANGED
                 }
             }
         
@@ -2716,6 +2716,7 @@ Ready to test the new mini-header system!
     </script>
 </body>
 </html>
+
 
 
 
