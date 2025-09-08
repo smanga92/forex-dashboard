@@ -1291,12 +1291,12 @@
             FOREX_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby9EfAuvKyL-gFE2gi8c-0EfaWetoKdsC53gcT76oOmQEpQO71je055gAOAEg-IBY3_LQ/exec',
             FOREX_CSV_URL: '',
             
-            // G8 Fundamentals URLs  
-            G8_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/1mvYRgzIxTc4l6LDg409P6_b6BrdrbBjFr1dn5amyJM4/exec',
-            G8_CSV_URL: '',
+            // Currency Bias URLs (replaces G8)
+            BIAS_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/YOUR_CURRENCY_BIAS_SCRIPT_ID/exec',
+            BIAS_CSV_URL: '',
             
             // Current app state
-            CURRENT_APP: 'forex', // 'forex' or 'g8'
+            CURRENT_APP: 'forex', // 'forex' or 'bias'
             
             // Runtime configuration
             REFRESH_INTERVAL: 60 * 60 * 1000, // 1 hour
@@ -1445,10 +1445,10 @@
             
             // Update button states only in mini-header
             document.getElementById('miniForexBtn').classList.toggle('active', appType === 'forex');
-            document.getElementById('miniG8Btn').classList.toggle('active', appType === 'g8');
-
+            document.getElementById('miniBiasBtn').classList.toggle('active', appType === 'bias');
+        
             // Update page title only in mini-header
-            const title = appType === 'forex' ? 'Multi-Dashboard Forex Analysis' : 'G8 Fundamentals Analysis';
+            const title = appType === 'forex' ? 'Multi-Dashboard Forex Analysis' : 'Currency Bias Analysis';
             document.querySelector('.mini-logo').innerHTML = `📊 ${title}`;
             
             // Clear current data and load new
@@ -1462,8 +1462,9 @@
             loadData();
             
             // Show notification
-            showNotification(`Switched to ${appType === 'forex' ? 'Forex Analysis' : 'G8 Fundamentals'}`, 'Loading data for selected dashboard...');
+            showNotification(`Switched to ${appType === 'forex' ? 'Forex Analysis' : 'Currency Bias Analysis'}`, 'Loading data for selected dashboard...');
         }
+        
         function updateFiltersForApp(appType) {
             const pairFilter = document.getElementById('pairFilter');
             const biasFilter = document.getElementById('biasFilter');
@@ -1481,8 +1482,8 @@
                 biasFilter.setAttribute('aria-label', 'Filter by trading bias');
                 biasFilter.setAttribute('title', 'Select trading bias to filter');
             } else {
-                pairFilter.placeholder = 'Filter by currency or country...';
-                pairFilter.setAttribute('aria-label', 'Filter by currency or country');
+                pairFilter.placeholder = 'Filter by currency...';
+                pairFilter.setAttribute('aria-label', 'Filter by currency');
                 
                 biasFilter.innerHTML = `
                     <option value="">All Biases</option>
@@ -1490,8 +1491,8 @@
                     <option value="BEARISH">Bearish Only</option>
                     <option value="NEUTRAL">Neutral Only</option>
                 `;
-                biasFilter.setAttribute('aria-label', 'Filter by market bias');
-                biasFilter.setAttribute('title', 'Select market bias to filter');
+                biasFilter.setAttribute('aria-label', 'Filter by currency bias');
+                biasFilter.setAttribute('title', 'Select currency bias to filter');
             }
         }
 
@@ -1534,7 +1535,7 @@
             // Check URL parameters first
             const urlParams = new URLSearchParams(window.location.search);
             const forexScript = urlParams.get('forex_script');
-            const g8Script = urlParams.get('g8_script');
+            const biasScript = urlParams.get('bias_script');
             const demo = urlParams.get('demo');
             const app = urlParams.get('app');
             
@@ -1545,10 +1546,10 @@
                 return true;
             }
             
-            if (g8Script) {
-                CONFIG.G8_APPS_SCRIPT_URL = decodeURIComponent(g8Script);
+            if (biasScript) {
+                CONFIG.BIAS_APPS_SCRIPT_URL = decodeURIComponent(biasScript);
                 CONFIG.USE_DEMO = false;
-                console.log('Using G8 Apps Script URL from URL parameter');
+                console.log('Using Bias Apps Script URL from URL parameter');
                 return true;
             }
             
@@ -1571,8 +1572,8 @@
                         const parsed = JSON.parse(savedConfig);
                         CONFIG.FOREX_APPS_SCRIPT_URL = parsed.forexAppsScriptUrl || CONFIG.FOREX_APPS_SCRIPT_URL;
                         CONFIG.FOREX_CSV_URL = parsed.forexCsvUrl || '';
-                        CONFIG.G8_APPS_SCRIPT_URL = parsed.g8AppsScriptUrl || CONFIG.G8_APPS_SCRIPT_URL;
-                        CONFIG.G8_CSV_URL = parsed.g8CsvUrl || '';
+                        CONFIG.BIAS_APPS_SCRIPT_URL = parsed.biasAppsScriptUrl || CONFIG.BIAS_APPS_SCRIPT_URL;
+                        CONFIG.BIAS_CSV_URL = parsed.biasCsvUrl || '';
                         CONFIG.USE_DEMO = parsed.useDemo || false;
                         console.log('Loaded configuration from localStorage');
                         return true;
@@ -1593,8 +1594,8 @@
                 const configToSave = {
                     forexAppsScriptUrl: CONFIG.FOREX_APPS_SCRIPT_URL,
                     forexCsvUrl: CONFIG.FOREX_CSV_URL,
-                    g8AppsScriptUrl: CONFIG.G8_APPS_SCRIPT_URL,
-                    g8CsvUrl: CONFIG.G8_CSV_URL,
+                    biasAppsScriptUrl: CONFIG.BIAS_APPS_SCRIPT_URL,
+                    biasCsvUrl: CONFIG.BIAS_CSV_URL,
                     useDemo: CONFIG.USE_DEMO,
                     savedAt: new Date().toISOString()
                 };
@@ -1604,7 +1605,30 @@
                 console.warn('Failed to save configuration:', e);
             }
         }
-
+        
+        function saveConfig() {
+            const forexAppsScript = document.getElementById('forexAppsScriptUrl').value.trim();
+            const forexCsv = document.getElementById('forexCsvUrl').value.trim();
+            const biasAppsScript = document.getElementById('biasAppsScriptUrl').value.trim();
+            const biasCsv = document.getElementById('biasCsvUrl').value.trim();
+            
+            if (!forexAppsScript && !forexCsv && !biasAppsScript && !biasCsv) {
+                alert('Please provide at least one data source URL for at least one dashboard');
+                return;
+            }
+            
+            CONFIG.FOREX_APPS_SCRIPT_URL = forexAppsScript;
+            CONFIG.FOREX_CSV_URL = forexCsv;
+            CONFIG.BIAS_APPS_SCRIPT_URL = biasAppsScript;
+            CONFIG.BIAS_CSV_URL = biasCsv;
+            CONFIG.USE_DEMO = false;
+            
+            saveConfigToStorage();
+            toggleConfig();
+            showNotification('Configuration Saved', 'Data source URLs have been updated and saved');
+            loadData();
+        }
+        
         function toggleConfig() {
             const panel = document.getElementById('configPanel');
             
@@ -1619,32 +1643,9 @@
                 // Pre-populate with current config
                 document.getElementById('forexAppsScriptUrl').value = CONFIG.FOREX_APPS_SCRIPT_URL;
                 document.getElementById('forexCsvUrl').value = CONFIG.FOREX_CSV_URL;
-                document.getElementById('g8AppsScriptUrl').value = CONFIG.G8_APPS_SCRIPT_URL;
-                document.getElementById('g8CsvUrl').value = CONFIG.G8_CSV_URL;
+                document.getElementById('biasAppsScriptUrl').value = CONFIG.BIAS_APPS_SCRIPT_URL;
+                document.getElementById('biasCsvUrl').value = CONFIG.BIAS_CSV_URL;
             }
-        }
-
-        function saveConfig() {
-            const forexAppsScript = document.getElementById('forexAppsScriptUrl').value.trim();
-            const forexCsv = document.getElementById('forexCsvUrl').value.trim();
-            const g8AppsScript = document.getElementById('g8AppsScriptUrl').value.trim();
-            const g8Csv = document.getElementById('g8CsvUrl').value.trim();
-            
-            if (!forexAppsScript && !forexCsv && !g8AppsScript && !g8Csv) {
-                alert('Please provide at least one data source URL for at least one dashboard');
-                return;
-            }
-            
-            CONFIG.FOREX_APPS_SCRIPT_URL = forexAppsScript;
-            CONFIG.FOREX_CSV_URL = forexCsv;
-            CONFIG.G8_APPS_SCRIPT_URL = g8AppsScript;
-            CONFIG.G8_CSV_URL = g8Csv;
-            CONFIG.USE_DEMO = false;
-            
-            saveConfigToStorage();
-            toggleConfig();
-            showNotification('Configuration Saved', 'Data source URLs have been updated and saved');
-            loadData();
         }
 
         function useDemo() {
@@ -1750,9 +1751,9 @@
             let lastError = null;
             
             // Get URLs based on current app
-            const appsScriptUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_APPS_SCRIPT_URL : CONFIG.G8_APPS_SCRIPT_URL;
-            const csvUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_CSV_URL : CONFIG.G8_CSV_URL;
-
+            const appsScriptUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_APPS_SCRIPT_URL : CONFIG.BIAS_APPS_SCRIPT_URL;
+            const csvUrl = CONFIG.CURRENT_APP === 'forex' ? CONFIG.FOREX_CSV_URL : CONFIG.BIAS_CSV_URL;
+        
             // Try Apps Script first if configured
             if (appsScriptUrl) {
                 try {
@@ -1776,6 +1777,34 @@
                     lastError = error;
                 }
             }
+        
+            // Try CSV with CORS proxy if configured
+            if (csvUrl) {
+                try {
+                    console.log(`Trying ${CONFIG.CURRENT_APP} CSV with CORS proxy...`);
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(csvUrl)}`;
+                    const proxyResponse = await fetch(proxyUrl);
+                    
+                    if (!proxyResponse.ok) {
+                        throw new Error(`CORS proxy returned ${proxyResponse.status}: ${proxyResponse.statusText}`);
+                    }
+                    
+                    const proxyData = await proxyResponse.json();
+                    
+                    if (proxyData.status && proxyData.status.http_code !== 200) {
+                        throw new Error(`Google Sheets returned error: ${proxyData.status.http_code}`);
+                    }
+                    
+                    console.log(`${CONFIG.CURRENT_APP} CSV data fetched successfully via proxy`);
+                    return proxyData.contents;
+                } catch (error) {
+                    console.error(`${CONFIG.CURRENT_APP} CSV fetch failed:`, error);
+                    lastError = error;
+                }
+            }
+        
+            throw new Error(lastError ? lastError.message : 'No data sources configured');
+        }
 
             // Try CSV with CORS proxy if configured
             if (csvUrl) {
@@ -1820,22 +1849,22 @@
                     console.log('First JSON item keys:', Object.keys(jsonData[0]));
                     console.log('First JSON item:', jsonData[0]);
                     
-                    // Special handling for G8 data
-                    if (CONFIG.CURRENT_APP === 'g8') {
-                        if (isG8DataMalformed(jsonData[0])) {
-                            console.warn('G8 data is malformed, using demo data');
-                            return handleG8DataIssue();
+                    // Special handling for Currency Bias data
+                    if (CONFIG.CURRENT_APP === 'bias') {
+                        if (isBiasDataMalformed(jsonData[0])) {
+                            console.warn('Bias data is malformed, using demo data');
+                            return handleBiasDataIssue();
                         }
                         
-                        // If G8 data looks valid, validate it has the right structure
+                        // If Bias data looks valid, validate it has the right structure
                         const firstItem = jsonData[0];
-                        const hasValidG8Structure = firstItem.hasOwnProperty('Currency') || 
-                                                  firstItem.hasOwnProperty('Interest Rate') ||
-                                                  firstItem.hasOwnProperty('Central Bank');
+                        const hasValidBiasStructure = firstItem.hasOwnProperty('Currency') || 
+                                                      firstItem.hasOwnProperty('AI Bias') ||
+                                                      firstItem.hasOwnProperty('Meta-Analysis');
                         
-                        if (!hasValidG8Structure) {
-                            console.warn('G8 data missing expected fields, using demo data');
-                            return handleG8DataIssue();
+                        if (!hasValidBiasStructure) {
+                            console.warn('Bias data missing expected fields, using demo data');
+                            return handleBiasDataIssue();
                         }
                     }
                     
@@ -1851,27 +1880,27 @@
             console.log('First CSV item keys:', csvData.length > 0 ? Object.keys(csvData[0]) : 'No data');
             console.log('First CSV item:', csvData.length > 0 ? csvData[0] : 'No data');
             
-            // Check CSV data for G8 app
-            if (CONFIG.CURRENT_APP === 'g8' && csvData.length > 0 && isG8DataMalformed(csvData[0])) {
-                console.warn('G8 CSV data appears malformed, using demo data');
-                return handleG8DataIssue();
+            // Check CSV data for Bias app
+            if (CONFIG.CURRENT_APP === 'bias' && csvData.length > 0 && isBiasDataMalformed(csvData[0])) {
+                console.warn('Bias CSV data appears malformed, using demo data');
+                return handleBiasDataIssue();
             }
             
             return validateData(csvData);
         }
-
-        function handleG8DataIssue() {
-            console.warn('G8 data source returning configuration instead of data');
+        
+        function handleBiasDataIssue() {
+            console.warn('Bias data source returning configuration instead of data');
             showNotification(
-                'G8 Data Issue', 
-                'G8 sheet needs setup. Using demo data. Check Apps Script deployment.'
+                'Bias Data Issue', 
+                'Bias sheet needs setup. Using demo data. Check Apps Script deployment.'
             );
             
-            // Always use demo data for G8 when malformed
-            return getG8DemoData();
+            // Always use demo data for Bias when malformed
+            return getBiasAnalysisDemoData();
         }
         
-        function isG8DataMalformed(dataItem) {
+        function isBiasDataMalformed(dataItem) {
             const keys = Object.keys(dataItem);
             
             // Check for API key-like fields (long alphanumeric strings)
@@ -1882,21 +1911,18 @@
             // Check for empty field names
             const hasEmptyField = keys.includes('') || keys.includes(null) || keys.includes(undefined);
             
-            // Check for "Fred" field (indicates config data)
-            const hasFredField = keys.includes('Fred');
-            
-            // Check if we have expected G8 fields
-            const hasExpectedG8Fields = keys.some(key => {
+            // Check if we have expected Bias fields
+            const hasExpectedBiasFields = keys.some(key => {
                 const lowerKey = key.toLowerCase();
                 return lowerKey.includes('currency') || 
-                       lowerKey.includes('rate') || 
-                       lowerKey.includes('bank') ||
-                       lowerKey.includes('country') ||
-                       lowerKey.includes('date');
+                       lowerKey.includes('bias') || 
+                       lowerKey.includes('analysis') ||
+                       lowerKey.includes('meta') ||
+                       lowerKey.includes('confidence');
             });
             
-            // Data is malformed if it has config-like fields and no proper G8 fields
-            return (hasAPIKeyField || hasEmptyField || hasFredField) && !hasExpectedG8Fields;
+            // Data is malformed if it has config-like fields and no proper Bias fields
+            return (hasAPIKeyField || hasEmptyField) && !hasExpectedBiasFields;
         }
 
         function validateData(data) {
@@ -1963,7 +1989,7 @@
             if (CONFIG.CURRENT_APP === 'forex') {
                 return getForexDemoData();
             } else {
-                return getG8DemoData();
+                return getBiasAnalysisDemoData();
             }
         }
 
@@ -2011,7 +2037,7 @@
             ];
         }
 
-        function getG8DemoData() {
+        function getBiasAnalysisDemoData() {
             return [
                 {
                     "Currency": "USD",
@@ -2022,40 +2048,44 @@
                     "Previous": "5.50%",
                     "Trend": "↘️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "BULLISH - Fed maintaining restrictive policy, strong yields attracting capital flows globally"
+                    "Meta-Analysis": "Strong bullish bias (0.187) with high confidence (78%). Direction stable for 12 days, indicating established trend. Federal Reserve policy stance and global reserve currency status key factors.",
+                    "AI Bias": "BULLISH - Economic surprises consistently exceed forecasts, strengthening momentum. High conviction signal"
                 },
                 {
                     "Currency": "EUR",
                     "Date": new Date().toISOString().split('T')[0],
-                    "Country": "Euro Area", 
+                    "Country": "Euro Area",
                     "Central Bank": "European Central Bank",
                     "Interest Rate": "4.25%",
                     "Previous": "4.50%",
                     "Trend": "↘️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "NEUTRAL - ECB policy on hold, inflation moderating but growth concerns persist"
+                    "Meta-Analysis": "Moderate bearish bias (-0.143) with moderate confidence (64%). Direction maintained for 8 days, showing consistency. ECB monetary policy and eurozone economic cohesion drive sentiment.",
+                    "AI Bias": "BEARISH - Economic data consistently disappoint forecasts, weakening momentum"
                 },
                 {
                     "Currency": "GBP",
                     "Date": new Date().toISOString().split('T')[0],
                     "Country": "United Kingdom",
-                    "Central Bank": "Bank of England", 
+                    "Central Bank": "Bank of England",
                     "Interest Rate": "5.00%",
                     "Previous": "5.25%",
                     "Trend": "↘️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "BEARISH - BoE dovish pivot likely, inflation falling faster than expected"
+                    "Meta-Analysis": "Strong bearish bias (-0.221) with high confidence (81%). Direction stable for 15 days, indicating established trend. Bank of England decisions and UK economic indicators primary drivers.",
+                    "AI Bias": "BEARISH - Economic surprises consistently disappoint forecasts, weakening momentum. High conviction signal"
                 },
                 {
                     "Currency": "JPY",
                     "Date": new Date().toISOString().split('T')[0],
                     "Country": "Japan",
                     "Central Bank": "Bank of Japan",
-                    "Interest Rate": "-0.10%", 
+                    "Interest Rate": "-0.10%",
                     "Previous": "-0.10%",
                     "Trend": "→",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "NEUTRAL - BoJ ultra-loose policy unchanged, intervention risks limiting downside"
+                    "Meta-Analysis": "Neutral bias (0.034) with moderate confidence (58%). Recent directional change (3 days), trend developing. Bank of Japan ultra-loose policy and intervention risks influence direction.",
+                    "AI Bias": "NEUTRAL - Economic data in line with expectations. Monitor for confirmation"
                 },
                 {
                     "Currency": "AUD",
@@ -2063,10 +2093,11 @@
                     "Country": "Australia",
                     "Central Bank": "Reserve Bank of Australia",
                     "Interest Rate": "4.35%",
-                    "Previous": "4.10%", 
+                    "Previous": "4.10%",
                     "Trend": "↗️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "BULLISH - RBA hawkish stance, commodity strength supporting fundamentals"
+                    "Meta-Analysis": "Moderate bullish bias (0.156) with high confidence (72%). Direction maintained for 9 days, showing consistency. RBA policy and commodity prices, especially iron ore, affect outlook.",
+                    "AI Bias": "BULLISH - Economic surprises consistently exceed forecasts, strengthening momentum"
                 },
                 {
                     "Currency": "CAD",
@@ -2075,9 +2106,10 @@
                     "Central Bank": "Bank of Canada",
                     "Interest Rate": "5.00%",
                     "Previous": "4.75%",
-                    "Trend": "↗️", 
+                    "Trend": "↗️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "NEUTRAL - BoC pausing cycle, oil prices mixed, housing market cooling"
+                    "Meta-Analysis": "Weak bullish bias (0.087) with low confidence (48%). Recent directional change (4 days), trend developing. Bank of Canada stance and oil prices drive currency sentiment.",
+                    "AI Bias": "NEUTRAL - Economic data in line with expectations. Monitor for confirmation"
                 },
                 {
                     "Currency": "CHF",
@@ -2087,8 +2119,9 @@
                     "Interest Rate": "1.75%",
                     "Previous": "1.75%",
                     "Trend": "→",
-                    "Next Meeting": "Dec 2024", 
-                    "AI Bias": "NEUTRAL - SNB maintaining stability focus, safe haven demand balanced"
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Weak bearish bias (-0.092) with moderate confidence (61%). Direction maintained for 6 days, showing consistency. SNB stability focus and safe-haven demand key considerations.",
+                    "AI Bias": "NEUTRAL - Economic data in line with expectations"
                 },
                 {
                     "Currency": "NZD",
@@ -2099,7 +2132,8 @@
                     "Previous": "5.25%",
                     "Trend": "↗️",
                     "Next Meeting": "Dec 2024",
-                    "AI Bias": "BEARISH - RBNZ cutting cycle ahead, dairy prices under pressure"
+                    "Meta-Analysis": "Strong bearish bias (-0.198) with high confidence (76%). Direction stable for 11 days, indicating established trend. RBNZ policy and dairy prices influence currency direction.",
+                    "AI Bias": "BEARISH - Economic surprises consistently disappoint forecasts, weakening momentum. High conviction signal"
                 }
             ];
         }
@@ -2116,7 +2150,7 @@
             if (CONFIG.CURRENT_APP === 'forex') {
                 grid.innerHTML = filteredData.map(item => createForexCard(item)).join('');
             } else {
-                grid.innerHTML = filteredData.map(item => createG8Card(item)).join('');
+                grid.innerHTML = filteredData.map(item => createBiasCard(item)).join('');
             }
         }
 
@@ -2193,7 +2227,7 @@
             `;
         }
 
-        function createG8Card(data) {
+        function createBiasCard(data) {
             // Clean currency name - remove any country codes or extra text
             let currency = data['Currency'] || data['Pair'] || data['Symbol'] || 'N/A';
             
@@ -2327,7 +2361,7 @@
                         (item['Country'] || '').toLowerCase().includes(pairFilter);
                     matchesBias = !biasFilter || 
                         (item['AI Bias'] || '').includes(biasFilter) ||
-                        (item['AI Analysis'] || '').includes(biasFilter);
+                        (item['Meta-Analysis'] || '').includes(biasFilter);
                 }
                 
                 return matchesPair && matchesBias;
@@ -2682,6 +2716,7 @@ Ready to test the new mini-header system!
     </script>
 </body>
 </html>
+
 
 
 
