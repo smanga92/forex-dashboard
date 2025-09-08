@@ -1164,13 +1164,14 @@
         <div class="mini-logo">📊 Multi-Dashboard Forex Analysis</div>
         
         <!-- Duplicated App Toggle for Mini Header -->
+        <!-- Mini Header Toggle Buttons - REPLACE BOTH -->
         <div class="mini-app-toggle">
             <button class="mini-toggle-btn active" onclick="switchApp('forex')" id="miniForexBtn" aria-label="Switch to Forex Analysis dashboard">
                 📈 Forex
             </button>
             <button class="mini-toggle-btn" onclick="switchApp('bias')" id="miniBiasBtn" aria-label="Switch to Currency Bias dashboard">
-            📊 Bias
-        </button>
+                📊 Bias
+            </button>
         </div>
         
         <div class="header-caret" aria-hidden="true">▼</div>
@@ -1230,12 +1231,11 @@
                 <input type="url" class="config-input" id="forexCsvUrl" placeholder="https://docs.google.com/spreadsheets/d/YOUR_FOREX_SHEET_ID/export?format=csv&gid=0">
             </div>
 
-            <!-- G8 Fundamentals Configuration -->
             <!-- Currency Bias Configuration (replace the G8 section) -->
             <div class="config-group">
                 <div class="config-group-title">📊 Currency Bias Analysis Dashboard</div>
                 <label style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
-                    Currency Bias Apps Script Web App URL:
+                    Google Apps Script Web App URL (Recommended):
                 </label>
                 <input type="url" class="config-input" id="biasAppsScriptUrl" placeholder="https://script.google.com/macros/s/YOUR_BIAS_SCRIPT_ID/exec">
                 
@@ -1806,35 +1806,6 @@
         
             throw new Error(lastError ? lastError.message : 'No data sources configured');
         }
-
-            // Try CSV with CORS proxy if configured
-            if (csvUrl) {
-                try {
-                    console.log(`Trying ${CONFIG.CURRENT_APP} CSV with CORS proxy...`);
-                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(csvUrl)}`;
-                    const proxyResponse = await fetch(proxyUrl);
-                    
-                    if (!proxyResponse.ok) {
-                        throw new Error(`CORS proxy returned ${proxyResponse.status}: ${proxyResponse.statusText}`);
-                    }
-                    
-                    const proxyData = await proxyResponse.json();
-                    
-                    if (proxyData.status && proxyData.status.http_code !== 200) {
-                        throw new Error(`Google Sheets returned error: ${proxyData.status.http_code}`);
-                    }
-                    
-                    console.log(`${CONFIG.CURRENT_APP} CSV data fetched successfully via proxy`);
-                    return proxyData.contents;
-                } catch (error) {
-                    console.error(`${CONFIG.CURRENT_APP} CSV fetch failed:`, error);
-                    lastError = error;
-                }
-            }
-
-            throw new Error(lastError ? lastError.message : 'No data sources configured');
-        }
-
         function parseData(dataText) {
             if (!dataText || dataText.trim().length === 0) {
                 throw new Error('Empty response received');
@@ -2716,6 +2687,7 @@ Ready to test the new mini-header system!
     </script>
 </body>
 </html>
+
 
 
 
