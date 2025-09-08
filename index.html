@@ -1459,26 +1459,31 @@
         }
 
         function parseData(dataText) {
-            if (!dataText || dataText.trim().length === 0) {
-                throw new Error('Empty response received');
-            }
+          if (!dataText || dataText.trim().length === 0) {
+            throw new Error('Empty response received');
+          }
         
-            try {
-                const jsonData = JSON.parse(dataText);
-                if (Array.isArray(jsonData) && jsonData.length > 0) {
-                    console.log('Parsed as JSON data from Apps Script');
-                    // REMOVE the bias validation that's causing the problem
-                    return validateData(jsonData);
-                }
-            } catch (e) {
-                console.log('Not JSON, trying CSV parsing...');
+          console.log('Raw data received (first 200 chars):', dataText.substring(0, 200));
+        
+          try {
+            const jsonData = JSON.parse(dataText);
+            if (Array.isArray(jsonData) && jsonData.length > 0) {
+              console.log('Parsed as JSON data from Apps Script');
+              console.log('First JSON item keys:', Object.keys(jsonData[0]));
+              console.log('First JSON item:', jsonData[0]);
+              
+              // REMOVED the problematic validation that was rejecting your good data
+              return validateData(jsonData);
             }
-            
-            // Only try CSV if JSON parsing actually failed
-            const csvData = parseCSVData(dataText);
-            return validateData(csvData);
+          } catch (e) {
+            console.log('Not JSON, trying CSV parsing...');
+          }
+          
+          console.log('Parsing as CSV data');
+          const csvData = parseCSVData(dataText);
+          return validateData(csvData);
         }
-        
+                
         function handleBiasDataIssue() {
             console.warn('Bias data source returning configuration instead of data');
             showNotification(
@@ -2235,6 +2240,7 @@ Ready for deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
