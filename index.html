@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Dashboard Forex Analysis</title>
-    <link rel="manifest" href="#" id="manifest-placeholder">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3049,55 +3049,6 @@
             }
         });
 
-        // ================ PWA SETUP ================ 
-        function setupPWA() {
-            const manifest = {
-                name: "Multi-Dashboard Forex Analysis",
-                short_name: "ForexMulti",
-                description: "Professional forex and currency bias analysis with real-time data integration",
-                start_url: window.location.origin + "/",
-                scope: window.location.origin + "/",
-                display: "standalone",
-                orientation: "portrait-primary",
-                background_color: "#1a1a2e",
-                theme_color: "#1a1a2e",
-                categories: ["finance", "business", "productivity"],
-                lang: "en",
-                icons: [
-                    {
-                        src: "https://via.placeholder.com/144x144/00ff88/1a1a2e?text=F",
-                        sizes: "144x144",
-                        type: "image/png"
-                    },
-                    {
-                        src: "https://via.placeholder.com/192x192/00ff88/1a1a2e?text=F", 
-                        sizes: "192x192",
-                        type: "image/png"
-                    },
-                    {
-                        src: "https://via.placeholder.com/512x512/00ff88/1a1a2e?text=F",
-                        sizes: "512x512",
-                        type: "image/png",
-                        purpose: "any maskable"
-                    }
-                ]
-            };
-        
-            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(blob);
-            document.getElementById('manifest-placeholder').href = manifestURL;
-        
-            // Register service worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered successfully:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            }
-        }
         console.log(`
 🚀 COMPLETE MULTI-DASHBOARD FOREX ANALYSIS SYSTEM READY
 ======================================================
@@ -3129,6 +3080,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
