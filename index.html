@@ -2774,40 +2774,7 @@
             const manifestURL = URL.createObjectURL(blob);
             document.getElementById('manifest-placeholder').href = manifestURL;
         }
-
-        function switchApp(app) {
-        const forexBtn = document.getElementById('miniForexBtn');
-        const biasBtn = document.getElementById('miniBiasBtn');
-        if (app === 'forex') {
-            forexBtn.classList.add('active');
-            biasBtn.classList.remove('active');
-            // Show forex dashboard, hide bias dashboard
-            // document.getElementById('forexDashboard').style.display = 'block';
-            // document.getElementById('biasDashboard').style.display = 'none';
-        } else {
-            forexBtn.classList.remove('active');
-            biasBtn.classList.add('active');
-            // Show bias dashboard, hide forex dashboard
-            // document.getElementById('forexDashboard').style.display = 'none';
-            // document.getElementById('biasDashboard').style.display = 'block';
-        }
-    }
-
-    // Dummy testConnection function
-    function testConnection() {
-        alert('Testing connection...');
-    }
-
-    // Dummy toggleConfig function
-    function toggleConfig() {
-        alert('Toggling config...');
-    }
-
-    // Dummy loadData function
-    function loadData() {
-        alert('Refreshing data...');
-    }    
-
+        
         // ================ EVENT HANDLERS ================ 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
@@ -2876,6 +2843,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
