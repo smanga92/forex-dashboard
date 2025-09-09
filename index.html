@@ -2016,18 +2016,17 @@
         }
         
         function extractStabilityDays(data) {
-            const metaText = data['Meta-Analysis'] || '';
-            const stableMatch = metaText.match(/(\d+) days/);
-            if (stableMatch) {
-                return parseInt(stableMatch[1]) || 0;
+            // Direct field from your data: "Days Stable"
+            if (data['Days Stable'] !== undefined && data['Days Stable'] !== '') {
+                return parseInt(data['Days Stable']) || 0;
             }
             
-            // Check for direct Stability Days field
+            // Alternative field name
             if (data['Stability Days']) {
                 return parseInt(data['Stability Days']) || 0;
             }
             
-            return 0; // No fake data
+            return 0;
         }
         
         function extractEventCount(data) {
@@ -2405,9 +2404,9 @@
                 return data['Highest Impact Event'];
             }
             
-            return 'Not available'; // This matches your real data
+            return 'Not available';
         }
-        
+                
         function extractRawScore(data) {
             // Your sheet has "Raw Score" field
             if (data['Raw Score'] !== undefined && data['Raw Score'] !== '') {
@@ -2971,6 +2970,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
