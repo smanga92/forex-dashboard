@@ -2072,10 +2072,30 @@
             const weeklyChangePercent = parseFloat(data['Weekly Change %']) || (weeklyChange * 100);
             const confidencePercent = parseInt(data['Confidence %']) || confidence;
             const averageFinalScore = parseFloat(data['Average Final Score']) || 0;
+
+            // Interest rate data from PWA Data sheet (with proper percentage formatting)
+            let interestRate = data['Interest Rate'] || 'N/A';
+            let previousRate = data['Previous Rate'] || 'N/A';
             
-            // Interest rate data from PWA Data sheet
-            const interestRate = data['Interest Rate'] || 'N/A';
-            const previousRate = data['Previous Rate'] || 'N/A';
+            // Fix: Convert decimal rates back to percentage format if needed
+            if (typeof interestRate === 'number' && interestRate < 1) {
+                interestRate = (interestRate * 100).toFixed(2) + '%';
+            } else if (typeof interestRate === 'string' && !interestRate.includes('%') && !isNaN(parseFloat(interestRate))) {
+                const numRate = parseFloat(interestRate);
+                if (numRate < 1) {
+                    interestRate = (numRate * 100).toFixed(2) + '%';
+                }
+            }
+            
+            if (typeof previousRate === 'number' && previousRate < 1) {
+                previousRate = (previousRate * 100).toFixed(2) + '%';
+            } else if (typeof previousRate === 'string' && !previousRate.includes('%') && !isNaN(parseFloat(previousRate))) {
+                const numRate = parseFloat(previousRate);
+                if (numRate < 1) {
+                    previousRate = (numRate * 100).toFixed(2) + '%';
+                }
+            }
+            
             const rateTrend = data['Rate Trend'] || '→';
             const nextMeeting = data['Next Meeting'] || 'TBD';
             
@@ -2177,7 +2197,7 @@
                         </div>
                     </div>
 
-                    <div class="analysis-section">
+                    <<div class="analysis-section">
                         <div class="section-title">💰 Interest Rate Context</div>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 0.75rem 0;">
                             <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
@@ -2717,6 +2737,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
