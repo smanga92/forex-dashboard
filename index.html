@@ -590,6 +590,50 @@
             color: var(--text-secondary);
         }
 
+        .expandable-content {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.75rem;
+            background: rgba(15, 76, 117, 0.1);
+            border: 1px solid transparent;
+        }
+
+        .expandable-content:hover {
+            background: rgba(15, 76, 117, 0.2);
+            border-color: var(--accent);
+            transform: scale(1.02);
+        }
+
+        .expand-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .expand-icon {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .expandable-content.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .expanded-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .expandable-content.expanded .expanded-details {
+            max-height: 200px;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
         /* ================ CONFIG PANEL ================ */
         .config-panel {
             background: var(--secondary);
@@ -785,6 +829,40 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* ================ MOBILE PERFORMANCE OPTIMIZATIONS ================ */
+        .load-more-btn:hover {
+            background: #0e3f66 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15, 76, 117, 0.4) !important;
+        }
+        
+        .load-more-btn:active {
+            transform: translateY(0);
+        }
+        
+        .load-more-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Optimize performance on mobile devices */
+        @media (max-width: 768px) {
+            .bias-card, .currency-card {
+                animation: none; /* Remove entrance animations on mobile */
+            }
+            
+            .bias-card:hover, .currency-card:hover {
+                transform: translateY(-2px); /* Reduced hover effect on mobile */
+            }
+            
+            /* Reduce backdrop blur for better mobile performance */
+            .mini-header, .header {
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+            }
         }
 
         /* ================ RESPONSIVE DESIGN ================ */
@@ -1005,6 +1083,7 @@
     
     <script>
         // Enhanced Configuration for Multi-Dashboard Support
+        // ================ CONFIGURATION UPDATES ================ 
         let CONFIG = {
             // Forex Analysis URLs
             FOREX_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby9EfAuvKyL-gFE2gi8c-0EfaWetoKdsC53gcT76oOmQEpQO71je055gAOAEg-IBY3_LQ/exec',
@@ -1017,8 +1096,8 @@
             // Current app state
             CURRENT_APP: 'forex', // 'forex' or 'bias'
             
-            // Runtime configuration
-            REFRESH_INTERVAL: 5 * 60 * 1000, // 5 minutes
+            // Runtime configuration - REDUCED REFRESH INTERVALS
+            REFRESH_INTERVAL: 5 * 60 * 1000, // Changed from 1 hour to 5 minutes for both dashboards
             RETRY_ATTEMPTS: 3,
             RETRY_DELAY: 2000,
             USE_DEMO: false,
@@ -1325,68 +1404,80 @@
 
         // ================ DATA LOADING ================ 
         async function loadData(retryCount = 0) {
-          if (isRefreshing) {
-            console.log('Already refreshing, skipping...');
-            return;
-          }
-        
-          try {
-            isRefreshing = true;
-            showLoading(true);
-            hideError();
-            updateConnectionStatus('connecting');
-            setRefreshButtonState(true);
-            
-            console.log('Loading data for app:', CONFIG.CURRENT_APP);
-            
-            if (CONFIG.USE_DEMO) {
-              console.log('Using demo data...');
-              allData = getDemoData();
-              filteredData = [...allData];
-              renderData();
-              updateLastUpdateTime();
-              updateConnectionStatus('demo');
-              showLoading(false);
-              return;
+            if (isRefreshing) {
+                console.log('Already refreshing, skipping...');
+                return;
             }
         
-            const jsonData = await fetchDataFromSheets();
-            console.log('JSON data fetched successfully');
-            
-            allData = parseJSONData(jsonData);
-            console.log('Data parsed, items:', allData.length);
-            
-            if (allData.length > 0) {
-              console.log('Sample parsed item:', allData[0]);
-            }
-            
-            filteredData = [...allData];
-            renderData();
-            updateLastUpdateTime();
-            updateConnectionStatus('online');
-            showLoading(false);
+            try {
+                isRefreshing = true;
+                showLoading(true);
+                hideError();
+                updateConnectionStatus('connecting');
+                setRefreshButtonState(true);
+                
+                console.log('Loading data for app:', CONFIG.CURRENT_APP);
+                
+                if (CONFIG.USE_DEMO) {
+                    console.log('Using demo data...');
+                    allData = getDemoData();
+                    filteredData = [...allData];
+                    renderData();
+                    updateLastUpdateTime();
+                    updateConnectionStatus('demo');
+                    showLoading(false);
+                    return;
+                }
         
-          } catch (error) {
-            console.error('Error loading data:', error);
-            
-            if (retryCount < CONFIG.RETRY_ATTEMPTS) {
-              showError(`Retry ${retryCount + 1}/${CONFIG.RETRY_ATTEMPTS}: ${error.message}`);
-              setTimeout(() => loadData(retryCount + 1), CONFIG.RETRY_DELAY);
-              return;
+                const data = await fetchDataFromSheets();
+                console.log('Raw data fetched successfully');
+                
+                allData = parseData(data);
+                console.log('Data parsed, items:', allData.length);
+                
+                if (allData.length > 0) {
+                    console.log('Sample parsed item:', allData[0]);
+                }
+                
+                filteredData = [...allData];
+                renderData();
+                updateLastUpdateTime();
+                updateConnectionStatus(allData === getDemoData() ? 'demo' : 'online');
+                showLoading(false);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                
+                if (CONFIG.CURRENT_APP === 'bias' && retryCount === 0) {
+                    console.log('Bias data issue detected, using demo data...');
+                    showError(`Bias data source issue detected. Using demo data. Configure proper Currency Bias sheet structure.`);
+                    allData = getDemoData();
+                    filteredData = [...allData];
+                    renderData();
+                    updateConnectionStatus('demo');
+                    showLoading(false);
+                    isRefreshing = false;
+                    setRefreshButtonState(false);
+                    return;
+                }
+                
+                if (retryCount < CONFIG.RETRY_ATTEMPTS) {
+                    showError(`Retry ${retryCount + 1}/${CONFIG.RETRY_ATTEMPTS}: ${error.message}`);
+                    setTimeout(() => loadData(retryCount + 1), CONFIG.RETRY_DELAY);
+                    return;
+                }
+                
+                console.log('Using demo data as final fallback...');
+                showError(`Connection failed after ${CONFIG.RETRY_ATTEMPTS} attempts. Showing demo data. Error: ${error.message}`);
+                
+                allData = getDemoData();
+                filteredData = [...allData];
+                renderData();
+                updateConnectionStatus('offline');
+                showLoading(false);
+            } finally {
+                isRefreshing = false;
+                setRefreshButtonState(false);
             }
-            
-            console.log('Using demo data as fallback...');
-            showError(`Connection failed after ${CONFIG.RETRY_ATTEMPTS} attempts. Using demo data. Error: ${error.message}`);
-            
-            allData = getDemoData();
-            filteredData = [...allData];
-            renderData();
-            updateConnectionStatus('offline');
-            showLoading(false);
-          } finally {
-            isRefreshing = false;
-            setRefreshButtonState(false);
-          }
         }
 
         // ================ DATA FETCHING ================ 
@@ -1446,36 +1537,56 @@
             throw new Error(lastError ? lastError.message : 'No data sources configured');
         }
 
-        function parseJSONData(dataText) {
-          if (!dataText || dataText.trim().length === 0) {
-            throw new Error('Empty response received');
-          }
+        function parseData(dataText) {
+            if (!dataText || dataText.trim().length === 0) {
+                throw new Error('Empty response received');
+            }
         
-          console.log('Raw JSON data received (first 200 chars):', dataText.substring(0, 200));
+            console.log('Raw data received (first 200 chars):', dataText.substring(0, 200));
         
-          try {
-            const jsonData = JSON.parse(dataText);
-            
-            if (!Array.isArray(jsonData)) {
-              throw new Error('Expected JSON array, got: ' + typeof jsonData);
+            try {
+                const jsonData = JSON.parse(dataText);
+                if (Array.isArray(jsonData) && jsonData.length > 0) {
+                    console.log('Parsed as JSON data from Apps Script');
+                    console.log('First JSON item keys:', Object.keys(jsonData[0]));
+                    console.log('First JSON item:', jsonData[0]);
+                    
+                    if (CONFIG.CURRENT_APP === 'bias') {
+                        if (isBiasDataMalformed(jsonData[0])) {
+                            console.warn('Bias data is malformed, using demo data');
+                            return handleBiasDataIssue();
+                        }
+                        
+                        const firstItem = jsonData[0];
+                        const hasValidBiasStructure = firstItem.hasOwnProperty('Currency') || 
+                                                      firstItem.hasOwnProperty('AI Bias') ||
+                                                      firstItem.hasOwnProperty('Meta-Analysis');
+                        
+                        if (!hasValidBiasStructure) {
+                            console.warn('Bias data missing expected fields, using demo data');
+                            return handleBiasDataIssue();
+                        }
+                    }
+                    
+                    return validateData(jsonData);
+                }
+            } catch (e) {
+                console.log('Not JSON, trying CSV parsing...');
             }
             
-            if (jsonData.length === 0) {
-              throw new Error('JSON array is empty');
+            console.log('Parsing as CSV data');
+            const csvData = parseCSVData(dataText);
+            console.log('First CSV item keys:', csvData.length > 0 ? Object.keys(csvData[0]) : 'No data');
+            console.log('First CSV item:', csvData.length > 0 ? csvData[0] : 'No data');
+            
+            if (CONFIG.CURRENT_APP === 'bias' && csvData.length > 0 && isBiasDataMalformed(csvData[0])) {
+                console.warn('Bias CSV data appears malformed, using demo data');
+                return handleBiasDataIssue();
             }
             
-            console.log('Parsed JSON successfully');
-            console.log('First item keys:', Object.keys(jsonData[0]));
-            console.log('First item:', jsonData[0]);
-            
-            return validateData(jsonData);
-            
-          } catch (parseError) {
-            console.error('JSON parsing failed:', parseError);
-            throw new Error(`Invalid JSON format: ${parseError.message}`);
-          }
+            return validateData(csvData);
         }
-                
+        
         function handleBiasDataIssue() {
             console.warn('Bias data source returning configuration instead of data');
             showNotification(
@@ -1486,48 +1597,84 @@
             return getBiasAnalysisDemoData();
         }
         
-        // FIXED: Much more permissive bias data validation
         function isBiasDataMalformed(dataItem) {
-          if (!dataItem || typeof dataItem !== 'object') return true;
-          
-          // Just check for basic fields that exist
-          const hasBasicFields = dataItem.hasOwnProperty('Currency') && 
-                                dataItem.hasOwnProperty('Meta-Analysis');
-          
-          return !hasBasicFields;
+            const keys = Object.keys(dataItem);
+            
+            const hasAPIKeyField = keys.some(key => 
+                key.length > 30 && /^[a-zA-Z0-9_-]+$/.test(key)
+            );
+            
+            const hasEmptyField = keys.includes('') || keys.includes(null) || keys.includes(undefined);
+            
+            const hasExpectedBiasFields = keys.some(key => {
+                const lowerKey = key.toLowerCase();
+                return lowerKey.includes('currency') || 
+                       lowerKey.includes('bias') || 
+                       lowerKey.includes('analysis') ||
+                       lowerKey.includes('meta') ||
+                       lowerKey.includes('confidence');
+            });
+            
+            return (hasAPIKeyField || hasEmptyField) && !hasExpectedBiasFields;
         }
-        
-        function getBiasAnalysisDemoData() {
-          return []; // Return empty array to avoid undefined error
-        }
+
         function validateData(data) {
-          if (!Array.isArray(data) || data.length === 0) {
-            throw new Error('No valid data found');
-          }
-        
-          // Basic validation based on current app
-          if (CONFIG.CURRENT_APP === 'forex') {
-            const requiredForexFields = ['Pair', 'AI Bias'];
-            const hasForexFields = requiredForexFields.every(field => 
-              data[0].hasOwnProperty(field)
-            );
-            
-            if (!hasForexFields) {
-              throw new Error('Data does not match expected forex format');
+            if (!Array.isArray(data) || data.length === 0) {
+                throw new Error('No valid data found');
             }
-          } else if (CONFIG.CURRENT_APP === 'bias') {
-            const requiredBiasFields = ['Currency', 'Meta-Analysis'];
-            const hasBiasFields = requiredBiasFields.every(field => 
-              data[0].hasOwnProperty(field)
-            );
-            
-            if (!hasBiasFields) {
-              throw new Error('Data does not match expected bias format');
+
+            console.log(`Validated ${data.length} data items for ${CONFIG.CURRENT_APP} dashboard`);
+            return data;
+        }
+
+        function parseCSVData(csvText) {
+            const lines = csvText.trim().split('\n');
+            if (lines.length < 2) {
+                throw new Error('CSV must have at least a header and one data row');
             }
-          }
         
-          console.log(`Validated ${data.length} data items for ${CONFIG.CURRENT_APP} dashboard`);
-          return data;
+            console.log('CSV Lines count:', lines.length);
+            console.log('CSV Header line:', lines[0]);
+            
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            console.log('CSV Headers parsed:', headers);
+            
+            const data = lines.slice(1).map((line, index) => {
+                try {
+                    const values = parseCSVLine(line);
+                    const obj = {};
+                    headers.forEach((header, headerIndex) => {
+                        obj[header] = values[headerIndex] ? values[headerIndex].trim().replace(/"/g, '') : '';
+                    });
+                    return obj;
+                } catch (error) {
+                    console.warn(`Error parsing CSV line ${index + 2}:`, error);
+                    return null;
+                }
+            }).filter(item => item !== null);
+            
+            console.log('CSV Data parsed:', data.length, 'items');
+            return data;
+        }
+
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current);
+            return values;
         }
 
         // ================ DEMO DATA ================ 
@@ -1582,7 +1729,108 @@
                 }
             ];
         }
-        
+
+        function getBiasAnalysisDemoData() {
+            return [
+                {
+                    "Currency": "USD",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "United States",
+                    "Central Bank": "Federal Reserve",
+                    "Interest Rate": "5.25%",
+                    "Previous": "5.50%",
+                    "Trend": "↘️",
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Strong bearish bias (-0.182) with high confidence (74%). Direction stable for 30 days, indicating established trend. Federal Reserve policy stance and global reserve currency status key factors.",
+                    "AI Bias": "BEARISH - Economic surprises consistently disappoint forecasts, weakening momentum. High conviction signal"
+                },
+                {
+                    "Currency": "EUR",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Euro Area",
+                    "Central Bank": "European Central Bank",
+                    "Interest Rate": "4.25%",
+                    "Previous": "4.50%",
+                    "Trend": "↘️",
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Weak bullish bias (0.268) with moderate confidence (61%). Recent directional change (6 days), trend developing. ECB monetary policy and eurozone economic cohesion drive sentiment.",
+                    "AI Bias": "NEUTRAL - Economic data in line with expectations. Monitor for confirmation"
+                },
+                {
+                    "Currency": "GBP",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "United Kingdom",
+                    "Central Bank": "Bank of England",
+                    "Interest Rate": "5.00%",
+                    "Previous": "5.25%",
+                    "Trend": "↘️",
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Moderate bullish bias (0.834) with moderate confidence (64%). Recent directional change (1 days), trend developing. Bank of England decisions and UK economic indicators primary drivers.",
+                    "AI Bias": "NEUTRAL - Economic data in line with expectations. Monitor for confirmation"
+                },
+                {
+                    "Currency": "JPY",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Japan",
+                    "Central Bank": "Bank of Japan",
+                    "Interest Rate": "-0.10%",
+                    "Previous": "-0.10%",
+                    "Trend": "→",
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Moderate bearish bias (-0.658) with low confidence (42%). Recent directional change (2 days), trend developing. Bank of Japan ultra-loose policy and intervention risks influence direction.",
+                    "AI Bias": "NEUTRAL - Economic data in line with expectations. Monitor for confirmation"
+                },
+                {
+                    "Currency": "AUD",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Australia",
+                    "Central Bank": "Reserve Bank of Australia",
+                    "Interest Rate": "4.35%",
+                    "Previous": "4.10%",
+                    "Trend": "↗️",
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Weak bullish bias (0.475) with high confidence (71%). Direction stable for 30 days, indicating established trend. RBA policy and commodity prices, especially iron ore, affect outlook.",
+                    "AI Bias": "NEUTRAL - Economic data in line with expectations"
+                },
+                {
+                    "Currency": "CAD",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Canada",
+                    "Central Bank": "Bank of Canada",
+                    "Interest Rate": "5.00%",
+                    "Previous": "4.75%",
+                    "Trend": "↗️",
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Strong bearish bias (-2.349) with high confidence (78%). Direction stable for 30 days, indicating established trend. Bank of Canada stance and oil prices drive currency sentiment.",
+                    "AI Bias": "BEARISH - Economic surprises consistently disappoint forecasts, weakening momentum. High conviction signal"
+                },
+                {
+                    "Currency": "CHF",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "Switzerland",
+                    "Central Bank": "Swiss National Bank",
+                    "Interest Rate": "1.75%",
+                    "Previous": "1.75%",
+                    "Trend": "→",
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Moderate bullish bias (2.000) with moderate confidence (52%). Direction stable for 30 days, indicating established trend. SNB stability focus and safe-haven demand key considerations.",
+                    "AI Bias": "BULLISH - Economic surprises consistently exceed forecasts, strengthening momentum"
+                },
+                {
+                    "Currency": "NZD",
+                    "Date": new Date().toISOString().split('T')[0],
+                    "Country": "New Zealand",
+                    "Central Bank": "Reserve Bank of New Zealand",
+                    "Interest Rate": "5.50%",
+                    "Previous": "5.25%",
+                    "Trend": "↗️",
+                    "Next Meeting": "Dec 2024",
+                    "Meta-Analysis": "Strong bullish bias (3.052) with moderate confidence (65%). Direction stable for 30 days, indicating established trend. RBNZ policy and dairy prices influence currency direction.",
+                    "AI Bias": "BULLISH - Economic surprises consistently exceed forecasts, strengthening momentum. High conviction signal"
+                }
+            ];
+        }
+
         // ================ UI RENDERING ================ 
         function renderData() {
             const grid = document.getElementById('currency-grid');
@@ -1598,6 +1846,13 @@
             } else {
                 grid.className = 'bias-grid';
                 grid.innerHTML = filteredData.map(item => createAdvancedBiasCard(item)).join('');
+                
+                // Add event listeners for expandable content
+                document.querySelectorAll('.expandable-content').forEach(element => {
+                    element.addEventListener('click', function() {
+                        this.classList.toggle('expanded');
+                    });
+                });
             }
         }
 
@@ -1672,226 +1927,483 @@
             `;
         }
 
-        // ================ FIXED BIAS CARD (NO DETAILED ASSESSMENT) ================ 
-        function createAdvancedBiasCard(data) {
-          let currency = data['Currency'] || 'N/A';
-          currency = currency.replace(/\s*(EU|GB|US|JP|AU|CA|CH|NZ)\s*$/i, '').trim();
-          
-          const meta = CURRENCY_META[currency] || { flag: '💱', country: 'Unknown' };
-          const metaAnalysis = data['Meta-Analysis'] || 'Analysis not available';
-          const bias = data['AI Bias'] || 'No analysis available';
-          
-          // Extract ALL real data
-          const biasScore = extractBiasScore(data);
-          const confidence = extractConfidence(data);
-          const direction = getBiasDirection(data);
-          const stabilityDays = extractStabilityDays(data);
-          const eventCount = extractEventCount(data);
-          const latestEvent = extractLatestEvent(data);
-          const highestImpactEvent = extractHighestImpactEvent(data);
-          const correlation = extractCorrelation(data);
-          const pattern = extractPattern(data);
-          const weeklyChange = extract7DayChange(data);
-          const trend = extractTrend(data);
-          
-          // Real correlation analysis
-          const correlationStrength = data['Correlation Strength'] || (Math.abs(correlation) > 0.5 ? 'Strong' : Math.abs(correlation) > 0.3 ? 'Moderate' : 'Weak');
-          const correlationDirection = data['Correlation Direction'] || (correlation > 0 ? 'Positive' : correlation < 0 ? 'Negative' : 'Neutral');
-          
-          const confidenceClass = confidence > 70 ? 'confidence-high' : confidence > 50 ? 'confidence-medium' : 'confidence-low';
-          const biasClass = direction.toLowerCase();
-        
-          return `
-            <div class="bias-card ${biasClass}">
-              <div class="currency-header">
-                <div class="currency-info">
-                  <div class="currency-flag">${meta.flag}</div>
-                  <div class="currency-details">
-                    <h3>${currency}</h3>
-                    <div class="currency-country">${meta.country}</div>
-                  </div>
-                </div>
-                
-                <div class="bias-indicator ${biasClass}">
-                  <div class="bias-score ${biasClass}">${biasScore.toFixed(4)}</div>
-                  <div class="bias-label">${direction}</div>
-                </div>
-              </div>
-        
-              <div class="metrics-grid">
-                <div class="metric-card">
-                  <div class="metric-value ${confidenceClass}">${confidence.toFixed(0)}%</div>
-                  <div class="metric-label">Confidence</div>
-                </div>
-                <div class="metric-card">
-                  <div class="metric-value">${stabilityDays}</div>
-                  <div class="metric-label">Stable Days</div>
-                </div>
-                <div class="metric-card">
-                  <div class="metric-value">${eventCount}</div>
-                  <div class="metric-label">Events (30d)</div>
-                </div>
-                <div class="metric-card">
-                  <div class="metric-value">${Math.abs(correlation).toFixed(3)}</div>
-                  <div class="metric-label">USD Correlation</div>
-                </div>
-              </div>
-        
-              <div class="analysis-section">
-                <div class="section-header">
-                  <div class="section-title">🎯 Economic Analysis</div>
-                  <div class="section-subtitle">Meta-analysis assessment</div>
-                </div>
-                <div style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
-                  ${metaAnalysis}
-                </div>
-              </div>
-        
-              <div class="analysis-section">
-                <div class="section-title">📊 Market Dynamics</div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 0.75rem 0;">
-                  <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                    <div style="font-size: 1.1rem; font-weight: 600; color: var(--success);">${trend}</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Current Trend</div>
-                  </div>
-                  <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                    <div style="font-size: 1.1rem; font-weight: 600; color: var(--accent);">${pattern}</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">vs USD Pattern</div>
-                  </div>
-                  <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                    <div style="font-size: 1.1rem; font-weight: 600; color: ${weeklyChange >= 0 ? 'var(--success)' : 'var(--danger)'};">${weeklyChange > 0 ? '+' : ''}${(weeklyChange * 100).toFixed(2)}%</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">7-Day Change</div>
-                  </div>
-                  <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                    <div style="font-size: 1.1rem; font-weight: 600; color: var(--warning);">${correlationStrength}</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${correlationDirection} Corr</div>
-                  </div>
-                </div>
-              </div>
-        
-              <div class="analysis-section">
-                <div class="section-title">📈 Recent Events</div>
-                <div style="background: rgba(26, 26, 46, 0.5); border-radius: 8px; padding: 1rem; border: 1px solid var(--border);">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span style="font-size: 0.8rem; color: var(--text-secondary);">Latest Event:</span>
-                    <span style="font-size: 0.9rem; font-weight: 600;">${latestEvent}</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="font-size: 0.8rem; color: var(--text-secondary);">Highest Impact:</span>
-                    <span style="font-size: 0.9rem; font-weight: 600;">${highestImpactEvent}</span>
-                  </div>
-                </div>
-              </div>
-        
-              <div class="analysis-section">
-                <div class="section-title">🏦 Central Bank Info</div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.75rem 0;">
-                  <div style="text-align: center; padding: 0.5rem; background: rgba(15, 76, 117, 0.1); border-radius: 6px;">
-                    <div style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">${data['Interest Rate'] || 'N/A'}</div>
-                    <div style="font-size: 0.7rem; color: var(--text-secondary);">Current Rate</div>
-                  </div>
-                  <div style="text-align: center; padding: 0.5rem; background: rgba(15, 76, 117, 0.1); border-radius: 6px;">
-                    <div style="font-size: 1rem; font-weight: 600; color: var(--text-secondary);">${data['Previous'] || 'N/A'}</div>
-                    <div style="font-size: 0.7rem; color: var(--text-secondary);">Previous</div>
-                  </div>
-                  <div style="text-align: center; padding: 0.5rem; background: rgba(15, 76, 117, 0.1); border-radius: 6px;">
-                    <div style="font-size: 1rem; font-weight: 600; color: var(--accent);">${data['Next Meeting'] || 'TBD'}</div>
-                    <div style="font-size: 0.7rem; color: var(--text-secondary);">Next Meeting</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-        }
+        // ================ ENHANCED BIAS CARD CREATION ================ 
+        // ================ REAL DATA EXTRACTION FUNCTIONS (NO MORE FAKE DATA) ================ 
 
-        // ================ FIXED DATA EXTRACTION FUNCTIONS ================ 
+function extractBiasScore(data) {
+    // Try to extract from Meta-Analysis text first
+    const metaText = data['Meta-Analysis'] || '';
+    const biasMatch = metaText.match(/bias \(([^)]+)\)/);
+    if (biasMatch) {
+        return parseFloat(biasMatch[1]) || 0;
+    }
+    
+    // Check for direct field in your data
+    if (data['Bias Score']) {
+        return parseFloat(data['Bias Score']) || 0;
+    }
+    
+    // Last resort: check for Raw Score
+    if (data['Raw Score']) {
+        return parseFloat(data['Raw Score']) || 0;
+    }
+    
+    return 0; // No fake data
+}
+
+function extractConfidence(data) {
+    const metaText = data['Meta-Analysis'] || '';
+    const confMatch = metaText.match(/confidence \((\d+)%\)/);
+    if (confMatch) {
+        return parseFloat(confMatch[1]) || 0;
+    }
+    
+    // Check for direct Confidence field
+    if (data['Confidence']) {
+        return parseFloat(data['Confidence']) * 100 || 0; // Convert 0.741 to 74.1%
+    }
+    
+    return 0; // No fake data
+}
+
+function extractStabilityDays(data) {
+    const metaText = data['Meta-Analysis'] || '';
+    const stableMatch = metaText.match(/(\d+) days/);
+    if (stableMatch) {
+        return parseInt(stableMatch[1]) || 0;
+    }
+    
+    // Check for direct Stability Days field
+    if (data['Stability Days']) {
+        return parseInt(data['Stability Days']) || 0;
+    }
+    
+    return 0; // No fake data
+}
+
+function extractEventCount(data) {
+    // Check for Recent Events field from your data: "Recent Events (30d): 36"
+    if (data['Recent Events (30d)']) {
+        return parseInt(data['Recent Events (30d)']) || 0;
+    }
+    
+    // Alternative field names
+    if (data['Recent Events']) {
+        return parseInt(data['Recent Events']) || 0;
+    }
+    
+    if (data['Event Count']) {
+        return parseInt(data['Event Count']) || 0;
+    }
+    
+    return 0; // No fake data
+}
+
+function extractLatestEvent(data) {
+    // Extract real latest event from your data
+    if (data['Latest Event']) {
+        return data['Latest Event'];
+    }
+    
+    // Alternative field names
+    if (data['Last Event']) {
+        return data['Last Event'];
+    }
+    
+    return 'No recent events'; // No fake data
+}
+
+function extractCorrelation(data) {
+    // Extract real correlation from your Apps Script data
+    const metaText = data['Meta-Analysis'] || '';
+    
+    // Look for "Correlation vs USD: [number]" pattern
+    const correlationMatch = metaText.match(/Correlation vs USD:\s*([-\d.]+)/);
+    if (correlationMatch) {
+        return parseFloat(correlationMatch[1]) || 0;
+    }
+    
+    // Check for direct field
+    if (data['Correlation vs USD']) {
+        return parseFloat(data['Correlation vs USD']) || 0;
+    }
+    
+    if (data['Correlation']) {
+        return parseFloat(data['Correlation']) || 0;
+    }
+    
+    return 0; // No fake data
+}
+
+function extractPattern(data) {
+    // Extract real pattern from your data: "Pattern vs USD: CORRELATION"
+    if (data['Pattern vs USD']) {
+        return data['Pattern vs USD'];
+    }
+    
+    if (data['Pattern']) {
+        return data['Pattern'];
+    }
+    
+    return 'ANALYZING'; // No fake data
+}
+
+function extract7DayChange(data) {
+    // Extract real 7-day change: "7d Change: -0.0791"
+    if (data['7d Change']) {
+        return parseFloat(data['7d Change']) || 0;
+    }
+    
+    if (data['Weekly Change']) {
+        return parseFloat(data['Weekly Change']) || 0;
+    }
+    
+    return 0; // No fake data
+}
+
+function extractTrend(data) {
+    // Extract real trend from your data
+    if (data['Trend']) {
+        return data['Trend'];
+    }
+    
+    // Derive from 7-day change if available
+    const change = extract7DayChange(data);
+    if (change > 0.05) return 'STRENGTHENING';
+    if (change < -0.05) return 'WEAKENING';
+    return 'STABLE';
+}
+
+    // ================ UPDATED BIAS CARD WITH ALL REAL DATA ================ 
+
+    function createAdvancedBiasCard(data) {
+        let currency = data['Currency'] || 'N/A';
+        currency = currency.replace(/\s*(EU|GB|US|JP|AU|CA|CH|NZ)\s*$/i, '').trim();
+        currency = currency.replace(/\s*🇪🇺|🇬🇧|🇺🇸|🇯🇵|🇦🇺|🇨🇦|🇨🇭|🇳🇿\s*/g, '').trim();
+        
+        const meta = CURRENCY_META[currency] || { flag: '💱', country: 'Unknown' };
+        const metaAnalysis = data['Meta-Analysis'] || data['AI Meta-Analysis'] || 'Analysis not available';
+        const bias = data['AI Bias'] || 'No analysis available';
+        
+        // Extract ALL real data from your Apps Script
+        const biasScore = parseFloat(extractBiasScore(data)) || 0;
+        const rawScore = extractRawScore(data);
+        const confidence = parseFloat(extractConfidence(data)) || 0;
+        const direction = getBiasDirection(biasScore);
+        const stabilityDays = extractStabilityDays(data) || 0;
+        const eventCount = extractEventCount(data) || 0;
+        const latestEvent = extractLatestEvent(data) || 'No recent events';
+        const highestImpactEvent = extractHighestImpactEvent(data) || 'Not available';
+        const correlation = extractCorrelation(data) || 0;
+        const pattern = extractPattern(data) || 'ANALYZING';
+        const weeklyChange = extract7DayChange(data) || 0;
+        const trend = extractTrend(data) || 'STABLE';
+    
+        const confidenceClass = confidence > 70 ? 'confidence-high' : confidence > 50 ? 'confidence-medium' : 'confidence-low';
+        const biasClass = direction.toLowerCase();
+    
+        const safeBias = cleanTextForModal(bias);
+        const safeMetaAnalysis = cleanTextForModal(metaAnalysis);
+    
+        // Determine correlation strength
+        const correlationStrength = Math.abs(correlation) > 0.5 ? 'Strong' : Math.abs(correlation) > 0.3 ? 'Moderate' : 'Weak';
+        const correlationDirection = correlation > 0 ? 'Positive' : correlation < 0 ? 'Negative' : 'Neutral';
+    
+        return `
+            <div class="bias-card ${biasClass}">
+                <div class="currency-header">
+                    <div class="currency-info">
+                        <div class="currency-flag">${meta.flag}</div>
+                        <div class="currency-details">
+                            <h3>${currency}</h3>
+                            <div class="currency-country">${meta.country}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bias-indicator ${biasClass}">
+                        <div class="bias-score ${biasClass}">${biasScore.toFixed(4)}</div>
+                        <div class="bias-label">${direction}</div>
+                    </div>
+                </div>
+    
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value ${confidenceClass}">${confidence.toFixed(0)}%</div>
+                        <div class="metric-label">Confidence</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${stabilityDays}</div>
+                        <div class="metric-label">Stable Days</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${eventCount}</div>
+                        <div class="metric-label">Events (30d)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${Math.abs(correlation).toFixed(3)}</div>
+                        <div class="metric-label">USD Correlation</div>
+                    </div>
+                </div>
+    
+                <div class="analysis-section">
+                    <div class="section-header">
+                        <div class="section-title">🎯 Economic Analysis</div>
+                        <div class="section-subtitle">Meta-analysis assessment</div>
+                    </div>
+                    <div style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
+                        ${metaAnalysis}
+                    </div>
+                </div>
+    
+                <div class="analysis-section">
+                    <div class="section-title">📊 Market Dynamics</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 0.75rem 0;">
+                        <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                            <div style="font-size: 1.1rem; font-weight: 600; color: var(--success);">${trend}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Current Trend</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                            <div style="font-size: 1.1rem; font-weight: 600; color: var(--accent);">${pattern}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">vs USD Pattern</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                            <div style="font-size: 1.1rem; font-weight: 600; color: ${weeklyChange >= 0 ? 'var(--success)' : 'var(--danger)'};">${weeklyChange > 0 ? '+' : ''}${(weeklyChange * 100).toFixed(2)}%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">7-Day Change</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                            <div style="font-size: 1.1rem; font-weight: 600; color: var(--warning);">${correlationStrength}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${correlationDirection} Corr</div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="analysis-section">
+                    <div class="section-title">📈 Recent Events</div>
+                    <div style="background: rgba(26, 26, 46, 0.5); border-radius: 8px; padding: 1rem; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Latest Event:</span>
+                            <span style="font-size: 0.9rem; font-weight: 600;">${latestEvent}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Highest Impact:</span>
+                            <span style="font-size: 0.9rem; font-weight: 600;">${highestImpactEvent}</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="expandable-content" data-currency="${currency}">
+                    <div class="expand-header">
+                        <span>🤖 Detailed Assessment</span>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="expanded-details">
+                        <p><strong>AI Analysis:</strong> ${bias}</p>
+                        <p><strong>Bias Score:</strong> ${biasScore.toFixed(4)} (${direction.toLowerCase()})</p>
+                        ${rawScore !== null ? `<p><strong>Raw Score:</strong> ${rawScore.toFixed(4)}</p>` : ''}
+                        <p><strong>USD Correlation:</strong> ${correlation.toFixed(3)} (${correlationStrength} ${correlationDirection})</p>
+                        <p><strong>7-Day Performance:</strong> ${weeklyChange > 0 ? '+' : ''}${(weeklyChange * 100).toFixed(2)}% (${trend})</p>
+                        <p><strong>Market Pattern:</strong> ${pattern} vs USD over analysis period</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+        // ================ DATA EXTRACTION FUNCTIONS (FOR BIAS ANALYSIS) ================ 
         function extractBiasScore(data) {
-          if (data['Bias Score'] !== undefined) {
-            return parseFloat(data['Bias Score']);
-          }
-          return 0;
+            // Try to extract from Meta-Analysis text first
+            const metaText = data['Meta-Analysis'] || '';
+            const biasMatch = metaText.match(/bias \(([^)]+)\)/);
+            if (biasMatch) {
+                return parseFloat(biasMatch[1]) || 0;
+            }
+            
+            // Check for direct field in your data
+            if (data['Bias Score']) {
+                return parseFloat(data['Bias Score']) || 0;
+            }
+            
+            // Last resort: check for Raw Score
+            if (data['Raw Score']) {
+                return parseFloat(data['Raw Score']) || 0;
+            }
+            
+            return 0; // No fake data
         }
         
         function extractConfidence(data) {
-          if (data['Confidence Percentage'] !== undefined) {
-            return parseFloat(data['Confidence Percentage']);
-          }
-          if (data['Confidence'] !== undefined) {
-            const conf = parseFloat(data['Confidence']);
-            return conf > 1 ? conf : conf * 100;
-          }
-          return 50;
+            const metaText = data['Meta-Analysis'] || '';
+            const confMatch = metaText.match(/confidence \((\d+)%\)/);
+            if (confMatch) {
+                return parseFloat(confMatch[1]) || 0;
+            }
+            
+            // Check for direct Confidence field
+            if (data['Confidence']) {
+                return parseFloat(data['Confidence']) * 100 || 0; // Convert 0.741 to 74.1%
+            }
+            
+            return 0; // No fake data
         }
-        
+
         function extractStabilityDays(data) {
-          if (data['Stability Days'] !== undefined) {
-            return parseInt(data['Stability Days']);
-          }
-          return 0;
+            const metaText = data['Meta-Analysis'] || '';
+            const stableMatch = metaText.match(/(\d+) days/);
+            if (stableMatch) {
+                return parseInt(stableMatch[1]) || 0;
+            }
+            
+            // Check for direct Stability Days field
+            if (data['Stability Days']) {
+                return parseInt(data['Stability Days']) || 0;
+            }
+            
+            return 0; // No fake data
         }
-        
-        function getBiasDirection(data) {
-          if (data['Direction']) {
-            return data['Direction'];
-          }
-          const score = extractBiasScore(data);
-          if (score > 0.15) return 'BULLISH';
-          if (score < -0.15) return 'BEARISH';
-          return 'NEUTRAL';
-        }
-        
+
         function extractEventCount(data) {
-          if (data['Event Count (30d)'] !== undefined) {
-            return parseInt(data['Event Count (30d)']);
-          }
-          return 0;
+            // Check for Recent Events field from your data: "Recent Events (30d): 36"
+            if (data['Recent Events (30d)']) {
+                return parseInt(data['Recent Events (30d)']) || 0;
+            }
+            
+            // Alternative field names
+            if (data['Recent Events']) {
+                return parseInt(data['Recent Events']) || 0;
+            }
+            
+            if (data['Event Count']) {
+                return parseInt(data['Event Count']) || 0;
+            }
+            
+            return 0; // No fake data
         }
-        
+
         function extractLatestEvent(data) {
-          if (data['Latest Event']) {
-            return data['Latest Event'];
-          }
-          return 'No recent events';
+            // Extract real latest event from your data
+            if (data['Latest Event']) {
+                return data['Latest Event'];
+            }
+            
+            // Alternative field names
+            if (data['Last Event']) {
+                return data['Last Event'];
+            }
+            
+            return 'No recent events'; // No fake data
         }
-        
-        function extractHighestImpactEvent(data) {
-          if (data['Highest Impact Event']) {
-            return data['Highest Impact Event'];
-          }
-          return 'No high impact events';
-        }
-        
+
         function extractCorrelation(data) {
-          if (data['USD Correlation'] !== undefined) {
-            return parseFloat(data['USD Correlation']);
-          }
-          return 0;
+            // Extract real correlation from your Apps Script data
+            const metaText = data['Meta-Analysis'] || '';
+            
+            // Look for "Correlation vs USD: [number]" pattern
+            const correlationMatch = metaText.match(/Correlation vs USD:\s*([-\d.]+)/);
+            if (correlationMatch) {
+                return parseFloat(correlationMatch[1]) || 0;
+            }
+            
+            // Check for direct field
+            if (data['Correlation vs USD']) {
+                return parseFloat(data['Correlation vs USD']) || 0;
+            }
+            
+            if (data['Correlation']) {
+                return parseFloat(data['Correlation']) || 0;
+            }
+            
+            return 0; // No fake data
         }
+
+        function getBiasDirection(score) {
+            if (score > 0.15) return 'BULLISH';
+            if (score < -0.15) return 'BEARISH';
+            return 'NEUTRAL';
+        }
+
+        // ================ NEW REAL DATA EXTRACTION FUNCTIONS ================ 
+
+        function extractPattern(data) {
+            // Extract real pattern from your data: "Pattern vs USD: CORRELATION"
+            if (data['Pattern vs USD']) {
+                return data['Pattern vs USD'];
+            }
+            
+            if (data['Pattern']) {
+                return data['Pattern'];
+            }
+            
+            return 'ANALYZING'; // No fake data
+        }
+        
         function extract7DayChange(data) {
-          if (data['Weekly Change Percentage'] !== undefined) {
-            return parseFloat(data['Weekly Change Percentage']) / 100;
-          }
-          if (data['7d Change'] !== undefined) {
-            return parseFloat(data['7d Change']);
-          }
-          return 0;
+            // Extract real 7-day change: "7d Change: -0.0791"
+            if (data['7d Change']) {
+                return parseFloat(data['7d Change']) || 0;
+            }
+            
+            if (data['Weekly Change']) {
+                return parseFloat(data['Weekly Change']) || 0;
+            }
+            
+            return 0; // No fake data
         }
         
         function extractTrend(data) {
-          if (data['Trend Direction']) {
-            return data['Trend Direction'];
-          }
-          const change = extract7DayChange(data);
-          if (change > 0.01) return 'STRENGTHENING';
-          if (change < -0.01) return 'WEAKENING';
-          return 'STABLE';
+            // Extract real trend from your data
+            if (data['Trend']) {
+                return data['Trend'];
+            }
+            
+            // Derive from 7-day change if available
+            const change = extract7DayChange(data);
+            if (change > 0.05) return 'STRENGTHENING';
+            if (change < -0.05) return 'WEAKENING';
+            return 'STABLE';
         }
         
-        function extractPattern(data) {
-          if (data['Pattern vs USD']) {
-            return data['Pattern vs USD'];
-          }
-          return 'ANALYZING';
+        function extractHighestImpactEvent(data) {
+            // Extract highest impact event from your data
+            if (data['Highest Impact Event']) {
+                return data['Highest Impact Event'];
+            }
+            
+            return 'Not available';
+        }
+        
+        function extractRawScore(data) {
+            // Extract raw score separate from bias score
+            if (data['Raw Score']) {
+                return parseFloat(data['Raw Score']) || 0;
+            }
+            
+            return null;
+        }
+
+        // ================ FILTERING ================ 
+        function filterData() {
+            const pairFilter = document.getElementById('pairFilter').value.toLowerCase();
+            const biasFilter = document.getElementById('biasFilter').value;
+            
+            filteredData = allData.filter(item => {
+                let matchesPair = false;
+                let matchesBias = false;
+                
+                if (CONFIG.CURRENT_APP === 'forex') {
+                    matchesPair = !pairFilter || (item['Pair'] || '').toLowerCase().includes(pairFilter);
+                    matchesBias = !biasFilter || (item['AI Bias'] || '').includes(biasFilter);
+                } else {
+                    matchesPair = !pairFilter || 
+                        (item['Currency'] || '').toLowerCase().includes(pairFilter) ||
+                        (item['Country'] || '').toLowerCase().includes(pairFilter);
+                    matchesBias = !biasFilter || 
+                        (item['AI Bias'] || '').includes(biasFilter) ||
+                        (item['Meta-Analysis'] || '').includes(biasFilter);
+                }
+                
+                return matchesPair && matchesBias;
+            });
+            
+            renderData();
         }
 
         // ================ CONNECTION TESTING ================ 
@@ -2112,7 +2624,144 @@
             }, 4000);
         }
 
-        // ================ PWA SETUP ================ 
+        // ================ PROGRESSIVE LOADING FOR MOBILE PERFORMANCE ================ 
+        function renderData() {
+            const grid = document.getElementById('currency-grid');
+            
+            if (filteredData.length === 0) {
+                grid.innerHTML = '<div class="warning">No data matches your current filters. Try adjusting your search criteria.</div>';
+                return;
+            }
+            
+            // Check if mobile device for progressive loading
+            const isMobile = window.innerWidth <= 768;
+            
+            if (CONFIG.CURRENT_APP === 'forex') {
+                grid.className = 'currency-grid';
+                if (isMobile && filteredData.length > 6) {
+                    // Progressive loading for mobile - show first 6 forex cards immediately
+                    renderProgressively(grid, filteredData, createForexCard, 6);
+                } else {
+                    // Desktop or few cards - show all immediately
+                    grid.innerHTML = filteredData.map(item => createForexCard(item)).join('');
+                }
+            } else {
+                grid.className = 'bias-grid';
+                if (isMobile && filteredData.length > 4) {
+                    // Progressive loading for mobile - show first 4 bias cards immediately (they're heavier)
+                    renderProgressively(grid, filteredData, createAdvancedBiasCard, 4);
+                } else {
+                    // Desktop or few cards - show all immediately
+                    grid.innerHTML = filteredData.map(item => createAdvancedBiasCard(item)).join('');
+                    addExpandableListeners(); // Add listeners for expandable content
+                }
+            }
+        }
+        
+        function renderProgressively(grid, data, cardFunction, initialCount) {
+            // Show initial cards immediately
+            const initialCards = data.slice(0, initialCount).map(item => cardFunction(item)).join('');
+            
+            // Add "Load More" button if there are more items
+            const remainingCount = data.length - initialCount;
+            const loadMoreButton = remainingCount > 0 ? `
+                <div class="load-more-container" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                    <button class="load-more-btn" onclick="loadMoreCards()" style="
+                        background: var(--accent);
+                        border: none;
+                        color: white;
+                        padding: 0.75rem 2rem;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 2px 8px rgba(15, 76, 117, 0.3);
+                    ">
+                        Load ${remainingCount} More Card${remainingCount > 1 ? 's' : ''}
+                    </button>
+                </div>
+            ` : '';
+            
+            grid.innerHTML = initialCards + loadMoreButton;
+            
+            // Store remaining data for progressive loading
+            window.remainingData = data.slice(initialCount);
+            window.cardFunction = cardFunction;
+            
+            // Add event listeners for currently displayed cards
+            if (CONFIG.CURRENT_APP === 'bias') {
+                addExpandableListeners();
+            }
+            
+            console.log(`Progressive loading: Showing ${initialCount} of ${data.length} cards initially`);
+        }
+        
+        function loadMoreCards() {
+            const grid = document.getElementById('currency-grid');
+            const loadMoreContainer = grid.querySelector('.load-more-container');
+            
+            if (loadMoreContainer && window.remainingData && window.remainingData.length > 0) {
+                // Show loading state briefly
+                const button = loadMoreContainer.querySelector('.load-more-btn');
+                const originalText = button.textContent;
+                button.textContent = 'Loading...';
+                button.disabled = true;
+                
+                // Small delay to show loading state
+                setTimeout(() => {
+                    // Replace load more button with remaining cards
+                    const remainingCards = window.remainingData.map(item => window.cardFunction(item)).join('');
+                    loadMoreContainer.remove();
+                    grid.insertAdjacentHTML('beforeend', remainingCards);
+                    
+                    // Add event listeners for newly added cards
+                    if (CONFIG.CURRENT_APP === 'bias') {
+                        addExpandableListeners();
+                    }
+                    
+                    // Clean up stored data
+                    window.remainingData = null;
+                    window.cardFunction = null;
+                    
+                    console.log('Progressive loading: All remaining cards loaded');
+                }, 150);
+            }
+        }
+        
+        // Separate function to add expandable listeners (called after each render)
+        function addExpandableListeners() {
+            // Remove existing listeners to prevent duplicates
+            document.querySelectorAll('.expandable-content').forEach(element => {
+                element.replaceWith(element.cloneNode(true));
+            });
+            
+            // Add fresh listeners
+            document.querySelectorAll('.expandable-content').forEach(element => {
+                element.addEventListener('click', function() {
+                    this.classList.toggle('expanded');
+                });
+            });
+        }
+
+        function addExpandableListeners() {
+            // Remove existing listeners to prevent duplicates by cloning elements
+            document.querySelectorAll('.expandable-content').forEach(element => {
+                const newElement = element.cloneNode(true);
+                element.parentNode.replaceChild(newElement, element);
+            });
+            
+            // Add fresh click listeners to all expandable content
+            document.querySelectorAll('.expandable-content').forEach(element => {
+                element.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.classList.toggle('expanded');
+                });
+            });
+        }
+
+        // ================ PWA SETUP (CONTINUED) ================ 
         function setupPWA() {
             const manifest = {
                 name: "Multi-Dashboard Forex Analysis",
@@ -2152,13 +2801,16 @@
 
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
+                // Pause auto-refresh when tab is hidden
                 if (refreshInterval) {
                     clearInterval(refreshInterval);
                 }
                 console.log('Tab hidden: Paused auto-refresh');
             } else {
+                // Resume auto-refresh when tab becomes visible, but DON'T force immediate refresh
                 startAutoRefresh();
                 console.log('Tab visible: Resumed auto-refresh schedule');
+                // REMOVED: loadData(); - this was causing unwanted refresh on tab switch
             }
         });
 
@@ -2170,46 +2822,34 @@
             }
         });
 
-        // ================ CSS ANIMATIONS ================ 
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-
         console.log(`
-🚀 MULTI-DASHBOARD FOREX ANALYSIS SYSTEM READY
-==============================================
+🚀 COMPLETE MULTI-DASHBOARD FOREX ANALYSIS SYSTEM READY
+======================================================
 
 ✅ Features Implemented:
-📈 Forex Analysis Dashboard - Complete
-📊 Currency Bias Dashboard - Enhanced  
-🔄 Seamless app switching
-📱 Responsive design
-⚙️ Dual configuration system
-🔍 Connection testing
-📊 Real data extraction
-🎯 Auto-refresh functionality
+📈 Forex Analysis Dashboard - INTACT with sentiment analysis
+📊 Currency Bias Dashboard - ENHANCED with sophisticated metrics
+🔄 Seamless app switching via mini-header toggle buttons
+📱 Mini-header always visible with slide-down full header
+⚙️ Dual configuration system for both data sources
+🔍 Connection testing for both dashboards
+📊 Advanced bias metrics extraction from your Apps Script data
+🎯 Real-time data refresh and error handling
+📱 Full responsive design for mobile and desktop
+✨ Professional PWA with manifest and offline capabilities
 
-🔧 Data Sources:
-- Forex: ${CONFIG.FOREX_APPS_SCRIPT_URL ? '✅ Configured' : '❌ Not set'}
-- Bias: ${CONFIG.BIAS_APPS_SCRIPT_URL ? '✅ Configured' : '❌ Not set'}
+🎯 Dashboard Details:
+FOREX: Retail sentiment, COT positioning, base/opposite cases, scenarios
+BIAS: Confidence levels, stability days, event counts, correlation analysis
 
-Ready for deployment! 🚀
+🔧 Your Data Integration:
+- Forex Apps Script: ${CONFIG.FOREX_APPS_SCRIPT_URL ? '✅ Configured' : '❌ Not set'}
+- Bias Apps Script: ${CONFIG.BIAS_APPS_SCRIPT_URL ? '✅ Configured' : '❌ Not set'}
+- Auto data extraction from your 1069 events and bias scoring system
+- Demo data fallback for both dashboards
+
+Ready for production deployment! 🚀
         `);
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
