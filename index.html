@@ -1983,37 +1983,24 @@
         }
 
         // ================ ENHANCED BIAS CARD CREATION ================ 
-        // ================ REAL DATA EXTRACTION FUNCTIONS (NO MORE FAKE DATA) ================ 
-
         function extractBiasScore(data) {
-            // Direct field from your data structure
+            // Your sheet has "Bias Score" field
             if (data['Bias Score'] !== undefined && data['Bias Score'] !== '') {
                 return parseFloat(data['Bias Score']) || 0;
             }
-            
-            // Alternative field names from your sheet
-            if (data['Raw Score']) {
-                return parseFloat(data['Raw Score']) || 0;
-            }
-            
             return 0;
         }
-
-        function extractConfidence(data) {
-            const metaText = data['Meta-Analysis'] || '';
-            const confMatch = metaText.match(/confidence \((\d+)%\)/);
-            if (confMatch) {
-                return parseFloat(confMatch[1]) || 0;
-            }
-            
-            // Check for direct Confidence field
-            if (data['Confidence']) {
-                return parseFloat(data['Confidence']) * 100 || 0; // Convert 0.741 to 74.1%
-            }
-            
-            return 0; // No fake data
-        }
         
+        function extractConfidence(data) {
+            // Your sheet has "Confidence" field
+            if (data['Confidence'] !== undefined && data['Confidence'] !== '') {
+                const conf = parseFloat(data['Confidence']);
+                // Convert to percentage if it's a decimal (0.741 -> 74.1%)
+                return conf <= 1 ? conf * 100 : conf;
+            }
+            return 0;
+        }
+                
         function extractStabilityDays(data) {
             // Your sheet has "Days Stable" field
             if (data['Days Stable'] !== undefined && data['Days Stable'] !== '') {
@@ -2189,37 +2176,6 @@
             `;
         }
         // ================ DATA EXTRACTION FUNCTIONS (FOR BIAS ANALYSIS) ================ 
-        function extractBiasScore(data) {
-            // Try to extract from Meta-Analysis text first
-            const metaText = data['Meta-Analysis'] || '';
-            const biasMatch = metaText.match(/bias \(([^)]+)\)/);
-            if (biasMatch) {
-                return parseFloat(biasMatch[1]) || 0;
-            }
-            
-            // Check for direct field in your data
-            if (data['Bias Score']) {
-                return parseFloat(data['Bias Score']) || 0;
-            }
-            
-            // Last resort: check for Raw Score
-            if (data['Raw Score']) {
-                return parseFloat(data['Raw Score']) || 0;
-            }
-            
-            return 0; // No fake data
-        }
-        
-        function extractConfidence(data) {
-            // Direct field from your data: "Confidence"
-            if (data['Confidence'] !== undefined && data['Confidence'] !== '') {
-                const conf = parseFloat(data['Confidence']);
-                // Your data shows values like 0.741, convert to percentage
-                return conf <= 1 ? conf * 100 : conf;
-            }
-            return 0;
-        }
-
         function extractEventCount(data) {
             // This needs to be calculated from your Economic Data sheet
             // For now, return a reasonable estimate based on your 1069 total events
@@ -2737,6 +2693,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
