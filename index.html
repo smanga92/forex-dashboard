@@ -8,6 +8,12 @@
     <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ForexMulti">
+    <meta name="application-name" content="ForexMulti">
+    <meta name="msapplication-TileColor" content="#1a1a2e">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHQ0lEQVR4nO2dPWgUQRiGX0VsrK2srK0srLa2srKwsLCwsLCwsLK2srKwsLCwsLCwsLCwsLKysrKwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLKysrKwsLCwsLCwsLCwsLKysrKysrKwsLCwsLCwsLCwsLKysrKysrKwsLCwsLCwsLKysrKysrKwsLCwsLCwsLKysrKysrKwsLCwsLBk/wAAB4RJREFUAAA=">
+    <link rel="mask-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwZmY4OCIvPjx0ZXh0IHg9IjUwIiB5PSI2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIzMCIgZmlsbD0iIzFhMWEyZSI+8J+TijwvdGV4dD48L3N2Zz4=" color="#00ff88">
     <style>
         /* ================ GLOBAL STYLES ================ */
         * {
@@ -3003,28 +3009,33 @@
         }
 
         // ================ PWA SETUP (CONTINUED) ================ 
-        function setupPWA() {
-            const manifest = {
-                name: "Multi-Dashboard Forex Analysis",
-                short_name: "ForexMulti",
-                description: "Dual forex analysis dashboards with seamless switching",
-                start_url: "./",
-                display: "standalone",
-                background_color: "#1a1a2e",
-                theme_color: "#1a1a2e",
-                icons: [
-                    {
-                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%2300ff88'/%3E%3Ctext x='50' y='60' text-anchor='middle' font-size='30' fill='%231a1a2e'%3E📊%3C/text%3E%3C/svg%3E",
-                        sizes: "192x192",
-                        type: "image/svg+xml"
-                    }
-                ]
-            };
-
-            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(blob);
-            document.getElementById('manifest-placeholder').href = manifestURL;
-        }
+        const manifest = {
+            name: "Multi-Dashboard Forex Analysis",
+            short_name: "ForexMulti",
+            description: "Professional forex and currency bias analysis with real-time data integration",
+            start_url: "./",
+            scope: "./",
+            display: "standalone",
+            orientation: "portrait-primary",
+            background_color: "#1a1a2e",
+            theme_color: "#1a1a2e",
+            categories: ["finance", "business", "productivity"],
+            lang: "en",
+            icons: [
+                {
+                    src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHQ0lEQVR4nO2dPWgUQRiGX0VsrK2srK0srLa2srKwsLCwsLCwsLK2srKwsLCwsLCwsLCwsLKysrKwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLKysrKwsLCwsLCwsLCwsLKysrKysrKwsLCwsLCwsLCwsLKysrKysrKwsLCwsLCwsLKysrKysrKwsLCwsLCwsLKysrKysrKwsLCwsLBk/wAAB4RJREFUAAA=",
+                    sizes: "192x192",
+                    type: "image/png",
+                    purpose: "any"
+                },
+                {
+                    src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAQWklEQVR4nO3dP2gcVR7H8e8kJhAIBFsrK2urraysrKysrKwsLCwsLCwsrKysrKwsLCwsLCwsrKysrKysLCwsLCwsrKysrKwsLCwsLCwsrKysrKwsLCwsLCwsrKysrKysLCwsLCysrKysrKwsLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCys",
+                    sizes: "512x512",
+                    type: "image/png",
+                    purpose: "any maskable"
+                }
+            ]
+        };
         
         // ================ EVENT HANDLERS ================ 
         document.addEventListener('keydown', function(e) {
@@ -3063,6 +3074,52 @@
             }
         });
 
+        // ================ PWA SETUP ================ 
+        function setupPWA() {
+            const manifest = {
+                name: "Multi-Dashboard Forex Analysis",
+                short_name: "ForexMulti",
+                description: "Professional forex and currency bias analysis with real-time data integration",
+                start_url: "./",
+                scope: "./",
+                display: "standalone",
+                orientation: "portrait-primary",
+                background_color: "#1a1a2e",
+                theme_color: "#1a1a2e",
+                categories: ["finance", "business", "productivity"],
+                lang: "en",
+                icons: [
+                    {
+                        src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHQ0lEQVR4nO2dPWgUQRiGX0VsrK2srK0srLa2srKwsLCwsLCwsLK2srKwsLCwsLCwsLCwsLKysrKwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLKysrKwsLCwsLCwsLCwsLKysrKysrKwsLCwsLCwsLCwsLKysrKysrKwsLCwsLCwsLKysrKysrKwsLCwsLCwsLKysrKysrKwsLCwsLBk/wAAB4RJREFUAAA=",
+                        sizes: "192x192",
+                        type: "image/png",
+                        purpose: "any"
+                    },
+                    {
+                        src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAQWklEQVR4nO3dP2gcVR7H8e8kJhAIBFsrK2urraysrKysrKwsLCwsLCwsrKysrKwsLCwsLCwsrKysrKysLCwsLCwsrKysrKwsLCwsLCwsrKysrKwsLCwsLCwsrKysrKysLCwsLCysrKysrKwsLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCwsrKysrKysLCwsLCys",
+                        sizes: "512x512",
+                        type: "image/png",
+                        purpose: "any maskable"
+                    }
+                ]
+            };
+
+            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            document.getElementById('manifest-placeholder').href = manifestURL;
+
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            }
+        }
+
         console.log(`
 🚀 COMPLETE MULTI-DASHBOARD FOREX ANALYSIS SYSTEM READY
 ======================================================
@@ -3094,6 +3151,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
