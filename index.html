@@ -1984,7 +1984,6 @@
 
         // ================ ENHANCED BIAS CARD CREATION ================ 
         function extractBiasScore(data) {
-            // Your sheet has "Bias Score" field
             if (data['Bias Score'] !== undefined && data['Bias Score'] !== '') {
                 return parseFloat(data['Bias Score']) || 0;
             }
@@ -1992,17 +1991,14 @@
         }
         
         function extractConfidence(data) {
-            // Your sheet has "Confidence" field
             if (data['Confidence'] !== undefined && data['Confidence'] !== '') {
                 const conf = parseFloat(data['Confidence']);
-                // Convert to percentage if it's a decimal (0.741 -> 74.1%)
                 return conf <= 1 ? conf * 100 : conf;
             }
             return 0;
         }
                 
         function extractStabilityDays(data) {
-            // Your sheet has "Days Stable" field
             if (data['Days Stable'] !== undefined && data['Days Stable'] !== '') {
                 return parseInt(data['Days Stable']) || 0;
             }
@@ -2010,25 +2006,21 @@
         }
         
         function extractLatestEvent(data) {
-            // This would need to be calculated from Economic Data sheet
-            // For now, return a placeholder that indicates real system
-            return 'Recent economic data processed';
+            // Now reads from PWA Data sheet's calculated field
+            return data['Latest Event'] || 'No recent events';
         }
 
         function extractCorrelation(data) {
-            // This would need complex correlation calculation
-            // Return 0 for now since this isn't a direct sheet field
-            return 0;
+            // Now reads from PWA Data sheet's calculated field
+            return parseFloat(data['USD Correlation']) || 0;
         }
-
+        
         function extractPattern(data) {
-            // This would need pattern analysis calculation
-            // Return analyzing status since this isn't a direct sheet field
-            return 'ANALYZING';
+            // Now reads from PWA Data sheet's calculated field
+            return data['Pattern vs USD'] || 'ANALYZING';
         }
         
         function extract7DayChange(data) {
-            // Your sheet has "7d Change" field
             if (data['7d Change'] !== undefined && data['7d Change'] !== '') {
                 return parseFloat(data['7d Change']) || 0;
             }
@@ -2036,7 +2028,6 @@
         }
         
         function extractTrend(data) {
-            // Your sheet has "Trend" field
             if (data['Trend'] && data['Trend'] !== '') {
                 return data['Trend'].toString().toUpperCase();
             }
@@ -2050,32 +2041,50 @@
             let currency = data['Currency'] || 'N/A';
             const meta = CURRENCY_META[currency] || { flag: '💱', country: 'Unknown' };
             
-            // Extract REAL data from your sheet structure using exact field names
+            // Extract ALL data from your PWA Data sheet (no more hardcoded values!)
             const biasScore = extractBiasScore(data);
             const rawScore = extractRawScore(data);
             const confidence = extractConfidence(data);
-            const direction = getBiasDirection(biasScore);
+            const direction = data['Direction'] || getBiasDirection(biasScore);
             const stabilityDays = extractStabilityDays(data);
-            const eventCount = extractEventCount(data);
-            const latestEvent = extractLatestEvent(data);
-            const highestImpactEvent = extractHighestImpactEvent(data);
-            const correlation = extractCorrelation(data);
-            const pattern = extractPattern(data);
-            const weeklyChange = extract7DayChange(data);
             const trend = extractTrend(data);
+            const weeklyChange = extract7DayChange(data);
             
-            // Get real AI analysis from your data
-            const bias = data['AI Bias'] || data['Direction'] || 'Analysis from real economic data';
+            // Event data from PWA Data sheet
+            const eventCount90d = parseInt(data['Event Count (90d)']) || 0;
+            const eventCount30d = parseInt(data['Event Count (30d)']) || 0;
+            const latestEvent = data['Latest Event'] || 'No recent events';
+            const highestImpactEvent = data['Highest Impact Event'] || 'No high impact events';
+            const highImpactCount = parseInt(data['High Impact Count']) || 0;
+            
+            // Pattern analysis from PWA Data sheet
+            const correlation = parseFloat(data['USD Correlation']) || 0;
+            const pattern = data['Pattern vs USD'] || 'ANALYZING';
+            const correlationStrength = data['Correlation Strength'] || 'Unknown';
+            const correlationDirection = data['Correlation Direction'] || 'Neutral';
+            
+            // Analysis text from PWA Data sheet
+            const metaAnalysis = data['Meta-Analysis'] || 'Analysis from real economic data';
+            const aiAnalysis = data['AI Bias'] || 'Real-time bias assessment';
+            const outlook = data['Outlook'] || 'Monitor for developments';
+            
+            // Performance metrics from PWA Data sheet
+            const weeklyChangePercent = parseFloat(data['Weekly Change %']) || (weeklyChange * 100);
+            const confidencePercent = parseInt(data['Confidence %']) || confidence;
+            const averageFinalScore = parseFloat(data['Average Final Score']) || 0;
+            
+            // Interest rate data from PWA Data sheet
+            const interestRate = data['Interest Rate'] || 'N/A';
+            const previousRate = data['Previous Rate'] || 'N/A';
+            const rateTrend = data['Rate Trend'] || '→';
+            const nextMeeting = data['Next Meeting'] || 'TBD';
             
             const confidenceClass = confidence > 70 ? 'confidence-high' : confidence > 50 ? 'confidence-medium' : 'confidence-low';
             const biasClass = direction.toLowerCase();
             
-            const safeBias = cleanTextForModal(bias);
+            const safeBias = cleanTextForModal(aiAnalysis);
+            const safeMetaAnalysis = cleanTextForModal(metaAnalysis);
             
-            // Determine correlation strength
-            const correlationStrength = Math.abs(correlation) > 0.5 ? 'Strong' : Math.abs(correlation) > 0.3 ? 'Moderate' : 'Weak';
-            const correlationDirection = correlation > 0 ? 'Positive' : correlation < 0 ? 'Negative' : 'Neutral';
-        
             return `
                 <div class="bias-card ${biasClass}">
                     <div class="currency-header">
@@ -2092,10 +2101,10 @@
                             <div class="bias-label">${direction}</div>
                         </div>
                     </div>
-        
+
                     <div class="metrics-grid">
                         <div class="metric-card">
-                            <div class="metric-value ${confidenceClass}">${confidence.toFixed(0)}%</div>
+                            <div class="metric-value ${confidenceClass}">${confidencePercent}%</div>
                             <div class="metric-label">Confidence</div>
                         </div>
                         <div class="metric-card">
@@ -2103,7 +2112,7 @@
                             <div class="metric-label">Stable Days</div>
                         </div>
                         <div class="metric-card">
-                            <div class="metric-value">${eventCount}</div>
+                            <div class="metric-value">${eventCount90d}</div>
                             <div class="metric-label">Events (90d)</div>
                         </div>
                         <div class="metric-card">
@@ -2111,17 +2120,17 @@
                             <div class="metric-label">USD Correlation</div>
                         </div>
                     </div>
-        
+
                     <div class="analysis-section">
                         <div class="section-header">
-                            <div class="section-title">🎯 Real Bias Analysis</div>
-                            <div class="section-subtitle">From your 1069 economic events</div>
+                            <div class="section-title">🎯 Real-Time Analysis</div>
+                            <div class="section-subtitle">Live data from your bias system</div>
                         </div>
                         <div style="font-size: 0.9rem; line-height: 1.4; color: var(--text-primary);">
-                            Based on ${eventCount} recent economic events, this currency shows ${direction.toLowerCase()} bias with ${confidence.toFixed(0)}% confidence. Direction has been stable for ${stabilityDays} days.
+                            ${safeMetaAnalysis}
                         </div>
                     </div>
-        
+
                     <div class="analysis-section">
                         <div class="section-title">📊 Market Dynamics</div>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 0.75rem 0;">
@@ -2134,7 +2143,7 @@
                                 <div style="font-size: 0.8rem; color: var(--text-secondary);">vs USD Pattern</div>
                             </div>
                             <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
-                                <div style="font-size: 1.1rem; font-weight: 600; color: ${weeklyChange >= 0 ? 'var(--success)' : 'var(--danger)'};">${weeklyChange > 0 ? '+' : ''}${(weeklyChange * 100).toFixed(2)}%</div>
+                                <div style="font-size: 1.1rem; font-weight: 600; color: ${weeklyChange >= 0 ? 'var(--success)' : 'var(--danger)'};">${weeklyChange > 0 ? '+' : ''}${weeklyChangePercent.toFixed(2)}%</div>
                                 <div style="font-size: 0.8rem; color: var(--text-secondary);">7-Day Change</div>
                             </div>
                             <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
@@ -2143,61 +2152,78 @@
                             </div>
                         </div>
                     </div>
-        
+
                     <div class="analysis-section">
-                        <div class="section-title">📈 Recent Activity</div>
+                        <div class="section-title">📈 Economic Activity</div>
                         <div style="background: rgba(26, 26, 46, 0.5); border-radius: 8px; padding: 1rem; border: 1px solid var(--border);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-size: 0.8rem; color: var(--text-secondary);">90d Events:</span>
+                                    <span style="font-size: 0.9rem; font-weight: 600;">${eventCount90d}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-size: 0.8rem; color: var(--text-secondary);">30d Events:</span>
+                                    <span style="font-size: 0.9rem; font-weight: 600;">${eventCount30d}</span>
+                                </div>
+                            </div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">System Status:</span>
-                                <span style="font-size: 0.9rem; font-weight: 600; color: var(--success);">Live Data Active</span>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">High Impact:</span>
+                                <span style="font-size: 0.9rem; font-weight: 600; color: var(--warning);">${highImpactCount} events</span>
                             </div>
                             <div style="display: flex; justify-content: space-between;">
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Data Source:</span>
-                                <span style="font-size: 0.9rem; font-weight: 600;">${eventCount} Real Economic Events</span>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Latest Event:</span>
+                                <span style="font-size: 0.9rem; font-weight: 600;">${latestEvent.length > 25 ? latestEvent.substring(0, 25) + '...' : latestEvent}</span>
                             </div>
                         </div>
                     </div>
-        
+
+                    <div class="analysis-section">
+                        <div class="section-title">💰 Interest Rate Context</div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 0.75rem 0;">
+                            <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                                <div style="font-size: 1.1rem; font-weight: 600;">${interestRate}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Current Rate</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                                <div style="font-size: 1.5rem;">${rateTrend}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Trend</div>
+                            </div>
+                            <div style="text-align: center; padding: 0.75rem; background: rgba(15, 76, 117, 0.1); border-radius: 8px;">
+                                <div style="font-size: 0.9rem; font-weight: 600;">${nextMeeting}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Next Meeting</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="expandable-content" data-currency="${currency}">
                         <div class="expand-header">
                             <span>🤖 Detailed Assessment</span>
                             <span class="expand-icon">▼</span>
                         </div>
                         <div class="expanded-details">
-                            <p><strong>Real Bias Score:</strong> ${biasScore.toFixed(4)} (${direction.toLowerCase()})</p>
-                            ${rawScore !== null ? `<p><strong>Raw Score:</strong> ${rawScore.toFixed(4)}</p>` : ''}
-                            <p><strong>Confidence Level:</strong> ${confidence.toFixed(0)}% (based on data quality)</p>
-                            <p><strong>7-Day Performance:</strong> ${weeklyChange > 0 ? '+' : ''}${(weeklyChange * 100).toFixed(2)}% (${trend})</p>
+                            <p><strong>AI Analysis:</strong> ${aiAnalysis}</p>
+                            <p><strong>Raw Bias Score:</strong> ${biasScore.toFixed(4)} (${direction.toLowerCase()})</p>
+                            <p><strong>Raw Data Score:</strong> ${rawScore.toFixed(4)}</p>
+                            <p><strong>Confidence Level:</strong> ${confidencePercent}% (based on ${eventCount90d} events)</p>
+                            <p><strong>Weekly Performance:</strong> ${weeklyChange > 0 ? '+' : ''}${weeklyChangePercent.toFixed(2)}% (${trend})</p>
                             <p><strong>Stability:</strong> Direction maintained for ${stabilityDays} days</p>
-                            <p><strong>Data Points:</strong> Analysis from ${eventCount} economic events</p>
+                            <p><strong>USD Correlation:</strong> ${correlation.toFixed(3)} (${correlationStrength} ${correlationDirection})</p>
+                            <p><strong>Average Score:</strong> ${averageFinalScore.toFixed(3)} per event</p>
+                            <p><strong>Most Impactful:</strong> ${highestImpactEvent}</p>
+                            <p><strong>Outlook:</strong> ${outlook}</p>
                         </div>
                     </div>
                 </div>
             `;
         }
+        
         // ================ DATA EXTRACTION FUNCTIONS (FOR BIAS ANALYSIS) ================ 
         function extractEventCount(data) {
-            // This needs to be calculated from your Economic Data sheet
-            // For now, return a reasonable estimate based on your 1069 total events
-            const currency = data['Currency'];
-            
-            // Rough distribution based on your debug output:
-            const eventCounts = {
-                'USD': 92,
-                'EUR': 28, 
-                'GBP': 21,
-                'AUD': 13,
-                'CAD': 20,
-                'JPY': 2,
-                'CHF': 1,
-                'NZD': 4
-            };
-            
-            return eventCounts[currency] || 0;
+            // Now reads from PWA Data sheet's calculated field
+            return parseInt(data['Event Count (90d)']) || parseInt(data['Event Count (30d)']) || 0;
         }
 
         function getBiasDirection(score) {
-            // Use your actual bias score thresholds
             if (score > 0.15) return 'BULLISH';
             if (score < -0.15) return 'BEARISH';
             return 'NEUTRAL';
@@ -2206,17 +2232,15 @@
         // ================ NEW REAL DATA EXTRACTION FUNCTIONS ================ 
         
         function extractHighestImpactEvent(data) {
-            // This would need to be calculated from Economic Data sheet
-            // For now, return a placeholder that indicates real system
-            return 'High impact events analyzed';
+            // Now reads from PWA Data sheet's calculated field
+            return data['Highest Impact Event'] || 'No high impact events';
         }
                 
         function extractRawScore(data) {
-            // Your sheet has "Raw Score" field  
             if (data['Raw Score'] !== undefined && data['Raw Score'] !== '') {
-                return parseFloat(data['Raw Score']);
+                return parseFloat(data['Raw Score']) || 0;
             }
-            return null;
+            return 0;
         }
 
         // ================ FILTERING ================ 
@@ -2693,6 +2717,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
