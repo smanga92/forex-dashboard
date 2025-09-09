@@ -2566,54 +2566,6 @@
             }, 4000);
         }
 
-        function debugBiasDataStructure() {
-          try {
-            const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Currency Bias Analysis');
-            
-            if (!sheet) {
-              console.log('ERROR: Currency Bias Analysis sheet not found');
-              return;
-            }
-            
-            const data = sheet.getDataRange().getValues();
-            const headers = data[0];
-            const firstRow = data[1] || [];
-            
-            console.log('=== BIAS DATA STRUCTURE DEBUG ===');
-            console.log('Total rows:', data.length);
-            console.log('Headers found:', headers);
-            console.log('First data row:', firstRow);
-            
-            // Show exact field mapping
-            console.log('\n=== FIELD MAPPING ===');
-            headers.forEach((header, index) => {
-              console.log(`Field "${header}": ${firstRow[index] || 'EMPTY'}`);
-            });
-            
-            // Check for key bias fields
-            const keyFields = ['Currency', 'Bias Score', 'Raw Score', 'Confidence', 'Days Stable', 'Trend', '7d Change'];
-            console.log('\n=== KEY FIELD CHECK ===');
-            keyFields.forEach(field => {
-              const index = headers.indexOf(field);
-              if (index >= 0) {
-                console.log(`✅ ${field}: Column ${index + 1}, Value: ${firstRow[index]}`);
-              } else {
-                console.log(`❌ ${field}: NOT FOUND`);
-              }
-            });
-            
-            return {
-              headers: headers,
-              sampleData: firstRow,
-              totalRows: data.length
-            };
-            
-          } catch (error) {
-            console.log('Error in debug function:', error);
-            return { error: error.toString() };
-          }
-        }
-
         // ================ PROGRESSIVE LOADING FOR MOBILE PERFORMANCE ================ 
         function renderData() {
             const grid = document.getElementById('currency-grid');
@@ -2843,6 +2795,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
