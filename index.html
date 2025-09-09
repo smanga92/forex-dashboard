@@ -8,7 +8,6 @@
     <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
     <style>
         /* ================ GLOBAL STYLES ================ */
         * {
@@ -2058,7 +2057,6 @@
         }
 
         function extractPattern(data) {
-            // Extract real pattern from your data: "Pattern vs USD: CORRELATION"
             if (data['Pattern vs USD']) {
                 return data['Pattern vs USD'];
             }
@@ -2067,16 +2065,14 @@
                 return data['Pattern'];
             }
             
-            return 'ANALYZING'; // No fake data
+            return 'ANALYZING';
         }
         
         function extract7DayChange(data) {
-            // Your data shows "7d Change" field
             if (data['7d Change'] !== undefined && data['7d Change'] !== '') {
                 return parseFloat(data['7d Change']) || 0;
             }
             
-            // Alternative field names
             if (data['Change (7d)']) {
                 return parseFloat(data['Change (7d)']) || 0;
             }
@@ -2089,12 +2085,10 @@
         }
         
         function extractTrend(data) {
-            // Your data has "Trend" field directly
             if (data['Trend'] && data['Trend'] !== '') {
                 return data['Trend'].toUpperCase();
             }
             
-            // Derive from 7-day change if available
             const change = extract7DayChange(data);
             if (Math.abs(change) < 0.01) return 'STABLE';
             if (change > 0.05) return 'STRENGTHENING';
@@ -2271,52 +2265,36 @@
         }
 
         function extractEventCount(data) {
-            // Check for Recent Events field from your data: "Recent Events (30d): 36"
+            // Your data has no events field showing in the sample
             if (data['Recent Events (30d)']) {
                 return parseInt(data['Recent Events (30d)']) || 0;
-            }
-            
-            // Alternative field names
-            if (data['Recent Events']) {
-                return parseInt(data['Recent Events']) || 0;
             }
             
             if (data['Event Count']) {
                 return parseInt(data['Event Count']) || 0;
             }
             
-            return 0; // No fake data
+            return 0;
         }
 
         function extractLatestEvent(data) {
-            // Your real data shows no recent events
             if (data['Latest Event'] && data['Latest Event'] !== '') {
                 return data['Latest Event'];
             }
             
-            return 'No recent events'; // This matches your real data
+            return 'No recent events';
         }
 
         function extractCorrelation(data) {
-            // Extract real correlation from your Apps Script data
-            const metaText = data['Meta-Analysis'] || '';
-            
-            // Look for "Correlation vs USD: [number]" pattern
-            const correlationMatch = metaText.match(/Correlation vs USD:\s*([-\d.]+)/);
-            if (correlationMatch) {
-                return parseFloat(correlationMatch[1]) || 0;
-            }
-            
-            // Check for direct field
             if (data['Correlation vs USD']) {
                 return parseFloat(data['Correlation vs USD']) || 0;
             }
             
-            if (data['Correlation']) {
-                return parseFloat(data['Correlation']) || 0;
+            if (data['USD Correlation']) {
+                return parseFloat(data['USD Correlation']) || 0;
             }
             
-            return 0; // No fake data
+            return 0;
         }
 
         function getBiasDirection(score) {
@@ -2327,45 +2305,6 @@
         }
 
         // ================ NEW REAL DATA EXTRACTION FUNCTIONS ================ 
-
-        function extractPattern(data) {
-            // Your data doesn't show pattern field in bias analysis
-            if (data['Pattern vs USD']) {
-                return data['Pattern vs USD'];
-            }
-            
-            if (data['Pattern']) {
-                return data['Pattern'];
-            }
-            
-            return 'ANALYZING'; // Default since no pattern data available
-        }
-        
-        function extract7DayChange(data) {
-            // Extract real 7-day change: "7d Change: -0.0791"
-            if (data['7d Change']) {
-                return parseFloat(data['7d Change']) || 0;
-            }
-            
-            if (data['Weekly Change']) {
-                return parseFloat(data['Weekly Change']) || 0;
-            }
-            
-            return 0; // No fake data
-        }
-        
-        function extractTrend(data) {
-            // Extract real trend from your data
-            if (data['Trend']) {
-                return data['Trend'];
-            }
-            
-            // Derive from 7-day change if available
-            const change = extract7DayChange(data);
-            if (change > 0.05) return 'STRENGTHENING';
-            if (change < -0.05) return 'WEAKENING';
-            return 'STABLE';
-        }
         
         function extractHighestImpactEvent(data) {
             if (data['Highest Impact Event'] && data['Highest Impact Event'] !== '') {
@@ -2376,7 +2315,6 @@
         }
                 
         function extractRawScore(data) {
-            // Your sheet has "Raw Score" field
             if (data['Raw Score'] !== undefined && data['Raw Score'] !== '') {
                 return parseFloat(data['Raw Score']);
             }
@@ -2938,6 +2876,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
