@@ -271,20 +271,20 @@
         .header-backdrop {
             display: none;
             position: fixed;
-            top: 0;
+            top: var(--mini-header-height);  /* Start where header starts */
             left: 0;
             right: 0;
-            bottom: 0;
+            height: 200px;  /* Fixed height instead of bottom: 0 */
             background: rgba(0, 0, 0, 0.3);
             z-index: 1000;
             -webkit-backdrop-filter: blur(2px);
             backdrop-filter: blur(2px);
             cursor: pointer;
         }
-
+        
         .header-backdrop.show {
             display: block;
-            transform: translateY(60px);
+            transform: translateY(30px);  /* Now this will be visible */
         }
 
         /* ================ MAIN CONTAINER ================ */
@@ -3077,6 +3077,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
