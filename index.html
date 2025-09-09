@@ -2029,24 +2029,6 @@
             return 0;
         }
         
-        function extractEventCount(data) {
-            // Check for Recent Events field from your data: "Recent Events (30d): 36"
-            if (data['Recent Events (30d)']) {
-                return parseInt(data['Recent Events (30d)']) || 0;
-            }
-            
-            // Alternative field names
-            if (data['Recent Events']) {
-                return parseInt(data['Recent Events']) || 0;
-            }
-            
-            if (data['Event Count']) {
-                return parseInt(data['Event Count']) || 0;
-            }
-            
-            return 0; // No fake data
-        }
-        
         function extractLatestEvent(data) {
             // Extract real latest event from your data
             if (data['Latest Event']) {
@@ -2286,20 +2268,6 @@
                 return conf <= 1 ? conf * 100 : conf;
             }
             return 0;
-        }
-
-        function extractEventCount(data) {
-            // Your data has no events field showing in the sample
-            // Return 0 until you confirm the field name
-            if (data['Recent Events (30d)']) {
-                return parseInt(data['Recent Events (30d)']) || 0;
-            }
-            
-            if (data['Event Count']) {
-                return parseInt(data['Event Count']) || 0;
-            }
-            
-            return 0; // Real data shows no events currently
         }
 
         function extractEventCount(data) {
@@ -2970,6 +2938,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
