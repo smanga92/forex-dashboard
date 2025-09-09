@@ -1444,6 +1444,11 @@
             }
         });
 
+        window.addEventListener('beforeinstallprompt', (e) => {
+          console.log('Install prompt available');
+          e.prompt();
+        });
+
         // ================ CONFIGURATION MANAGEMENT ================ 
         function loadConfig() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -3124,6 +3129,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
