@@ -627,10 +627,181 @@
         }
 
         .expandable-content.expanded .expanded-details {
-            max-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
             margin-top: 1rem;
             padding-top: 1rem;
             border-top: 1px solid var(--border);
+        }
+
+        /* ================ MOBILE BIAS CARDS ================ */
+        .bias-summary-card {
+            background: linear-gradient(135deg, rgba(22, 33, 62, 0.9), rgba(26, 26, 46, 0.8));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            min-height: 120px;
+        }
+        
+        .bias-summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--neutral);
+        }
+        
+        .bias-summary-card.bullish::before { background: linear-gradient(90deg, var(--bullish), #00cc66); }
+        .bias-summary-card.bearish::before { background: linear-gradient(90deg, var(--bearish), #cc3333); }
+        .bias-summary-card.neutral::before { background: linear-gradient(90deg, var(--neutral), #cc8800); }
+        
+        .bias-summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow);
+            border-color: var(--accent);
+        }
+        
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .summary-flag {
+            font-size: 1.8rem;
+        }
+        
+        .summary-currency {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+        
+        .summary-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .summary-metric {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(15, 76, 117, 0.1);
+            border-radius: 6px;
+        }
+        
+        .summary-metric-value {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        
+        .summary-metric-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        /* Mobile detailed modal */
+        .bias-detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        
+        .bias-detail-content {
+            background: var(--primary);
+            margin: 1rem;
+            border-radius: 16px;
+            max-width: 600px;
+            margin: 1rem auto;
+            position: relative;
+        }
+        
+        .detail-header {
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            padding: 1rem;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .detail-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .detail-body {
+            padding: 1.5rem;
+        }
+        
+        .mobile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .mobile-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .bias-grid.mobile-summary {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .bias-card {
+                padding: 1.25rem;
+            }
+            
+            .currency-header {
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.75rem;
+            }
+            
+            .currency-flag {
+                font-size: 2rem;
+            }
+            
+            .analysis-section {
+                margin: 1rem 0;
+                padding: 1rem;
+            }
+            
+            .metrics-grid {
+                gap: 0.75rem;
+            }
+            
+            .metric-card {
+                padding: 0.75rem;
+            }
         }
 
         /* ================ CONFIG PANEL ================ */
@@ -2034,6 +2205,51 @@
             return 'STABLE';
         }
 
+        // ================ MOBILE BIAS SUMMARY CARD ================
+        function createBiasSummaryCard(data) {
+            const currency = data['Currency'] || 'N/A';
+            const meta = CURRENCY_META[currency] || { flag: '💱', country: 'Unknown' };
+            
+            const biasScore = extractBiasScore(data);
+            const confidence = extractConfidence(data);
+            const direction = data['Direction'] || getBiasDirection(biasScore);
+            const trend = extractTrend(data);
+            
+            const biasClass = direction.toLowerCase();
+            const confidenceClass = confidence > 70 ? 'confidence-high' : confidence > 50 ? 'confidence-medium' : 'confidence-low';
+            
+            return `
+                <div class="bias-summary-card ${biasClass}" onclick="showBiasDetail('${currency}')" data-currency="${currency}">
+                    <div class="summary-header">
+                        <div class="summary-flag">${meta.flag}</div>
+                        <div>
+                            <div class="summary-currency">${currency}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${direction}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-metrics">
+                        <div class="summary-metric">
+                            <div class="summary-metric-value ${biasClass}">${biasScore.toFixed(3)}</div>
+                            <div class="summary-metric-label">Bias Score</div>
+                        </div>
+                        <div class="summary-metric">
+                            <div class="summary-metric-value ${confidenceClass}">${confidence.toFixed(0)}%</div>
+                            <div class="summary-metric-label">Confidence</div>
+                        </div>
+                        <div class="summary-metric">
+                            <div class="summary-metric-value">${trend}</div>
+                            <div class="summary-metric-label">Trend</div>
+                        </div>
+                        <div class="summary-metric">
+                            <div class="summary-metric-value">${parseInt(data['Event Count (90d)']) || 0}</div>
+                            <div class="summary-metric-label">90d Events</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
     // ================ UPDATED BIAS CARD WITH ALL REAL DATA ================ 
 
             function createAdvancedBiasCard(data) {
@@ -2477,6 +2693,149 @@
             refreshInterval = setInterval(loadData, CONFIG.REFRESH_INTERVAL);
         }
 
+        // ================ MOBILE BIAS DETAIL MODAL ================
+        function showBiasDetail(currency) {
+            if (!window.currentBiasData) return;
+            
+            const data = window.currentBiasData.find(item => item['Currency'] === currency);
+            if (!data) return;
+            
+            const meta = CURRENCY_META[currency] || { flag: '💱', country: 'Unknown' };
+            const biasScore = extractBiasScore(data);
+            const confidence = extractConfidence(data);
+            const direction = data['Direction'] || getBiasDirection(biasScore);
+            const stabilityDays = extractStabilityDays(data);
+            const trend = extractTrend(data);
+            const weeklyChange = extract7DayChange(data);
+            const eventCount90d = parseInt(data['Event Count (90d)']) || 0;
+            const eventCount30d = parseInt(data['Event Count (30d)']) || 0;
+            const correlation = parseFloat(data['USD Correlation']) || 0;
+            const pattern = data['Pattern vs USD'] || 'ANALYZING';
+            const metaAnalysis = data['Meta-Analysis'] || 'Analysis from real economic data';
+            const aiAnalysis = data['AI Bias'] || 'Real-time bias assessment';
+            const interestRate = data['Interest Rate'] || 'N/A';
+            const rateTrend = data['Rate Trend'] || '→';
+            const nextMeeting = data['Next Meeting'] || 'TBD';
+            const latestEvent = data['Latest Event'] || 'No recent events';
+            const highImpactCount = parseInt(data['High Impact Count']) || 0;
+            
+            const biasClass = direction.toLowerCase();
+            const confidenceClass = confidence > 70 ? 'confidence-high' : confidence > 50 ? 'confidence-medium' : 'confidence-low';
+            
+            // Create modal HTML
+            const modalHTML = `
+                <div class="bias-detail-modal" id="biasDetailModal" onclick="closeBiasDetail(event)">
+                    <div class="bias-detail-content" onclick="event.stopPropagation()">
+                        <div class="detail-header">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="font-size: 2rem;">${meta.flag}</div>
+                                <div>
+                                    <h2 style="margin: 0; color: white;">${currency}</h2>
+                                    <div style="color: rgba(255,255,255,0.8);">${meta.country}</div>
+                                </div>
+                            </div>
+                            <button class="detail-close-btn" onclick="closeBiasDetail()">×</button>
+                        </div>
+                        
+                        <div class="detail-body">
+                            <!-- Core Metrics Grid -->
+                            <h3 style="margin-top: 0;">Core Metrics</h3>
+                            <div class="mobile-grid">
+                                <div class="metric-card">
+                                    <div class="metric-value ${biasClass}">${biasScore.toFixed(4)}</div>
+                                    <div class="metric-label">Bias Score</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value ${confidenceClass}">${confidence.toFixed(0)}%</div>
+                                    <div class="metric-label">Confidence</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">${stabilityDays}</div>
+                                    <div class="metric-label">Days Stable</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">${eventCount90d}</div>
+                                    <div class="metric-label">90d Events</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Market Dynamics Grid -->
+                            <h3>Market Dynamics</h3>
+                            <div class="mobile-grid">
+                                <div class="metric-card">
+                                    <div class="metric-value" style="color: var(--success);">${trend}</div>
+                                    <div class="metric-label">Trend</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value" style="color: var(--accent);">${pattern}</div>
+                                    <div class="metric-label">Pattern</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value" style="color: ${weeklyChange >= 0 ? 'var(--success)' : 'var(--danger)'};">
+                                        ${weeklyChange > 0 ? '+' : ''}${(weeklyChange * 100).toFixed(2)}%
+                                    </div>
+                                    <div class="metric-label">7-Day Change</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">${Math.abs(correlation).toFixed(3)}</div>
+                                    <div class="metric-label">USD Correlation</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Interest Rates Grid -->
+                            <h3>Interest Rate Context</h3>
+                            <div class="mobile-grid-3">
+                                <div class="metric-card">
+                                    <div class="metric-value">${interestRate}</div>
+                                    <div class="metric-label">Current</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value" style="font-size: 1.5rem;">${rateTrend}</div>
+                                    <div class="metric-label">Trend</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value" style="font-size: 0.8rem;">${nextMeeting}</div>
+                                    <div class="metric-label">Next Meeting</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Analysis Text -->
+                            <h3>Real-Time Analysis</h3>
+                            <div style="background: rgba(15, 76, 117, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; line-height: 1.5;">
+                                ${metaAnalysis}
+                            </div>
+                            
+                            <!-- AI Analysis -->
+                            <h3>AI Assessment</h3>
+                            <div style="background: rgba(0, 255, 136, 0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0; line-height: 1.5;">
+                                <strong>Bias:</strong> ${aiAnalysis}<br>
+                                <strong>Latest Event:</strong> ${latestEvent}<br>
+                                <strong>High Impact Events:</strong> ${highImpactCount}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Show modal
+            const modal = document.getElementById('biasDetailModal');
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeBiasDetail(event) {
+            if (event && event.target !== event.currentTarget) return;
+            
+            const modal = document.getElementById('biasDetailModal');
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = 'auto';
+            }
+        }
+
         // ================ NOTIFICATION SYSTEM ================ 
         function showNotification(title, body) {
             const popup = document.createElement('div');
@@ -2517,31 +2876,29 @@
                 return;
             }
             
-            // Check if mobile device for progressive loading
-            const isMobile = window.innerWidth <= 768;
-            
             if (CONFIG.CURRENT_APP === 'forex') {
                 grid.className = 'currency-grid';
-                if (isMobile && filteredData.length > 6) {
-                    // Progressive loading for mobile - show first 6 forex cards immediately
-                    renderProgressively(grid, filteredData, createForexCard, 6);
-                } else {
-                    // Desktop or few cards - show all immediately
-                    grid.innerHTML = filteredData.map(item => createForexCard(item)).join('');
-                }
+                grid.innerHTML = filteredData.map(item => createForexCard(item)).join('');
             } else {
-                grid.className = 'bias-grid';
-                if (isMobile && filteredData.length > 4) {
-                    // Progressive loading for mobile - show first 4 bias cards immediately (they're heavier)
-                    renderProgressively(grid, filteredData, createAdvancedBiasCard, 4);
+                // Check if mobile device for bias dashboard
+                const isMobile = window.innerWidth <= 768;
+                
+                if (isMobile) {
+                    // Mobile: Use summary cards
+                    grid.className = 'bias-grid mobile-summary';
+                    grid.innerHTML = filteredData.map(item => createBiasSummaryCard(item)).join('');
                 } else {
-                    // Desktop or few cards - show all immediately
+                    // Desktop: Use full cards
+                    grid.className = 'bias-grid';
                     grid.innerHTML = filteredData.map(item => createAdvancedBiasCard(item)).join('');
-                    addExpandableListeners(); // Add listeners for expandable content
+                    addExpandableListeners();
                 }
             }
+            
+            // Store data for mobile modal
+            window.currentBiasData = filteredData;
         }
-        
+                
         function renderProgressively(grid, data, cardFunction, initialCount) {
             // Show initial cards immediately
             const initialCards = data.slice(0, initialCount).map(item => cardFunction(item)).join('');
@@ -2737,6 +3094,7 @@ Ready for production deployment! 🚀
     </script>
 </body>
 </html>
+
 
 
 
